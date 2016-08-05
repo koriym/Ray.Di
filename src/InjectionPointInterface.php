@@ -18,7 +18,7 @@ interface InjectionPointInterface
     /**
      * Return method reflection
      *
-     * @return \ReflectionFunctionAbstract
+     * @return \ReflectionMethod
      */
     public function getMethod();
 

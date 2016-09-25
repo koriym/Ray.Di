@@ -18,14 +18,24 @@ final class AssistedInterceptor implements MethodInterceptor
      */
     private $injector;
 
-    public function __construct(InjectorInterface $injector)
+    /**
+     * @var MethodInvocationProvider
+     */
+    private $methodInvocationProvider;
+
+    public function __construct(InjectorInterface $injector, MethodInvocationProvider $methodInvocationProvider)
     {
         $this->injector = $injector;
+        $this->methodInvocationProvider = $methodInvocationProvider;
     }
 
     /**
      * Intercepts any method and injects instances of the missing arguments
      * when they are type hinted
+     *
+     * @param MethodInvocation $invocation
+     *
+     * @return object
      */
     public function invoke(MethodInvocation $invocation)
     {
@@ -35,6 +45,7 @@ final class AssistedInterceptor implements MethodInterceptor
         $parameters = $method->getParameters();
         $arguments = $invocation->getArguments()->getArrayCopy();
         if ($assisted instanceof Assisted && $method instanceof ReflectionMethod) {
+            $this->methodInvocationProvider->set($invocation);
             $arguments = $this->injectAssistedParameters($method, $assisted, $parameters, $arguments);
         }
         $invocation->getArguments()->exchangeArray($arguments);

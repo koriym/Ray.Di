@@ -9,7 +9,7 @@ use Ray\Di\Di\Assisted;
 
 use const PHP_VERSION_ID;
 
-class AssistedModule extends AbstractModule
+final class AssistedModule extends AbstractModule
 {
     protected function configure(): void
     {

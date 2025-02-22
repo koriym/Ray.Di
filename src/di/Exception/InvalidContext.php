@@ -6,6 +6,6 @@ namespace Ray\Di\Exception;
 
 use InvalidArgumentException;
 
-class InvalidContext extends InvalidArgumentException implements ExceptionInterface
+final class InvalidContext extends InvalidArgumentException implements ExceptionInterface
 {
 }

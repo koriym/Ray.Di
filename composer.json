@@ -50,7 +50,8 @@
         "sa": ["psalm -m -c psalm.xml --show-info=true", "phpstan analyse -c phpstan.neon --no-progress "],
         "metrics": ["@test", "phpmetrics --report-html=build/metrics --exclude=Exception --log-junit=build/junit.xml --junit=build/junit.xml src"],
         "phpmd": ["phpmd src/di text ./phpmd.xml"],
-        "build": ["@cs", "@sa", "@pcov", "@metrics"]
+        "build": ["@cs", "@sa", "@pcov", "@metrics"],
+        "baseline": ["phpstan analyse -c phpstan.neon --generate-baseline", "psalm --set-baseline=psalm-baseline.xml"]
     },
     "extra": {
         "bamarni-bin": {

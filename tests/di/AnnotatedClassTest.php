@@ -21,7 +21,7 @@ class AnnotatedClassTest extends TestCase
 
     public function testInvoke(): void
     {
-        $newInstance = $this->annotatedClass->getNewInstance(new ReflectionClass(FakeCar::class));
+        $newInstance = $this->annotatedClass->getNewInstance(new ReflectionClass(FakeCar::class)); // @phpstan-ignore-line
         $this->assertInstanceOf(NewInstance::class, $newInstance);
         $container = new Container();
         (new Bind($container, FakeTyreInterface::class))->to(FakeTyre::class);

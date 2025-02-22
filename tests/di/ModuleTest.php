@@ -7,6 +7,8 @@ namespace Ray\Di;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Exception\NotFound;
 
+use function str_replace;
+
 class ModuleTest extends TestCase
 {
     public function testNew(): void
@@ -50,7 +52,10 @@ class ModuleTest extends TestCase
     public function testtoString(): void
     {
         $string = (string) new FakeLogStringModule();
-        $this->assertSame('-array => (array)
+        $normalize = static function (string $str): string {
+            return str_replace(["\r\n", "\r"], "\n", $str);
+        };
+        $this->assertSame($normalize('-array => (array)
 -bool => (boolean) 1
 -int => (integer) 1
 -null => (NULL)
@@ -58,6 +63,6 @@ class ModuleTest extends TestCase
 -string => (string) 1
 Ray\Di\FakeAopInterface- => (dependency) Ray\Di\FakeAop (aop) +returnSame(Ray\Di\FakeDoubleInterceptor)
 Ray\Di\FakeDoubleInterceptor- => (dependency) Ray\Di\FakeDoubleInterceptor
-Ray\Di\FakeRobotInterface- => (provider) (dependency) Ray\Di\FakeRobotProvider', $string);
+Ray\Di\FakeRobotInterface- => (provider) (dependency) Ray\Di\FakeRobotProvider'), $normalize($string));
     }
 }

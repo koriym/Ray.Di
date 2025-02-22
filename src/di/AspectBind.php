@@ -22,7 +22,7 @@ final class AspectBind implements AcceptInterface
     /**
      * Instantiate interceptors
      *
-     * @return array<string, list<MethodInterceptor>>
+     * @return array<non-empty-string, list<MethodInterceptor>>
      */
     public function inject(Container $container): array
     {

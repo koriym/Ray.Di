@@ -9,6 +9,7 @@ use Ray\Aop\ReflectionMethod;
 use Ray\Di\Di\InjectInterface;
 use Ray\Di\Di\Named;
 
+use function assert;
 use const PHP_VERSION_ID;
 
 final class AnnotatedClassMethods
@@ -38,6 +39,7 @@ final class AnnotatedClassMethods
             }
         }
 
+        assert($constructor instanceof ReflectionMethod);
         $named = $constructor->getAnnotation(Named::class);
         if ($named instanceof Named) {
             return new Name($named->value);

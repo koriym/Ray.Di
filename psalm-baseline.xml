@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="4.30.0@d0bc6e25d89f649e4f36a534f330f8bb4643dd69">
+  <file src="src/di/AnnotatedClassMethods.php">
+    <MixedAssignment occurrences="1">
+      <code>$named</code>
+    </MixedAssignment>
+    <UndefinedMethod occurrences="1">
+      <code>getAnnotation</code>
+    </UndefinedMethod>
+  </file>
+  <file src="src/di/AspectBind.php">
+    <MixedArrayOffset occurrences="1">
+      <code>$instantiatedBindings[$methodName]</code>
+    </MixedArrayOffset>
+    <MixedAssignment occurrences="3">
+      <code>$interceptorClassName</code>
+      <code>$interceptorClassNames</code>
+      <code>$methodName</code>
+    </MixedAssignment>
+    <MixedReturnTypeCoercion occurrences="2">
+      <code>$instantiatedBindings</code>
+      <code>array&lt;string, list&lt;MethodInterceptor&gt;&gt;</code>
+    </MixedReturnTypeCoercion>
+  </file>
+  <file src="src/di/Dependency.php">
+    <InvalidArgument occurrences="1">
+      <code>$pointcuts</code>
+    </InvalidArgument>
+  </file>
+</files>

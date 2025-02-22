@@ -12,7 +12,6 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 
-use function assert;
 use function class_exists;
 use function explode;
 use function get_class;
@@ -153,7 +152,6 @@ final class Name
             if (isset($exploded[1])) {
                 [$key, $value] = $exploded;
                 if (isset($key[0]) && $key[0] === '$') {
-                    assert(is_string($key)); // @phpstan-ignore-line
                     $key = substr($key, 1);
                 }
 

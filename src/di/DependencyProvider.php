@@ -60,7 +60,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
      */
     public function inject(Container $container)
     {
-        if ($this->isSingleton && $this->instance) {
+        if ($this->isSingleton && $this->instance !== null) {
             return $this->instance;
         }
 

@@ -24,7 +24,7 @@ final class InjectorInterfaceTest
         $this->a = $injector->getInstance(DateTimeInterface::class);
         /** @psalm-suppress PropertyTypeCoercion */
         $this->b = $injector->getInstance(DateTimeInterface::class); // @phpstan-ignore-line
-        /** @psalm-suppress ArgumentTypeCoercion */
+        /** @psalm-suppress */
         $this->m = $injector->getInstance('a'); // @phpstan-ignore-line
     }
 }

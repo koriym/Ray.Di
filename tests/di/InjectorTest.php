@@ -328,6 +328,7 @@ class InjectorTest extends TestCase
         (new Injector())->getInstance(FakeConcreteClass::class);
     }
 
+    /** @requires OS ^Linux|^Darwin */
     public function testIsOptionalValue(): void
     {
         if (! defined('HHVM_VERSION')) {
@@ -343,6 +344,7 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(FakeInternalTypes::class, $types);
     }
 
+    /** @requires OS ^Linux|^Darwin */
     public function testToConstructor(): void
     {
         $module = new class extends AbstractModule {

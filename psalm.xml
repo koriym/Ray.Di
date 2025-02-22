@@ -8,7 +8,6 @@
 >
     <projectFiles>
         <directory name="src/di"/>
-        <directory name="tests/type"/>
     </projectFiles>
     <stubs>
         <file name="tests/stub/BindInterface.phpstub"/>

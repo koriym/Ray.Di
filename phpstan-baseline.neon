@@ -1,7 +1,7 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to an undefined method ReflectionMethod\:\:getAnnotation\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: src/di/AnnotatedClassMethods.php

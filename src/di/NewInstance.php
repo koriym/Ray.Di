@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use Ray\Aop\Bind as AopBind;
+use Ray\Aop\WeavedInterface;
 use ReflectionClass;
 use ReflectionException;
 
@@ -94,15 +95,22 @@ final class NewInstance
 
     private function postNewInstance(Container $container, object $instance): object
     {
-        // bind dependency injected interceptors
-        if ($this->bind instanceof AspectBind) {
-            assert(isset($instance->bindings));
-            $instance->bindings = $this->bind->inject($container);
-        }
+        $this->enableAop($instance, $container);
 
         // setter injection
         ($this->setterMethods)($instance, $container);
 
         return $instance;
+    }
+
+    public function enableAop(object $instance, Container $container): void
+    {
+        if (! $this->bind instanceof AspectBind) {
+            return;
+        }
+
+        assert($instance instanceof WeavedInterface);
+
+        $instance->_setBindings($this->bind->inject($container));  // Ray.Aop ^2.18
     }
 }

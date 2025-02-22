@@ -6,6 +6,6 @@ namespace Ray\Di\Exception;
 
 use LogicException;
 
-class SetNotFound extends LogicException implements ExceptionInterface
+final class SetNotFound extends LogicException implements ExceptionInterface
 {
 }

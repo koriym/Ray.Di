@@ -6,6 +6,6 @@ namespace Ray\Di\Exception;
 
 use LogicException;
 
-class NotFound extends LogicException implements ExceptionInterface
+final class NotFound extends LogicException implements ExceptionInterface
 {
 }

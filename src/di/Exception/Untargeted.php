@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Ray\Di\Exception;
 
-class Untargeted extends Unbound
+final class Untargeted extends Unbound
 {
 }

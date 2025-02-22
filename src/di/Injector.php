@@ -18,7 +18,7 @@ use function sprintf;
 use function str_replace;
 use function sys_get_temp_dir;
 
-class Injector implements InjectorInterface
+final class Injector implements InjectorInterface
 {
     /** @var non-empty-string */
     private $classDir;

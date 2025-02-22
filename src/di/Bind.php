@@ -117,7 +117,7 @@ final class Bind
         }
 
         $this->untarget = null;
-        $postConstructRef = $postConstruct ? new ReflectionMethod($class, $postConstruct) : null;
+        $postConstructRef = $postConstruct !== null ? new ReflectionMethod($class, $postConstruct) : null;
         /** @var ReflectionClass<object> $reflection */
         $reflection = new ReflectionClass($class);
         $this->bound = (new DependencyFactory())->newToConstructor($reflection, $name, $injectionPoints, $postConstructRef);

@@ -30,7 +30,7 @@ class DependencyTest extends TestCase
         $setters[] = new SetterMethod(new ReflectionMethod(FakeCar::class, 'setTires'), $name);
         $setters[] = new SetterMethod(new ReflectionMethod(FakeCar::class, 'setHardtop'), $name);
         $setterMethods = new SetterMethods($setters);
-        $newInstance = new NewInstance($class, $setterMethods);
+        $newInstance = new NewInstance($class, $setterMethods); // @phpstan-ignore-line
         $this->dependency = new Dependency($newInstance, new ReflectionMethod(FakeCar::class, 'postConstruct'));
     }
 
@@ -105,7 +105,7 @@ class DependencyTest extends TestCase
 
     public function testInjectInterceptor(): void
     {
-        $dependency = new Dependency(new NewInstance(new ReflectionClass(FakeAop::class), new SetterMethods([])));
+        $dependency = new Dependency(new NewInstance(new ReflectionClass(FakeAop::class), new SetterMethods([]))); // @phpstan-ignore-line
         $pointcut = new Pointcut((new Matcher())->any(), (new Matcher())->any(), [FakeDoubleInterceptor::class]);
         $dependency->weaveAspects(new Compiler(__DIR__ . '/tmp'), [$pointcut]);
         $container = new Container();

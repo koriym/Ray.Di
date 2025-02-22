@@ -48,7 +48,7 @@ final class NewInstance
      */
     public function __invoke(Container $container): object
     {
-        /** @psalm-suppress MixedMethodCall */
+        /** @psalm-suppress MixedMethodCall, ArgumentTypeCoercion */
         $instance = $this->arguments instanceof Arguments ? (new ReflectionClass($this->class))->newInstanceArgs($this->arguments->inject($container)) : new $this->class();
 
         return $this->postNewInstance($container, $instance);
@@ -69,6 +69,7 @@ final class NewInstance
      */
     public function newInstanceArgs(Container $container, array $params): object
     {
+        /** @psalm-suppress ArgumentTypeCoercion */
         $instance = (new ReflectionClass($this->class))->newInstanceArgs($params);
 
         return $this->postNewInstance($container, $instance);

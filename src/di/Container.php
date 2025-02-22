@@ -94,6 +94,7 @@ final class Container implements InjectorInterface
             throw new BadMethodCallException($interface);
         }
 
+        /** @psalm-suppress ArgumentTypeCoercion */
         return $dependency->injectWithArgs($this, $params);
     }
 

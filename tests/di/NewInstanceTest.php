@@ -23,7 +23,7 @@ class NewInstanceTest extends TestCase
         $setters[] = new SetterMethod(new ReflectionMethod(FakeCar::class, 'setTires'), $name);
         $setters[] = new SetterMethod(new ReflectionMethod(FakeCar::class, 'setHardtop'), $name);
         $setterMethods = new SetterMethods($setters);
-        $this->newInstance = new NewInstance($class, $setterMethods);
+        $this->newInstance = new NewInstance($class, $setterMethods); // @phpstan-ignore-line
     }
 
     public function testInvoke(): void

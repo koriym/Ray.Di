@@ -67,7 +67,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     public function inject(Container $container)
     {
         // singleton ?
-        if ($this->isSingleton === true && $this->instance) {
+        if ($this->isSingleton === true && $this->instance !== null) {
             return $this->instance;
         }
 
@@ -75,7 +75,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
         $this->instance = ($this->newInstance)($container);
 
         // @PostConstruct
-        if ($this->postConstruct) {
+        if ($this->postConstruct !== null) {
             assert(method_exists($this->instance, $this->postConstruct));
             $this->instance->{$this->postConstruct}();
         }
@@ -91,7 +91,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     public function injectWithArgs(Container $container, array $params)
     {
         // singleton ?
-        if ($this->isSingleton === true && $this->instance) {
+        if ($this->isSingleton === true && $this->instance !== null) {
             return $this->instance;
         }
 
@@ -99,7 +99,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
         $this->instance = $this->newInstance->newInstanceArgs($container, $params);
 
         // @PostConstruct
-        if ($this->postConstruct) {
+        if ($this->postConstruct !== null) {
             assert(method_exists($this->instance, $this->postConstruct));
             $this->instance->{$this->postConstruct}();
         }

@@ -32,7 +32,7 @@ final class InjectionPoint implements InjectionPointInterface, Serializable
     public function __construct(ReflectionParameter $parameter)
     {
         $this->parameter = $parameter;
-        $this->pFunction = (string) $parameter->getDeclaringFunction()->name;
+        $this->pFunction = $parameter->getDeclaringFunction()->name;
         $class = $parameter->getDeclaringClass();
         $this->pClass = $class instanceof ReflectionClass ? $class->name : '';
         $this->pName = $parameter->name;

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use Override;
 use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -102,7 +101,6 @@ final class Argument implements Serializable, AcceptInterface
      *
      * @psalm-param string $data
      */
-    #[Override]
     public function unserialize($data): void
     {
         /** @var array{0: string, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $array */
@@ -148,7 +146,6 @@ final class Argument implements Serializable, AcceptInterface
     }
 
     /** @inheritDoc */
-    #[Override]
     public function accept(VisitorInterface $visitor)
     {
         $visitor->visitArgument(

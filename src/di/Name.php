@@ -156,7 +156,7 @@ final class Name
                 }
 
                 /** @psalm-suppress MixedArgument */
-                $names[trim($key)] = trim($value);
+                $names[trim((string) $key)] = trim($value);
             }
         }
 

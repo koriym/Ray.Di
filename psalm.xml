@@ -12,4 +12,7 @@
     <stubs>
         <file name="tests/stub/BindInterface.phpstub"/>
     </stubs>
+    <issueHandlers>
+        <MissingOverrideAttribute errorLevel="suppress"/>
+    </issueHandlers>
 </psalm>

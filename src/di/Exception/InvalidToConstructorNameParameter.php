@@ -9,6 +9,6 @@ use InvalidArgumentException;
 /**
  * @see https://github.com/ray-di/Ray.Di#constructor-bindings
  */
-class InvalidToConstructorNameParameter extends InvalidArgumentException implements ExceptionInterface
+final class InvalidToConstructorNameParameter extends InvalidArgumentException implements ExceptionInterface
 {
 }

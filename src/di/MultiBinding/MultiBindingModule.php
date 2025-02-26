@@ -9,7 +9,7 @@ use Koriym\ParamReader\ParamReaderInterface;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
 
-class MultiBindingModule extends AbstractModule
+final class MultiBindingModule extends AbstractModule
 {
     protected function configure(): void
     {

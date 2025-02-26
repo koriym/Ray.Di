@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-class ProviderSetModule extends AbstractModule
+final class ProviderSetModule extends AbstractModule
 {
     protected function configure(): void
     {

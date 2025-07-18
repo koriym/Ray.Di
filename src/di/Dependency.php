@@ -118,7 +118,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * @param array<int,Pointcut> $pointcuts
+     * @param array<int, Pointcut> $pointcuts
      */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {

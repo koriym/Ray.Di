@@ -25,7 +25,7 @@ final class Container implements InjectorInterface
     /** @var MultiBindings */
     public $multiBindings;
 
-    /** @var DependencyInterface[] */
+    /** @var array<non-empty-string, DependencyInterface> */
     private $container = [];
 
     /** @var array<int, Pointcut> */
@@ -50,6 +50,10 @@ final class Container implements InjectorInterface
     public function add(Bind $bind): void
     {
         $dependency = $bind->getBound();
+        /**
+         * @psalm-suppress MixedPropertyTypeCoercion
+         * @phpstan-ignore assign.propertyType
+         */
         $dependency->register($this->container, $bind);
     }
 
@@ -172,6 +176,10 @@ final class Container implements InjectorInterface
     public function merge(self $container): void
     {
         $this->multiBindings->merge($container->multiBindings);
+        /**
+         * @psalm-suppress MixedPropertyTypeCoercion
+         * @phpstan-ignore assign.propertyType
+         */
         $this->container += $container->getContainer();
         $this->pointcuts = array_merge($this->pointcuts, $container->getPointcuts());
     }
@@ -204,7 +212,11 @@ final class Container implements InjectorInterface
     public function map(callable $f): void
     {
         foreach ($this->container as $key => &$index) {
-            assert(is_string($key));
+            /**
+             * @psalm-suppress RedundantConditionGivenDocblockType
+             * @phpstan-ignore function.alreadyNarrowedType
+             */
+            assert(is_string($key)); // @phpstan-ignore-line
             $index = $f($index, $key);
         }
     }

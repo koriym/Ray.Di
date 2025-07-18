@@ -58,12 +58,12 @@ use Ray\Di\MultiBinding\LazyTo;
  * @psalm-type InjectionPointSerialData = array{0: string, 1: string, 2: string}
  * @psalm-type AnnotationType Named|Inject|Qualifier|PostConstruct|Assisted|Set
  * @psalm-type DependencyImplementation Dependency|DependencyProvider|Instance|NullDependency|NullObjectDependency|LazyInstance|LazyProvider|LazyTo
- * @template T of MethodInterceptor
- * @psalm-type InterceptorClassList = array<class-string<T>>
- * @template T
- * @psalm-type GenericProvider = ProviderInterface<T>
- * @template T of object
- * @psalm-type TypedClassString = class-string<T>
- * @template T
- * @psalm-type OptionalBinding = T|null
+ * @template TInterceptor of MethodInterceptor
+ * @psalm-type InterceptorClassList = array<class-string<TInterceptor>>
+ * @template TProvider
+ * @psalm-type GenericProvider = ProviderInterface<TProvider>
+ * @template TClass of object
+ * @psalm-type TypedClassString = class-string<TClass>
+ * @template TOptional
+ * @psalm-type OptionalBinding = TOptional|null
  */

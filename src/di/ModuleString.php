@@ -15,6 +15,9 @@ use function unserialize;
 
 use const PHP_EOL;
 
+/**
+ * @psalm-import-type PointcutList from Types
+ */
 final class ModuleString
 {
     /**

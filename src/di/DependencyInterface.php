@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+/**
+ * @psalm-import-type DependencyContainer from Types
+ */
 interface DependencyInterface
 {
     /**
@@ -21,9 +24,11 @@ interface DependencyInterface
     /**
      * Register dependency to container
      *
-     * @param DependencyInterface[] $container
+     * @param DependencyContainer $container
      *
      * @return void
+     *
+     * @param-out DependencyContainer $container
      */
     public function register(array &$container, Bind $bind);
 

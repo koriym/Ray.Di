@@ -20,12 +20,17 @@ use function explode;
 use function is_string;
 use function ksort;
 
+/**
+ * @psalm-import-type DependencyContainer from Types
+ * @psalm-import-type PointcutList from Types
+ * @psalm-import-type DependencyIndex from Types
+ */
 final class Container implements InjectorInterface
 {
     /** @var MultiBindings */
     public $multiBindings;
 
-    /** @var array<non-empty-string, DependencyInterface> */
+    /** @var DependencyContainer */
     private $container = [];
 
     /** @var array<int, Pointcut> */
@@ -50,10 +55,6 @@ final class Container implements InjectorInterface
     public function add(Bind $bind): void
     {
         $dependency = $bind->getBound();
-        /**
-         * @psalm-suppress MixedPropertyTypeCoercion
-         * @phpstan-ignore assign.propertyType
-         */
         $dependency->register($this->container, $bind);
     }
 
@@ -98,12 +99,13 @@ final class Container implements InjectorInterface
             throw new BadMethodCallException($interface);
         }
 
-        /** @psalm-suppress ArgumentTypeCoercion */
         return $dependency->injectWithArgs($this, $params);
     }
 
     /**
      * Return dependency injected instance
+     *
+     * @param DependencyIndex $index
      *
      * @return mixed
      *
@@ -136,9 +138,9 @@ final class Container implements InjectorInterface
     /**
      * Return Unbound exception
      *
-     * @param string $index {interface}-{bind name}
+     * @param DependencyIndex $index {interface}-{bind name}
      *
-     * @return Unbound|Untargeted
+     * @return Exception\Unbound|Exception\Untargeted
      */
     public function unbound(string $index)
     {
@@ -153,7 +155,8 @@ final class Container implements InjectorInterface
     /**
      * Return container
      *
-     * @return DependencyInterface[]
+     * @return array<non-empty-string, DependencyInterface>
+     * @psalm-return DependencyContainer
      */
     public function getContainer(): array
     {
@@ -164,6 +167,7 @@ final class Container implements InjectorInterface
      * Return pointcuts
      *
      * @return array<int, Pointcut>
+     * @psalm-return PointcutList
      */
     public function getPointcuts(): array
     {
@@ -178,7 +182,6 @@ final class Container implements InjectorInterface
         $this->multiBindings->merge($container->multiBindings);
         /**
          * @psalm-suppress MixedPropertyTypeCoercion
-         * @phpstan-ignore assign.propertyType
          */
         $this->container += $container->getContainer();
         $this->pointcuts = array_merge($this->pointcuts, $container->getPointcuts());

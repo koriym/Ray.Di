@@ -14,6 +14,10 @@ use function assert;
 use function class_exists;
 use function interface_exists;
 
+/**
+ * @psalm-import-type BindableInterface from Types
+ * @psalm-import-type PointcutList from Types
+ */
 abstract class AbstractModule
 {
     /** @var Matcher */
@@ -134,7 +138,7 @@ abstract class AbstractModule
     /**
      * Bind interface
      *
-     * @phpstan-param class-string|string $interface
+     * @param BindableInterface $interface
      */
     protected function bind(string $interface = ''): Bind
     {

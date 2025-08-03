@@ -7,12 +7,16 @@ namespace Ray\Di;
 use ReflectionException;
 use ReflectionMethod;
 
+/**
+ * @psalm-import-type InjectionPointDefinition from Types
+ * @psalm-import-type InjectionPointsList from Types
+ */
 final class InjectionPoints
 {
     /**
      * Injection points
      *
-     * @var array<array{0:string, 1:string, 2:bool}>
+     * @var InjectionPointsList
      */
     private $points = [];
 
@@ -46,8 +50,8 @@ final class InjectionPoints
     }
 
     /**
-     * @param class-string                         $class
-     * @param array{0: string, 1: string, 2: bool} $point
+     * @param class-string             $class
+     * @param InjectionPointDefinition $point
      *
      * @throws ReflectionException
      */

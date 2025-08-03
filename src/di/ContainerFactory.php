@@ -8,11 +8,14 @@ use Ray\Aop\Compiler;
 
 use function array_shift;
 
+/**
+ * @psalm-import-type ModuleList from Types
+ */
 final class ContainerFactory
 {
     /**
-     * @param non-empty-string                                    $classDir
-     * @param AbstractModule|non-empty-array<AbstractModule>|null $module   Module(s)
+     * @param non-empty-string               $classDir
+     * @param AbstractModule|ModuleList|null $module   Module(s)
      */
     public function __invoke($module, string $classDir): Container
     {
@@ -29,7 +32,7 @@ final class ContainerFactory
     }
 
     /**
-     * @param AbstractModule|non-empty-array<AbstractModule>|null $module Module(s)
+     * @param AbstractModule|ModuleList|null $module Module(s)
      */
     private function getModule($module): AbstractModule
     {

@@ -20,6 +20,9 @@ use function preg_match;
 use function substr;
 use function trim;
 
+/**
+ * @psalm-import-type ParameterNameMapping from Types
+ */
 final class Name
 {
     /**
@@ -35,12 +38,12 @@ final class Name
      *
      * format: array<varName, NamedName>
      *
-     * @var array<string, string>
+     * @var ParameterNameMapping
      */
     private $names;
 
     /**
-     * @param string|array<string, string>|null $name
+     * @param string|ParameterNameMapping|null $name
      */
     public function __construct($name = null)
     {
@@ -139,7 +142,7 @@ final class Name
     }
 
     /**
-     * @return array<string, string>
+     * @return ParameterNameMapping
      *
      * @psalm-pure
      */

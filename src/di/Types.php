@@ -28,7 +28,7 @@ use Ray\Aop\Pointcut;
  * @psalm-type InjectionPointDefinition = array{0: string, 1: string, 2: bool}
  * @psalm-type InjectionPointsList = list<InjectionPointDefinition>
  * @psalm-type MethodArguments = list<mixed>
- * @psalm-type ArgumentSerializationData = array{0: string, 1: bool, 2: mixed, 3: string, 4: array{0: string, 1: string, 2: string}}
+ * @psalm-type ArgumentSerializationData = array{0: DependencyIndex, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2: string}}
  * @psalm-type UnboundTypeList = list<'bool'|'int'|'float'|'string'|'array'|'resource'|'callable'|'iterable'|'object'|'mixed'>
  * @psalm-type QualifierList = array<object>
  *
@@ -62,6 +62,10 @@ use Ray\Aop\Pointcut;
  * Core Component Types
  * @psalm-type SetterMethodsList = array<SetterMethod>
  * @psalm-type ArgumentsList = array<Argument>
+ *
+ * Domain-Specific Array Types
+ * @psalm-type ModuleList = non-empty-array<AbstractModule>
+ * @psalm-type NamedArguments = array<string, mixed>
  */
 final class Types
 {

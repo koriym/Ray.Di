@@ -33,6 +33,7 @@ final class SpyCompiler implements CompilerInterface
      *
      * Dummy classes are used for logging and don't really exist.
      * So the code breaks the QA rules as shown below.
+     * NOTE: psalm-suppress is acceptable here for dummy/logging infrastructure
      *
      * @psalm-suppress MoreSpecificReturnType
      * @psalm-suppress LessSpecificReturnStatement

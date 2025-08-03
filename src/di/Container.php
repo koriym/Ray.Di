@@ -14,16 +14,15 @@ use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionClass;
 
 use function array_merge;
-use function assert;
 use function class_exists;
 use function explode;
-use function is_string;
 use function ksort;
 
 /**
  * @psalm-import-type DependencyContainer from Types
  * @psalm-import-type PointcutList from Types
  * @psalm-import-type DependencyIndex from Types
+ * @psalm-import-type MethodArguments from Types
  */
 final class Container implements InjectorInterface
 {
@@ -81,7 +80,7 @@ final class Container implements InjectorInterface
     /**
      * Return dependency injected instance
      *
-     * @param array<int, mixed> $params
+     * @param MethodArguments $params
      *
      * @return mixed
      *
@@ -180,9 +179,6 @@ final class Container implements InjectorInterface
     public function merge(self $container): void
     {
         $this->multiBindings->merge($container->multiBindings);
-        /**
-         * @psalm-suppress MixedPropertyTypeCoercion
-         */
         $this->container += $container->getContainer();
         $this->pointcuts = array_merge($this->pointcuts, $container->getPointcuts());
     }
@@ -215,11 +211,6 @@ final class Container implements InjectorInterface
     public function map(callable $f): void
     {
         foreach ($this->container as $key => &$index) {
-            /**
-             * @psalm-suppress RedundantConditionGivenDocblockType
-             * @phpstan-ignore function.alreadyNarrowedType
-             */
-            assert(is_string($key)); // @phpstan-ignore-line
             $index = $f($index, $key);
         }
     }

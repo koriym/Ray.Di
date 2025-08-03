@@ -7,7 +7,6 @@ namespace Ray\Di;
 use Ray\Aop\Bind as AopBind;
 use Ray\Aop\CompilerInterface;
 use Ray\Aop\MethodInterceptor;
-use Ray\Aop\Pointcut;
 use Ray\Aop\WeavedInterface;
 use ReflectionClass;
 use ReflectionMethod;
@@ -18,6 +17,7 @@ use function sprintf;
 
 /**
  * @psalm-import-type MethodArguments from Types
+ * @psalm-import-type PointcutList from Types
  */
 final class Dependency implements DependencyInterface, AcceptInterface
 {
@@ -120,7 +120,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * @param array<int, Pointcut> $pointcuts
+     * @param PointcutList $pointcuts
      */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {

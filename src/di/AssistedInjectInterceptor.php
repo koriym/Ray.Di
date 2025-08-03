@@ -22,6 +22,8 @@ use function is_callable;
 
 /**
  * Assisted injection interceptor for #[Inject] attributed parameter
+ *
+ * @psalm-import-type NamedArguments from Types
  */
 final class AssistedInjectInterceptor implements MethodInterceptor
 {
@@ -65,7 +67,7 @@ final class AssistedInjectInterceptor implements MethodInterceptor
     /**
      * @param MethodInvocation<object> $invocation
      *
-     * @return array<string, mixed>
+     * @return NamedArguments
      */
     private function getNamedArguments(MethodInvocation $invocation): array
     {

@@ -9,6 +9,9 @@ use ReflectionParameter;
 
 /**
  * Visits a Dependency
+ *
+ * @psalm-import-type SetterMethodsList from Types
+ * @psalm-import-type ArgumentList from Types
  */
 interface VisitorInterface
 {
@@ -57,7 +60,7 @@ interface VisitorInterface
     /**
      * Visits Setter Methods
      *
-     * @param array<SetterMethod> $setterMethods
+     * @param SetterMethodsList $setterMethods
      *
      * @return mixed|void
      */
@@ -73,7 +76,7 @@ interface VisitorInterface
     /**
      * Visits Arguments
      *
-     * @param array<Argument> $arguments
+     * @param ArgumentList $arguments
      *
      * @return mixed|void
      */

@@ -9,6 +9,9 @@ use Ray\Aop\MethodInterceptor;
 
 use function assert;
 
+/**
+ * @psalm-import-type MethodInterceptorBindings from Types
+ */
 final class AspectBind implements AcceptInterface
 {
     /** @var AopBind */
@@ -22,7 +25,7 @@ final class AspectBind implements AcceptInterface
     /**
      * Instantiate interceptors
      *
-     * @return array<non-empty-string, list<MethodInterceptor>>
+     * @return MethodInterceptorBindings
      */
     public function inject(Container $container): array
     {

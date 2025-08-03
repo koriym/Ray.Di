@@ -15,8 +15,7 @@ final class SetterMethods implements AcceptInterface
     private $setterMethods;
 
     /**
-     * @param array<SetterMethod> $setterMethods
-     * @psalm-param SetterMethodsList $setterMethods
+     * @param SetterMethodsList $setterMethods
      */
     public function __construct(array $setterMethods)
     {

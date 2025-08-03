@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use Ray\Aop\Pointcut;
-
 use function assert;
 use function implode;
 use function serialize;
@@ -21,7 +19,7 @@ use const PHP_EOL;
 final class ModuleString
 {
     /**
-     * @param array<int, Pointcut> $pointcuts
+     * @param PointcutList $pointcuts
      */
     public function __invoke(Container $container, array $pointcuts): string
     {

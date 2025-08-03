@@ -22,6 +22,7 @@ use function is_string;
 /**
  * @psalm-import-type BindableInterface from Types
  * @psalm-import-type BindingName from Types
+ * @psalm-import-type ParameterNameMapping from Types
  */
 final class Bind
 {
@@ -112,8 +113,8 @@ final class Bind
     /**
      * Bind to constructor
      *
-     * @param class-string<T>              $class class name
-     * @param array<string, string>|string $name  "varName=bindName,..." or [$varName => $bindName, $varName => $bindName...]
+     * @param class-string<T>             $class class name
+     * @param ParameterNameMapping|string $name  "varName=bindName,..." or [$varName => $bindName, $varName => $bindName...]
      *
      * @throws ReflectionException
      *
@@ -214,7 +215,7 @@ final class Bind
      * input: ['varA' => 'nameA', 'varB' => 'nameB']
      * output: "varA=nameA,varB=nameB"
      *
-     * @param array<string, string> $name
+     * @param ParameterNameMapping $name
      */
     private function getStringName(array $name): string
     {

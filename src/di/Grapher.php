@@ -12,6 +12,9 @@ use function spl_autoload_register;
 use function sprintf;
 use function str_replace;
 
+/**
+ * @psalm-import-type MethodArguments from Types
+ */
 final class Grapher
 {
     /** @var non-empty-string */
@@ -55,8 +58,8 @@ final class Grapher
     /**
      * Build an object graph with give constructor parameters
      *
-     * @param string            $class  class name
-     * @param array<int, mixed> $params construct parameters
+     * @param string      $class  class name
+     * @param list<mixed> $params construct parameters (MethodArguments)
      *
      * @return mixed
      */

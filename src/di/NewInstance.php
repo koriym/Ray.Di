@@ -51,8 +51,9 @@ final class NewInstance
      */
     public function __invoke(Container $container): object
     {
-        /** @psalm-suppress MixedMethodCall, ArgumentTypeCoercion */
-        $instance = $this->arguments instanceof Arguments ? (new ReflectionClass($this->class))->newInstanceArgs($this->arguments->inject($container)) : new $this->class();
+        $reflection = new ReflectionClass($this->class);
+        /** @psalm-suppress MixedMethodCall */
+        $instance = $this->arguments instanceof Arguments ? $reflection->newInstanceArgs($this->arguments->inject($container)) : new $this->class();
 
         return $this->postNewInstance($container, $instance);
     }
@@ -66,13 +67,12 @@ final class NewInstance
     }
 
     /**
-     * @param array<int, mixed> $params
+     * @param MethodArguments $params
      *
      * @throws ReflectionException
      */
     public function newInstanceArgs(Container $container, array $params): object
     {
-        /** @psalm-suppress ArgumentTypeCoercion */
         $instance = (new ReflectionClass($this->class))->newInstanceArgs($params);
 
         return $this->postNewInstance($container, $instance);

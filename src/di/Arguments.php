@@ -27,8 +27,7 @@ final class Arguments implements AcceptInterface
     /**
      * Return arguments
      *
-     * @return array<int, mixed>
-     * @psalm-return MethodArguments
+     * @return MethodArguments
      *
      * @throws Exception\Unbound
      */

@@ -14,8 +14,8 @@ use function array_shift;
 final class ContainerFactory
 {
     /**
-     * @param non-empty-string               $classDir
      * @param AbstractModule|ModuleList|null $module   Module(s)
+     * @param non-empty-string               $classDir
      */
     public function __invoke($module, string $classDir): Container
     {

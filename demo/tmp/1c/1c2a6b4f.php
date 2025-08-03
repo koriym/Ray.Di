@@ -1,1 +1,0 @@
-<?php return 'a:2:{i:0;O:63:"Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor":0:{}i:1;O:9:"Attribute":1:{s:5:"flags";i:36;}}';

@@ -1,1 +1,0 @@
-<?php return 'a:1:{i:0;O:23:"Ray\Di\Di\PostConstruct":0:{}}';

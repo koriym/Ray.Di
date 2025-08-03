@@ -19,14 +19,14 @@ interface MovieListerInterface
 
 class Finder implements FinderInterface
 {
-    private $className;
+    private string $className;
 
-    public function __construct($className)
+    public function __construct(string $className)
     {
         $this->className = $className;
     }
 
-    public function find()
+    public function find(): string
     {
         return sprintf('search for [%s]', $this->className);
     }
@@ -34,8 +34,7 @@ class Finder implements FinderInterface
 
 class MovieLister implements MovieListerInterface
 {
-    /** @var Finder */
-    public $finder;
+    public FinderInterface $finder;
 
     public function __construct(FinderInterface $finder)
     {
@@ -45,12 +44,10 @@ class MovieLister implements MovieListerInterface
 
 class FinderProvider implements ProviderInterface
 {
-    private $ip;
-
-    public function __construct(InjectionPointInterface $ip)
-    {
-        $this->ip = $ip;
-    }
+    public function __construct(
+        public InjectionPointInterface $ip
+    )
+    {}
 
     /**
      * {@inheritdoc}

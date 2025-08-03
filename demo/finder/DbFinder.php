@@ -10,16 +10,12 @@ class DbFinder implements FinderInterface
     {
     }
 
-    /**
-     * @Inject
-     */
+    #[Inject]
     public function setDb(DbInterface $db)
     {
     }
 
-    /**
-     * @Inject
-     */
+    #[Inject]
     public function setSorter(Sorter $sorter, Sorter $sorte2)
     {
     }

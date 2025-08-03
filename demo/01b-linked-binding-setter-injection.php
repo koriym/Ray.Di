@@ -22,11 +22,9 @@ interface MovieListerInterface
 
 class MovieLister implements MovieListerInterface
 {
-    public $finder;
+    public FinderInterface $finder;
 
-    /**
-     * @Inject
-     */
+    #[Inject]
     public function setFinder(FinderInterface $finder)
     {
         $this->finder = $finder;

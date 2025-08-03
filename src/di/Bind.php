@@ -19,6 +19,10 @@ use function interface_exists;
 use function is_array;
 use function is_string;
 
+/**
+ * @psalm-import-type BindableInterface from Types
+ * @psalm-import-type BindingName from Types
+ */
 final class Bind
 {
     /** @var Container */
@@ -43,8 +47,8 @@ final class Bind
     private $untarget;
 
     /**
-     * @param Container                              $container dependency container
-     * @param class-string<MethodInterceptor>|string $interface interface or concrete class name
+     * @param Container         $container dependency container
+     * @param BindableInterface $interface interface or concrete class name
      */
     public function __construct(Container $container, string $interface)
     {
@@ -70,6 +74,9 @@ final class Bind
         }
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function __toString(): string
     {
         return $this->interface . '-' . $this->name;
@@ -77,6 +84,8 @@ final class Bind
 
     /**
      * Set dependency name
+     *
+     * @param BindingName $name
      */
     public function annotatedWith(string $name): self
     {

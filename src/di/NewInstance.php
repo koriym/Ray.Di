@@ -11,6 +11,9 @@ use ReflectionException;
 
 use function assert;
 
+/**
+ * @psalm-import-type MethodArguments from Types
+ */
 final class NewInstance
 {
     /** @var class-string */

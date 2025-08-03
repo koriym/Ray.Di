@@ -18,6 +18,9 @@ use function sprintf;
 use function str_replace;
 use function sys_get_temp_dir;
 
+/**
+ * @psalm-import-type BindableInterface from Types
+ */
 final class Injector implements InjectorInterface
 {
     /** @var non-empty-string */
@@ -80,7 +83,7 @@ final class Injector implements InjectorInterface
     }
 
     /**
-     * @param class-string $class
+     * @param BindableInterface $class
      *
      * @throws AnnotationException
      */

@@ -16,11 +16,14 @@ use function serialize;
 use function sprintf;
 use function unserialize;
 
+/**
+ * @psalm-import-type DependencyIndex from Types
+ */
 final class Argument implements Serializable, AcceptInterface
 {
     public const UNBOUND_TYPE = ['bool', 'int', 'float', 'string', 'array', 'resource', 'callable', 'iterable'];
 
-    /** @var string */
+    /** @var DependencyIndex */
     private $index;
 
     /** @var bool */
@@ -57,6 +60,11 @@ final class Argument implements Serializable, AcceptInterface
         );
     }
 
+    /**
+     * Return index
+     *
+     * @return DependencyIndex
+     */
     public function __toString(): string
     {
         return $this->index;
@@ -103,7 +111,7 @@ final class Argument implements Serializable, AcceptInterface
      */
     public function unserialize($data): void
     {
-        /** @var array{0: string, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $array */
+        /** @var array{0: DependencyIndex, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $array */
         $array = unserialize($data, ['allowed_classes' => false]);
         $this->__unserialize($array);
     }
@@ -131,7 +139,7 @@ final class Argument implements Serializable, AcceptInterface
     }
 
     /**
-     * @param array{0: string, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $unserialized
+     * @param array{0: DependencyIndex, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $unserialized
      */
     public function __unserialize(array $unserialized): void
     {

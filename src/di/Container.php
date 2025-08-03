@@ -23,6 +23,7 @@ use function ksort;
  * @psalm-import-type PointcutList from Types
  * @psalm-import-type DependencyIndex from Types
  * @psalm-import-type MethodArguments from Types
+ * @psalm-import-type InjectableValue from Types
  */
 final class Container implements InjectorInterface
 {
@@ -49,7 +50,7 @@ final class Container implements InjectorInterface
     }
 
     /**
-     * Add binding to container
+     * Add binding to a container
      */
     public function add(Bind $bind): void
     {
@@ -67,13 +68,17 @@ final class Container implements InjectorInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @param ''|class-string<T> $interface
+     * @param string             $name
+     *
+     * @return ($interface is '' ? mixed : T)
+     *
+     * @template T of object
      */
     public function getInstance($interface, $name = Name::ANY)
     {
-        /**
-         * @psalm-var T is object ? T : mixed
-         * @phpstan-var mixed
-         */
+        /** @psalm-suppress MixedReturnStatement */
         return $this->getDependency($interface . '-' . $name);
     }
 

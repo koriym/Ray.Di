@@ -73,7 +73,8 @@ final class Name
             /** @var array<ReflectionAttribute> $attributes */
             $attributes = $param->getAttributes();
             if ($attributes) {
-                $names[$param->name] = self::getName($attributes);
+                $name = self::getName($attributes);
+                $names[$param->name] = $name;
             }
         }
 
@@ -115,8 +116,10 @@ final class Name
             return $this->name;
         }
 
+        $parameterName = $parameter->name;
+
         // multiple variable named binding
-        return $this->names[$parameter->name] ?? $this->names[self::ANY] ?? self::ANY;
+        return $this->names[$parameterName] ?? $this->names[self::ANY] ?? self::ANY;
     }
 
     private function setName(string $name): void
@@ -158,8 +161,9 @@ final class Name
                     $key = substr($key, 1);
                 }
 
-                /** @psalm-suppress MixedArgument */
-                $names[trim((string) $key)] = trim($value);
+                $trimedKey = trim((string) $key);
+
+                $names[$trimedKey] = trim($value);
             }
         }
 

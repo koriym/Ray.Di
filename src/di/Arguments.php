@@ -27,7 +27,7 @@ final class Arguments implements AcceptInterface
     /**
      * Return arguments
      *
-     * @return MethodArguments
+     * @return list<mixed>
      *
      * @throws Exception\Unbound
      */

@@ -6,6 +6,8 @@ namespace Ray\Di;
 
 /**
  * @psalm-import-type DependencyContainer from Types
+ * @psalm-import-type ScopeType from Types
+ * @psalm-import-type InjectableValue from Types
  */
 interface DependencyInterface
 {

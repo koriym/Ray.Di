@@ -7,9 +7,13 @@ namespace Ray\Di;
 use Ray\Di\Exception\Unbound;
 use ReflectionMethod;
 
+/**
+ * @psalm-import-type ArgumentsList from Types
+ * @psalm-import-type MethodArguments from Types
+ */
 final class Arguments implements AcceptInterface
 {
-    /** @var Argument[] */
+    /** @var ArgumentsList */
     private $arguments = [];
 
     public function __construct(ReflectionMethod $method, Name $name)
@@ -23,7 +27,7 @@ final class Arguments implements AcceptInterface
     /**
      * Return arguments
      *
-     * @return array<int, mixed>
+     * @return list<mixed>
      *
      * @throws Exception\Unbound
      */

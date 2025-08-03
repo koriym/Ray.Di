@@ -16,32 +16,21 @@ class LegacyFinder implements FinderInterface
 {
 }
 
-class ModernFinder implements FinderInterface
-{
-}
-
 interface MovieListerInterface
 {
 }
 
 class MovieLister implements MovieListerInterface
 {
-    public $finder;
+    public FinderInterface $finder;
 
-    /**
-     * @Legacy
-     */
-    public function __construct(FinderInterface $finder)
+    public function __construct(#[Legacy] FinderInterface $finder)
     {
         $this->finder = $finder;
     }
 }
 
-/**
- * @Annotation
- * @Target("METHOD")
- * @Qualifier
- */
+#[Attribute(Attribute::TARGET_PARAMETER), Qualifier]
 class Legacy
 {
 }

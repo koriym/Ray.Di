@@ -8,6 +8,9 @@ use Ray\Aop\ReflectionClass;
 use Ray\Aop\ReflectionMethod;
 use ReflectionParameter;
 
+/**
+ * @psalm-import-type QualifierList from Types
+ */
 interface InjectionPointInterface
 {
     /**
@@ -31,7 +34,7 @@ interface InjectionPointInterface
     /**
      * Return Qualifier annotations
      *
-     * @return array<object>
+     * @return QualifierList
      */
     public function getQualifiers(): array;
 }

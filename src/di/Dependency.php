@@ -7,16 +7,18 @@ namespace Ray\Di;
 use Ray\Aop\Bind as AopBind;
 use Ray\Aop\CompilerInterface;
 use Ray\Aop\MethodInterceptor;
-use Ray\Aop\Pointcut;
 use Ray\Aop\WeavedInterface;
 use ReflectionClass;
 use ReflectionMethod;
 
 use function assert;
-use function class_exists;
 use function method_exists;
 use function sprintf;
 
+/**
+ * @psalm-import-type MethodArguments from Types
+ * @psalm-import-type PointcutList from Types
+ */
 final class Dependency implements DependencyInterface, AcceptInterface
 {
     /** @var NewInstance */
@@ -84,7 +86,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * @param array<int, mixed> $params
+     * @param MethodArguments $params
      *
      * @return mixed
      */
@@ -118,13 +120,11 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * @param array<int,Pointcut> $pointcuts
+     * @param PointcutList $pointcuts
      */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {
         $class = (string) $this->newInstance;
-        /**  @psalm-suppress RedundantConditionGivenDocblockType */
-        assert(class_exists($class));
         if ((new ReflectionClass($class))->isFinal()) {
             return;
         }
@@ -143,7 +143,6 @@ final class Dependency implements DependencyInterface, AcceptInterface
         }
 
         $class = $compiler->compile($className, $bind);
-        /** @psalm-suppress ArgumentTypeCoercion */
         $this->newInstance->weaveAspects($class, $bind);
     }
 

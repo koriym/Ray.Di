@@ -21,7 +21,14 @@ use function in_array;
 use function is_callable;
 
 /**
+ * @psalm-import-type NamedArguments from Types
+ * @psalm-import-type InjectableValue from Types
+ */
+
+/**
  * Assisted injection interceptor for #[Inject] attributed parameter
+ *
+ * @psalm-import-type NamedArguments from Types
  */
 final class AssistedInjectInterceptor implements MethodInterceptor
 {

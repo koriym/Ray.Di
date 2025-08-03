@@ -18,6 +18,10 @@ use function sprintf;
 use function str_replace;
 use function sys_get_temp_dir;
 
+/**
+ * @psalm-import-type BindableInterface from Types
+ * @psalm-import-type ModuleList from Types
+ */
 final class Injector implements InjectorInterface
 {
     /** @var non-empty-string */
@@ -27,8 +31,8 @@ final class Injector implements InjectorInterface
     private $container;
 
     /**
-     * @param AbstractModule|non-empty-array<AbstractModule>|null $module Module(s)
-     * @param string                                              $tmpDir Temp directory for generated class
+     * @param AbstractModule|ModuleList|null $module Module(s)
+     * @param string                         $tmpDir Temp directory for generated class
      */
     public function __construct($module = null, string $tmpDir = '')
     {
@@ -80,7 +84,7 @@ final class Injector implements InjectorInterface
     }
 
     /**
-     * @param class-string $class
+     * @param BindableInterface $class
      *
      * @throws AnnotationException
      */

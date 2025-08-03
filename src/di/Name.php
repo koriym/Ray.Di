@@ -20,6 +20,9 @@ use function preg_match;
 use function substr;
 use function trim;
 
+/**
+ * @psalm-import-type ParameterNameMapping from Types
+ */
 final class Name
 {
     /**
@@ -35,12 +38,12 @@ final class Name
      *
      * format: array<varName, NamedName>
      *
-     * @var array<string, string>
+     * @var ParameterNameMapping
      */
     private $names;
 
     /**
-     * @param string|array<string, string>|null $name
+     * @param string|ParameterNameMapping|null $name
      */
     public function __construct($name = null)
     {
@@ -70,7 +73,8 @@ final class Name
             /** @var array<ReflectionAttribute> $attributes */
             $attributes = $param->getAttributes();
             if ($attributes) {
-                $names[$param->name] = self::getName($attributes);
+                $name = self::getName($attributes);
+                $names[$param->name] = $name;
             }
         }
 
@@ -112,8 +116,10 @@ final class Name
             return $this->name;
         }
 
+        $parameterName = $parameter->name;
+
         // multiple variable named binding
-        return $this->names[$parameter->name] ?? $this->names[self::ANY] ?? self::ANY;
+        return $this->names[$parameterName] ?? $this->names[self::ANY] ?? self::ANY;
     }
 
     private function setName(string $name): void
@@ -139,7 +145,7 @@ final class Name
     }
 
     /**
-     * @return array<string, string>
+     * @return ParameterNameMapping
      *
      * @psalm-pure
      */
@@ -155,8 +161,9 @@ final class Name
                     $key = substr($key, 1);
                 }
 
-                /** @psalm-suppress MixedArgument */
-                $names[trim((string) $key)] = trim($value);
+                $trimedKey = trim((string) $key);
+
+                $names[$trimedKey] = trim($value);
             }
         }
 

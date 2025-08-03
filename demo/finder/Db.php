@@ -10,9 +10,7 @@ class Db implements DbInterface
     {
     }
 
-    /**
-     * @PostConstruct
-     */
+    #[PostConstruct]
     public function init()
     {
     }

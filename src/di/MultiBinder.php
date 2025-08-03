@@ -10,6 +10,10 @@ use Ray\Di\MultiBinding\LazyProvider;
 use Ray\Di\MultiBinding\LazyTo;
 use Ray\Di\MultiBinding\MultiBindings;
 
+/**
+ * @psalm-import-type BindableInterface from Types
+ * @psalm-import-type LazyBindingList from Types
+ */
 final class MultiBinder
 {
     /** @var Container */

@@ -6,7 +6,6 @@ namespace Ray\Di;
 
 use Ray\Aop\AbstractMatcher;
 use Ray\Aop\Matcher;
-use Ray\Aop\MethodInterceptor;
 use Ray\Aop\Pointcut;
 use Ray\Aop\PriorityPointcut;
 
@@ -14,6 +13,11 @@ use function assert;
 use function class_exists;
 use function interface_exists;
 
+/**
+ * @psalm-import-type BindableInterface from Types
+ * @psalm-import-type PointcutList from Types
+ * @psalm-import-type InterceptorClassList from Types
+ */
 abstract class AbstractModule
 {
     /** @var Matcher */
@@ -74,7 +78,7 @@ abstract class AbstractModule
     /**
      * Bind interceptor
      *
-     * @param array<class-string<MethodInterceptor>> $interceptors
+     * @param InterceptorClassList $interceptors
      */
     public function bindInterceptor(AbstractMatcher $classMatcher, AbstractMatcher $methodMatcher, array $interceptors): void
     {
@@ -95,7 +99,7 @@ abstract class AbstractModule
     /**
      * Bind interceptor early
      *
-     * @param array<class-string<MethodInterceptor>> $interceptors
+     * @param InterceptorClassList $interceptors
      */
     public function bindPriorityInterceptor(AbstractMatcher $classMatcher, AbstractMatcher $methodMatcher, array $interceptors): void
     {
@@ -134,7 +138,7 @@ abstract class AbstractModule
     /**
      * Bind interface
      *
-     * @phpstan-param class-string|string $interface
+     * @param BindableInterface $interface
      */
     protected function bind(string $interface = ''): Bind
     {

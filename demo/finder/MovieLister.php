@@ -10,7 +10,7 @@ class MovieLister implements MovieListerInterface
     {
     }
 
-    /** @Inject */
+    #[Inject]
     public function setFinder01(FinderInterface $finder, FinderInterface $finder1, FinderInterface $finder2)
     {
     }

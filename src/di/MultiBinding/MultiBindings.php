@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Ray\Di\MultiBinding;
 
 use ArrayObject;
+use Ray\Di\Types;
 
 use function array_merge_recursive;
 
 /**
- * @extends ArrayObject<string, non-empty-array<array-key, LazyInterface>>
+ * @psalm-import-type LazyBindingList from Types
+ * @extends ArrayObject<string, LazyBindingList>
  */
 final class MultiBindings extends ArrayObject
 {

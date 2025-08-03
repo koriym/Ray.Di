@@ -1,4 +1,5 @@
 parameters:
+  errorFormat: raw
   level: max
   paths:
     - src/di

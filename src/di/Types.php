@@ -18,13 +18,14 @@ use Ray\Aop\Pointcut;
  * @psalm-type DependencyContainer = array<non-empty-string, DependencyInterface>
  * @psalm-type DependencyIndex = non-empty-string
  * @psalm-type PointcutList array<int, Pointcut>
- * @psalm-type BindingName = string
+ * @psalm-type BindingName = non-empty-string
  * @psalm-type BindableInterface = class-string|''
- * @psalm-type ConstructorNameMapping = array<string, string>
+ * @psalm-type ConstructorNameMapping = array<non-empty-string, non-empty-string>
  * @psalm-type ParameterNameMapping = array<string, string>
- * @psalm-type NamedParameterString = string
+ * @psalm-type NamedParameterString = non-empty-string
  *
- * Injection and Argument Types
+ * Enhanced Injection and Argument Types
+ * @psalm-type InjectableValue object|scalar|array<array-key, (object|scalar|null)>|null
  * @psalm-type InjectionPointDefinition = array{0: string, 1: string, 2: bool}
  * @psalm-type InjectionPointsList = list<InjectionPointDefinition>
  * @psalm-type MethodArguments = list<mixed>
@@ -33,7 +34,7 @@ use Ray\Aop\Pointcut;
  * @psalm-type QualifierList = array<object>
  *
  * Scope and Lifecycle Types
- * @psalm-type ScopeType = 'Singleton'|'Prototype'
+ * @psalm-type ScopeType = Scope::SINGLETON|Scope::PROTOTYPE
  * @psalm-type ProviderContext = string
  *
  * MultiBinding Types
@@ -43,7 +44,7 @@ use Ray\Aop\Pointcut;
  * AOP and Aspect Types
  * @psalm-type MethodInterceptorBindings array<non-empty-string, list<MethodInterceptor>>
  * @psalm-type InterceptorClassList array<class-string<MethodInterceptor>>
- * @psalm-type VisitorResult = mixed
+ * @psalm-type VisitorResult = object|array<array-key, mixed>|null
  * @psalm-type SetterMethodList = array<SetterMethod>
  * @psalm-type ArgumentList = array<Argument>
  *
@@ -65,7 +66,7 @@ use Ray\Aop\Pointcut;
  *
  * Domain-Specific Array Types
  * @psalm-type ModuleList = non-empty-array<AbstractModule>
- * @psalm-type NamedArguments = array<string, mixed>
+ * @psalm-type NamedArguments = array<string, InjectableValue>
  */
 final class Types
 {

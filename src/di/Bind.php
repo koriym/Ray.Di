@@ -232,7 +232,7 @@ final class Bind
                     throw new InvalidToConstructorNameParameter((string) $key);
                 }
 
-                $varName = $name[$key];
+                $varName = $name[$key] ?? '';
                 $carry[] = $key . '=' . $varName;
 
                 return $carry;

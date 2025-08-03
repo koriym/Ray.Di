@@ -1,1 +1,0 @@
-<?php return 'a:1:{i:0;O:16:"Ray\Di\Di\Inject":1:{s:8:"optional";b:0;}}';

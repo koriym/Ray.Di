@@ -45,8 +45,6 @@ use Ray\Aop\Pointcut;
  * @psalm-type MethodInterceptorBindings array<non-empty-string, list<MethodInterceptor>>
  * @psalm-type InterceptorClassList array<class-string<MethodInterceptor>>
  * @psalm-type VisitorResult = object|array<array-key, mixed>|null
- * @psalm-type SetterMethodList = array<SetterMethod>
- * @psalm-type ArgumentList = array<Argument>
  *
  * Reflection and Metadata Types
  * @psalm-type ReflectionMethodReference = array{0: string, 1: string, 2: string}

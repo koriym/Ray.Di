@@ -11,7 +11,7 @@ use ReflectionParameter;
  * Visits a Dependency
  *
  * @psalm-import-type SetterMethodsList from Types
- * @psalm-import-type ArgumentList from Types
+ * @psalm-import-type ArgumentsList from Types
  */
 interface VisitorInterface
 {
@@ -76,7 +76,7 @@ interface VisitorInterface
     /**
      * Visits Arguments
      *
-     * @param ArgumentList $arguments
+     * @param ArgumentsList $arguments
      *
      * @return mixed|void
      */

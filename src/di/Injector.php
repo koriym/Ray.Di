@@ -39,7 +39,7 @@ final class Injector implements InjectorInterface
         /** @var non-empty-string $classDir */
         $classDir = is_dir($tmpDir) ? $tmpDir : sys_get_temp_dir();
         if (! is_writable($classDir)) {
-            throw new DirectoryNotWritable($classDir); // @CodeCoverageIgnore
+            throw new DirectoryNotWritable($classDir); // @codeCoverageIgnore
         }
 
         $this->classDir = $classDir;

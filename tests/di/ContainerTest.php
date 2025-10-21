@@ -6,12 +6,15 @@ namespace Ray\Di;
 
 use BadMethodCallException;
 use PHPUnit\Framework\TestCase;
+use Ray\Aop\Compiler;
 use Ray\Aop\Matcher;
 use Ray\Aop\Pointcut;
 use Ray\Di\Exception\Unbound;
 use Throwable;
 
+use function assert;
 use function get_class;
+use function sys_get_temp_dir;
 
 class ContainerTest extends TestCase
 {
@@ -172,5 +175,19 @@ class ContainerTest extends TestCase
     {
         $this->expectException(Unbound::class);
         (new Container())->getInstanceWithArgs(FakeEngineInterface::class, []);
+    }
+
+    public function testWeaveAspectsWithEmptyPointcuts(): void
+    {
+        $container = new Container();
+        (new Bind($container, FakeEngine::class));
+
+        // Should work fine even when no pointcuts are defined
+        $tmpDir = sys_get_temp_dir();
+        assert($tmpDir !== '');
+        $container->weaveAspects(new Compiler($tmpDir));
+
+        $instance = $container->getInstance(FakeEngine::class);
+        $this->assertInstanceOf(FakeEngine::class, $instance);
     }
 }

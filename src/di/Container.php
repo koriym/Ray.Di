@@ -193,6 +193,10 @@ final class Container implements InjectorInterface
      */
     public function weaveAspects(CompilerInterface $compiler): void
     {
+        if (empty($this->pointcuts)) {
+            return;
+        }
+
         foreach ($this->container as $dependency) {
             if ($dependency instanceof Dependency) {
                 $dependency->weaveAspects($compiler, $this->pointcuts);

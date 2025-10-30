@@ -12,9 +12,11 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 
+use function assert;
 use function class_exists;
 use function explode;
 use function get_class;
+use function is_object;
 use function is_string;
 use function preg_match;
 use function substr;
@@ -103,6 +105,8 @@ final class Name
 
         $isQualifier = (bool) (new ReflectionClass($attribute))->getAttributes(Qualifier::class);
         if ($isQualifier) {
+            assert(is_object($attribute)); // @phpstan-ignore-line
+
             return get_class($attribute);
         }
 

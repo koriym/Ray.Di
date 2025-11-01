@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-/**
- * @FakeConstant("class_constant_val")
- */
+#[FakeConstant('class_constant_val')]
 class FakeWalkRobot
 {
     /** @var FakeLegInterface */

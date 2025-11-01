@@ -11,19 +11,15 @@ class FakeHandleBar
     public $rightMirror;
     public $leftMirror;
 
-    /**
-     * @Inject
-     * @FakeRight
-     */
+    #[Inject]
+    #[FakeRight]
     public function setMirrors(FakeMirrorInterface $rightMirror): void
     {
         $this->rightMirror = $rightMirror;
     }
 
-    /**
-     * @Inject
-     * @FakeLeft
-     */
+    #[Inject]
+    #[FakeLeft]
     public function setLeftMirror(FakeMirrorInterface $leftMirror): void
     {
         $this->leftMirror = $leftMirror;

@@ -12,14 +12,15 @@
     "require": {
         "php": "^8.2",
         "koriym/null-object": "^1.0",
-        "koriym/param-reader": "^1.0",
-        "ray/aop": "^2.18",
+        "ray/aop": "dev-php82 as 2.19.0",
         "ray/compiler": "^1.10.3"
     },
     "require-dev": {
         "ext-pdo": "*",
+        "bamarni/composer-bin-plugin": "^1.4",
         "phpunit/phpunit": "^8.5.40 || ^9.5",
-        "bamarni/composer-bin-plugin": "^1.4"
+        "ray/rector-ray": "^1.1",
+        "rector/rector": "^0.16.0"
     },
     "config": {
         "sort-packages": true,

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use Koriym\ParamReader\ParamReaderInterface;
 use Ray\Di\Di\Set;
 use Ray\Di\Exception\SetNotFound;
 
@@ -20,20 +19,12 @@ final class ProviderSetProvider implements ProviderInterface
     /** @var InjectorInterface */
     private $injector;
 
-    /** @var ParamReaderInterface<T>  */
-    private $reader;
-
-    /**
-     * @param ParamReaderInterface<T> $reader
-     */
     public function __construct(
         InjectionPointInterface $ip,
-        InjectorInterface $injector,
-        ParamReaderInterface $reader
+        InjectorInterface $injector
     ) {
         $this->ip = $ip;
         $this->injector = $injector;
-        $this->reader = $reader;
     }
 
     /**
@@ -42,11 +33,12 @@ final class ProviderSetProvider implements ProviderInterface
     public function get()
     {
         $param = $this->ip->getParameter();
-        /** @var ?Set<object> $set */
-        $set = $this->reader->getParametrAnnotation($param, Set::class); // @phpstan-ignore-line
-        if ($set === null) {
+        $setAttribute = $param->getAttributes(Set::class);
+        if (! isset($setAttribute[0])) {
             throw new SetNotFound((string) $this->ip->getParameter());
         }
+
+        $set = $setAttribute[0]->newInstance();
 
         return new ProviderProvider($this->injector, $set);
     }

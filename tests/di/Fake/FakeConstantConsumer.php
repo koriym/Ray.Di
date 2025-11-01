@@ -14,29 +14,22 @@ class FakeConstantConsumer
     public $defaultBySetter;
     public $setterConstantWithoutVarName;
 
-    /**
-     * @FakeConstant("constant")
-     */
+    #[FakeConstant('constant')]
     public function __construct($constant, $default = 'default_construct')
     {
         $this->constantByConstruct = $constant;
         $this->defaultByConstruct = $default;
     }
 
-    /**
-     * @FakeConstant ("constant")
-     * @Inject
-     */
+    #[FakeConstant('constant')]
+    #[Inject]
     public function setFakeConstant($constant, $default = 'default_setter'): void
     {
         $this->constantBySetter = $constant;
         $this->defaultBySetter = $default;
     }
 
-    /**
-     * @FakeConstant
-     * @Inject
-     */
+    #[FakeConstant('constant')]
     public function setFakeConstantWithoutVarName($constant): void
     {
         $this->setterConstantWithoutVarName = $constant;

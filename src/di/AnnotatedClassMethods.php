@@ -8,6 +8,7 @@ use Ray\Aop\ReflectionClass;
 use Ray\Aop\ReflectionMethod;
 use Ray\Di\Di\InjectInterface;
 use Ray\Di\Di\Named;
+use ReflectionAttribute;
 
 use function assert;
 
@@ -56,7 +57,7 @@ final class AnnotatedClassMethods
 
     public function getSetterMethod(ReflectionMethod $method): ?SetterMethod
     {
-        $inject = $method->getAnnotation(InjectInterface::class);
+        $inject = $method->getAnnotation(InjectInterface::class, ReflectionAttribute::IS_INSTANCEOF);
         if (! $inject instanceof InjectInterface) {
             return null;
         }

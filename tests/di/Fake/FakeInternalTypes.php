@@ -14,9 +14,7 @@ class FakeInternalTypes
     public $array;
     public $callable;
 
-    /**
-     * @Named("bool=type-bool,int=type-int,string=type-string,array=type-array,callable=type-callable")
-     */
+    #[Named("bool=type-bool,int=type-int,string=type-string,array=type-array,callable=type-callable")]
     public function __construct(
         bool $bool,
         int $int,

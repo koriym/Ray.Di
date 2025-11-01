@@ -11,9 +11,6 @@ use Ray\Di\Di\Qualifier;
  * Script directory
  *
  * This qualifier should not use in an application code.
- *
- * @Annotation
- * @Qualifier
  */
 #[Attribute, Qualifier]
 final class ScriptDir

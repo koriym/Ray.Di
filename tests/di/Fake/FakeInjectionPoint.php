@@ -11,9 +11,7 @@ class FakeInjectionPoint implements ProviderInterface
 {
     public $ip;
 
-    /**
-     * @Named("aa")
-     */
+    #[Named("aa")]
     public function __construct(ReflectionParameter $ip)
     {
         $this->ip = $ip;

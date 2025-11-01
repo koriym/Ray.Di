@@ -11,10 +11,8 @@ class FakeHandleProvider implements ProviderInterface
 {
     private $logo;
 
-    /**
-     * @Inject
-     * @Named("logo")
-     */
+    #[Inject]
+    #[Named("logo")]
     public function __construct($logo = 'nardi')
     {
         $this->logo = $logo;

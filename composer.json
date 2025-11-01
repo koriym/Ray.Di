@@ -10,8 +10,7 @@
         }
     ],
     "require": {
-        "php": "^7.2 || ^8.0",
-        "koriym/attributes": "^1.0.4",
+        "php": "^8.2",
         "koriym/null-object": "^1.0",
         "koriym/param-reader": "^1.0",
         "ray/aop": "^2.18",

@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace Ray\Di\Di;
 
 use Attribute;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Annotates your class methods into which the Injector should inject values
  *
- * @Annotation
- * @Target("METHOD")
- * @NamedArgumentConstructor
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER)]

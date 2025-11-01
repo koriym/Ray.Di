@@ -17,9 +17,6 @@ use Attribute;
  *
  *  - The method MUST NOT have any parameters.
  *  - The return type of the method MUST be void.
- *
- * @Annotation
- * @Target("METHOD")
  */
 #[Attribute(Attribute::TARGET_METHOD)]
 final class PostConstruct

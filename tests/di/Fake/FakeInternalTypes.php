@@ -14,13 +14,12 @@ class FakeInternalTypes
     public $array;
     public $callable;
 
-    #[Named("bool=type-bool,int=type-int,string=type-string,array=type-array,callable=type-callable")]
     public function __construct(
-        bool $bool,
-        int $int,
-        string $string,
-        array $array,
-        callable $callable
+        #[Named('type-bool')] bool $bool,
+        #[Named('type-int')] int $int,
+        #[Named('type-string')] string $string,
+        #[Named('type-array')] array $array,
+        #[Named('type-callable')] callable $callable
     ) {
         $this->bool = $bool;
         $this->int = $int;

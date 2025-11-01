@@ -6,18 +6,12 @@ namespace Ray\Di;
 
 use Ray\Aop\MethodInterceptor;
 use Ray\Aop\ReflectionClass;
-use Ray\Di\Exception\InvalidToConstructorNameParameter;
 use ReflectionException;
 use ReflectionMethod;
 
-use function array_keys;
-use function array_reduce;
 use function assert;
 use function class_exists;
-use function implode;
 use function interface_exists;
-use function is_array;
-use function is_string;
 
 /**
  * @psalm-import-type BindableInterface from Types
@@ -122,10 +116,6 @@ final class Bind
      */
     public function toConstructor(string $class, $name, ?InjectionPoints $injectionPoints = null, ?string $postConstruct = null): self
     {
-        if (is_array($name)) {
-            $name = $this->getStringName($name);
-        }
-
         $this->untarget = null;
         $postConstructRef = $postConstruct !== null ? new ReflectionMethod($class, $postConstruct) : null;
         /** @var ReflectionClass<object> $reflection */
@@ -207,39 +197,5 @@ final class Bind
     private function isRegistered(string $interface): bool
     {
         return isset($this->container->getContainer()[$interface . '-' . Name::ANY]);
-    }
-
-    /**
-     * Return string
-     *
-     * input: ['varA' => 'nameA', 'varB' => 'nameB']
-     * output: "varA=nameA,varB=nameB"
-     *
-     * @param ParameterNameMapping $name
-     */
-    private function getStringName(array $name): string
-    {
-        $keys = array_keys($name);
-
-        $names = array_reduce(
-            $keys,
-            /**
-             * @param list<string> $carry
-             * @param array-key $key
-             */
-            static function (array $carry, $key) use ($name): array {
-                if (! is_string($key)) {
-                    throw new InvalidToConstructorNameParameter((string) $key);
-                }
-
-                $varName = $name[$key] ?? '';
-                $carry[] = $key . '=' . $varName;
-
-                return $carry;
-            },
-            []
-        );
-
-        return implode(',', $names);
     }
 }

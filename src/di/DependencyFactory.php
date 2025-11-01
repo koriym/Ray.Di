@@ -41,11 +41,12 @@ final class DependencyFactory
     /**
      * Create ToConstructor binding
      *
-     * @param ReflectionClass<object> $class
+     * @param ReflectionClass<object>      $class
+     * @param string|array<string, string> $name
      */
     public function newToConstructor(
         ReflectionClass $class,
-        string $name,
+        string|array $name,
         ?InjectionPoints $injectionPoints = null,
         ?ReflectionMethod $postConstruct = null
     ): Dependency {

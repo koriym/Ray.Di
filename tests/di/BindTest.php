@@ -81,7 +81,6 @@ class BindTest extends TestCase
     public function nameProvider(): array
     {
         return [
-            ['tmpDir=tmp_dir,leg=left'],
             [['tmpDir' => 'tmp_dir', 'leg' => 'left']],
         ];
     }
@@ -112,7 +111,7 @@ class BindTest extends TestCase
         $container->add(
             (new Bind($container, FakeRobotInterface::class))->toConstructor(
                 FakeToConstructorRobot::class,
-                'tmpDir=tmp_dir,leg=left',
+                ['tmpDir' => 'tmp_dir', 'leg' => 'left'],
                 (new InjectionPoints())->addMethod('setEngine')
             )
         );

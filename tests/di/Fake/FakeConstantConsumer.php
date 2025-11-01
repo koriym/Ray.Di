@@ -29,7 +29,8 @@ class FakeConstantConsumer
         $this->defaultBySetter = $default;
     }
 
-    #[FakeConstant('constant')]
+    #[FakeConstant]
+    #[Inject]
     public function setFakeConstantWithoutVarName($constant): void
     {
         $this->setterConstantWithoutVarName = $constant;

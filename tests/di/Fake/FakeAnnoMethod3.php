@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-/**
- * @Annotation
- * @Target("METHOD")
- */
+use Attribute;
+
+#[Attribute(Attribute::TARGET_METHOD)]
 class FakeAnnoMethod3
 {
 }

@@ -21,10 +21,11 @@ use function sys_get_temp_dir;
 /**
  * @psalm-import-type BindableInterface from Types
  * @psalm-import-type ModuleList from Types
+ * @psalm-import-type ScriptDir from Types
  */
 final class Injector implements InjectorInterface
 {
-    /** @var non-empty-string */
+    /** @var ScriptDir */
     private $classDir;
 
     /** @var Container */
@@ -36,7 +37,7 @@ final class Injector implements InjectorInterface
      */
     public function __construct($module = null, string $tmpDir = '')
     {
-        /** @var non-empty-string $classDir */
+        /** @var ScriptDir $classDir */
         $classDir = is_dir($tmpDir) ? $tmpDir : sys_get_temp_dir();
         if (! is_writable($classDir)) {
             throw new DirectoryNotWritable($classDir); // @codeCoverageIgnore
@@ -93,6 +94,7 @@ final class Injector implements InjectorInterface
         new Bind($this->container, $class);
         $bound = $this->container->getContainer()[$class . '-' . Name::ANY];
         assert($bound instanceof Dependency);
+        /** @psalm-suppress InvalidArgument */
         $this->container->weaveAspect(new Compiler($this->classDir), $bound)->getInstance($class);
     }
 }

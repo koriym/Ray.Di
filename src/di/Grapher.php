@@ -14,18 +14,19 @@ use function str_replace;
 
 /**
  * @psalm-import-type MethodArguments from Types
+ * @psalm-import-type ScriptDir from Types
  */
 final class Grapher
 {
-    /** @var non-empty-string */
+    /** @var ScriptDir */
     private $classDir;
 
     /** @var Container */
     private $container;
 
     /**
-     * @param AbstractModule   $module   Binding module
-     * @param non-empty-string $classDir Class directory
+     * @param AbstractModule $module   Binding module
+     * @param ScriptDir      $classDir Class directory
      *
      * @throws AnnotationException
      */
@@ -34,6 +35,7 @@ final class Grapher
         $module->install(new AssistedModule());
         $this->container = $module->getContainer();
         $this->classDir = $classDir;
+        /** @psalm-suppress InvalidArgument */
         $this->container->weaveAspects(new Compiler($this->classDir));
 
         // builtin injection

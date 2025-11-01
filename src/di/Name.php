@@ -161,7 +161,7 @@ final class Name
                     $key = substr($key, 1);
                 }
 
-                $trimedKey = trim((string) $key);
+                $trimedKey = trim($key);
 
                 $names[$trimedKey] = trim($value);
             }

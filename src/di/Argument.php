@@ -99,7 +99,7 @@ final class Argument implements Serializable, AcceptInterface
     /**
      * {@inheritDoc}
      */
-    public function serialize(): ?string // @phpstan-ignore-line
+    public function serialize(): ?string
     {
         return serialize($this->__serialize());
     }

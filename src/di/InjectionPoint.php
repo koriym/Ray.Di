@@ -8,14 +8,11 @@ use Ray\Aop\ReflectionClass;
 use Ray\Aop\ReflectionMethod;
 use Ray\Di\Di\Qualifier;
 use ReflectionParameter;
-use Serializable;
 
 use function assert;
 use function class_exists;
-use function serialize;
-use function unserialize;
 
-final class InjectionPoint implements InjectionPointInterface, Serializable
+final class InjectionPoint implements InjectionPointInterface
 {
     /** @var ?ReflectionParameter */
     private $parameter;
@@ -98,29 +95,10 @@ final class InjectionPoint implements InjectionPointInterface, Serializable
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @param array<string> $array
      */
     public function __unserialize(array $array): void
     {
         [$this->pClass, $this->pFunction, $this->pName] = $array;
-    }
-
-    public function serialize(): ?string
-    {
-        return serialize($this->__serialize());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-param string $data
-     */
-    public function unserialize($data): void
-    {
-        /** @var array<string> $array */
-        $array = unserialize($data);
-        $this->__unserialize($array);
     }
 }

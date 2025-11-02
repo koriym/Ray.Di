@@ -34,8 +34,7 @@
     "autoload-dev": {
         "psr-4": {
             "Ray\\Di\\": ["tests/di", "tests/di/Fake/"]
-        },
-        "files": ["tests/deleteFiles.php"]
+        }
     },
     "scripts": {
         "test": "phpunit --log-junit=build/junit.xml",

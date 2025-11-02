@@ -22,7 +22,7 @@ final class Inject implements InjectInterface
     public $optional;
 
     /**
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function __construct(bool $optional = false)
     {

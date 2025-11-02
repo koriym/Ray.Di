@@ -24,6 +24,7 @@ class DependencyTest extends TestCase
 
     protected function setUp(): void
     {
+        /** @var ReflectionClass<object> $class */
         $class = new ReflectionClass(FakeCar::class);
         $setters = [];
         $name = new Name(Name::ANY);
@@ -105,7 +106,9 @@ class DependencyTest extends TestCase
 
     public function testInjectInterceptor(): void
     {
-        $dependency = new Dependency(new NewInstance(new ReflectionClass(FakeAop::class), new SetterMethods([])));
+        /** @var ReflectionClass<object> $class */
+        $class = new ReflectionClass(FakeAop::class);
+        $dependency = new Dependency(new NewInstance($class, new SetterMethods([])));
         $pointcut = new Pointcut((new Matcher())->any(), (new Matcher())->any(), [FakeDoubleInterceptor::class]);
         $dependency->weaveAspects(new Compiler(__DIR__ . '/tmp'), [$pointcut]);
         $container = new Container();

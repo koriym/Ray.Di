@@ -75,8 +75,7 @@ class BindTest extends TestCase
     }
 
     /**
-     * @return (string|string[])[][]
-     * @psalm-return array{0: array{0: string}, 1: array{0: array{tmpDir: string, leg: string}}}
+     * @return array<int, array<int, array<string, string>>>
      */
     public function nameProvider(): array
     {

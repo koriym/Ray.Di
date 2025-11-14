@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-/**
- * @FakeAnnoClass
- */
+#[FakeAnnoClass]
 class FakeAnnoOrderClass
 {
-    /**
-     * @return void
-     *
-     * @FakeAnnoMethod1
-     * @FakeAnnoMethod2
-     * @FakeAnnoMethod3
-     */
+    #[FakeAnnoMethod1]
+    #[FakeAnnoMethod2]
+    #[FakeAnnoMethod3]
     public function get()
     {
     }

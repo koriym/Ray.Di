@@ -10,12 +10,13 @@ use function array_shift;
 
 /**
  * @psalm-import-type ModuleList from Types
+ * @psalm-import-type ScriptDir from Types
  */
 final class ContainerFactory
 {
     /**
      * @param AbstractModule|ModuleList|null $module   Module(s)
-     * @param non-empty-string               $classDir
+     * @param ScriptDir                      $classDir
      */
     public function __invoke($module, string $classDir): Container
     {
@@ -26,6 +27,7 @@ final class ContainerFactory
         // Compile null objects
         (new CompileNullObject())($container, $classDir);
         // Compile aspects
+        /** @psalm-suppress InvalidArgument */
         $container->weaveAspects(new Compiler($classDir));
 
         return $container;

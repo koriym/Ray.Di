@@ -8,7 +8,6 @@ use LogicException;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\NullInterceptor;
-use Ray\Di\Exception\InvalidToConstructorNameParameter;
 use Ray\Di\Exception\Unbound;
 
 use function assert;
@@ -353,25 +352,6 @@ class InjectorTest extends TestCase
                 $this->bind(PDO::class)->toConstructor(
                     PDO::class,
                     ['dsn' => 'pdo_dsn']
-                )->in(Scope::SINGLETON);
-                $this->bind()->annotatedWith('pdo_dsn')->toInstance('sqlite::memory:');
-            }
-        };
-        $injector = new Injector($module);
-        $pdo = $injector->getInstance(PDO::class);
-        $this->assertInstanceOf(PDO::class, $pdo);
-    }
-
-    public function testToConstructorInvalidName(): void
-    {
-        $this->expectException(InvalidToConstructorNameParameter::class);
-        $module = new class extends AbstractModule {
-            protected function configure()
-            {
-                $this->bind(PDO::class)->toConstructor(
-                    PDO::class,
-                    /** @phpstan-ignore-next-line */
-                    [['dsn' => 'pdo_dsn']] // wrong, cause InvalidToConstructorNameParameter exception
                 )->in(Scope::SINGLETON);
                 $this->bind()->annotatedWith('pdo_dsn')->toInstance('sqlite::memory:');
             }

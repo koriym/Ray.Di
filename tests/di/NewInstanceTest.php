@@ -17,6 +17,7 @@ class NewInstanceTest extends TestCase
 
     protected function setUp(): void
     {
+        /** @var ReflectionClass<object> $class */
         $class = new ReflectionClass(FakeCar::class);
         $setters = [];
         $name = new Name(Name::ANY);

@@ -13,12 +13,8 @@ use ReflectionMethod;
 use ReflectionParameter;
 
 use function class_exists;
-use function explode;
 use function get_class;
 use function is_string;
-use function preg_match;
-use function substr;
-use function trim;
 
 /**
  * @psalm-import-type ParameterNameMapping from Types
@@ -43,14 +39,10 @@ final class Name
     private $names;
 
     /**
-     * @param string|ParameterNameMapping|null $name
+     * @param string|ParameterNameMapping $name
      */
-    public function __construct($name = null)
+    public function __construct(string|array $name)
     {
-        if ($name === null) {
-            return;
-        }
-
         if (is_string($name)) {
             $this->setName($name);
 
@@ -133,40 +125,6 @@ final class Name
 
         // single name
         // @Named(name)
-        if ($name === self::ANY || preg_match('/^\w+$/', $name)) {
-            $this->name = $name;
-
-            return;
-        }
-
-        // name list
-        // @Named(varName1=name1, varName2=name2)]
-        $this->names = $this->parseName($name);
-    }
-
-    /**
-     * @return ParameterNameMapping
-     *
-     * @psalm-pure
-     */
-    private function parseName(string $name): array
-    {
-        $names = [];
-        $keyValues = explode(',', $name);
-        foreach ($keyValues as $keyValue) {
-            $exploded = explode('=', $keyValue);
-            if (isset($exploded[1])) {
-                [$key, $value] = $exploded;
-                if (isset($key[0]) && $key[0] === '$') {
-                    $key = substr($key, 1);
-                }
-
-                $trimedKey = trim((string) $key);
-
-                $names[$trimedKey] = trim($value);
-            }
-        }
-
-        return $names;
+        $this->name = $name;
     }
 }

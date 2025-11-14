@@ -8,18 +8,15 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
-use Serializable;
 
 use function assert;
 use function in_array;
-use function serialize;
 use function sprintf;
-use function unserialize;
 
 /**
  * @psalm-import-type DependencyIndex from Types
  */
-final class Argument implements Serializable, AcceptInterface
+final class Argument implements AcceptInterface
 {
     public const UNBOUND_TYPE = ['bool', 'int', 'float', 'string', 'array', 'resource', 'callable', 'iterable'];
 
@@ -94,26 +91,6 @@ final class Argument implements Serializable, AcceptInterface
     public function getMeta(): string
     {
         return $this->meta;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function serialize(): ?string // @phpstan-ignore-line
-    {
-        return serialize($this->__serialize());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @psalm-param string $data
-     */
-    public function unserialize($data): void
-    {
-        /** @var array{0: DependencyIndex, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $array */
-        $array = unserialize($data, ['allowed_classes' => false]);
-        $this->__unserialize($array);
     }
 
     /**

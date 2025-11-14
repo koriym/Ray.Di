@@ -31,61 +31,45 @@ class FakeCar implements FakeCarInterface
         $this->engine = $engine;
     }
 
-    /**
-     * @Inject
-     */
+    #[Inject]
     public function setTires(FakeTyreInterface $frontTyre, FakeTyreInterface $rearTyre): void
     {
         $this->frontTyre = $frontTyre;
         $this->rearTyre = $rearTyre;
     }
 
-    /**
-     * @Inject (optional=true)
-     */
+    #[Inject(optional: true)]
     public function setHardtop(FakeHardtopInterface $hardtop): void
     {
         $this->hardtop = $hardtop;
     }
 
-    /**
-     * @Inject
-     * @Named("rightMirror=right,$leftMirror=left")
-     */
-    public function setMirrors(FakeMirrorInterface $rightMirror, FakeMirrorInterface $leftMirror): void
+    #[Inject]
+    public function setMirrors(#[Named('right')] FakeMirrorInterface $rightMirror, #[Named('left')] FakeMirrorInterface $leftMirror): void
     {
         $this->rightMirror = $rightMirror;
         $this->leftMirror = $leftMirror;
     }
 
-    /**
-     * @Inject
-     * @Named("right")
-     */
-    public function setSpareMirror(FakeMirrorInterface $rightMirror): void
+    #[Inject]
+    public function setSpareMirror(#[Named('right')] FakeMirrorInterface $rightMirror): void
     {
         $this->spareMirror = $rightMirror;
     }
 
-    /**
-     * @Inject
-     */
+    #[Inject]
     public function setHandle(FakeHandleInterface $handle): void
     {
         $this->handle = $handle;
     }
 
-    /**
-     * @FakeGearStickInject ("leather")
-     */
+    #[FakeGearStickInject('leather')]
     public function setGearStick(FakeGearStickInterface $stick): void
     {
         $this->gearStick = $stick;
     }
 
-    /**
-     * @PostConstruct
-     */
+    #[PostConstruct]
     public function postConstruct(): void
     {
         $isEngineInstalled = $this->engine instanceof FakeEngine;

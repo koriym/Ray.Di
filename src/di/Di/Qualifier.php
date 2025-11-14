@@ -8,9 +8,6 @@ use Attribute;
 
 /**
  * Identifies qualifier annotations
- *
- * @Annotation
- * @Target("CLASS")
  */
 #[Attribute(Attribute::TARGET_CLASS)]
 final class Qualifier

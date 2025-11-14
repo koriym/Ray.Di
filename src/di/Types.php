@@ -23,6 +23,7 @@ use Ray\Aop\Pointcut;
  * @psalm-type ConstructorNameMapping = array<non-empty-string, non-empty-string>
  * @psalm-type ParameterNameMapping = array<string, string>
  * @psalm-type NamedParameterString = non-empty-string
+ * @psalm-type ScriptDir = non-empty-string
  *
  * Enhanced Injection and Argument Types
  * @psalm-type InjectableValue object|scalar|array<array-key, (object|scalar|null)>|null

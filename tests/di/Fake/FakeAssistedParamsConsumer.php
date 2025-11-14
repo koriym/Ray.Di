@@ -10,10 +10,8 @@ class FakeAssistedParamsConsumer
 {
     /**
      * @return array [int, FakeAbstractDb]
-     *
-     * @Assisted({"db"})
      */
-    public function getUser($id, ?FakeAbstractDb $db = null)
+    public function getUser($id, #[Assisted] ?FakeAbstractDb $db = null)
     {
         return [$id, $db];
     }

@@ -11,21 +11,15 @@ class FakeAssistedConsumer
 {
     /**
      * @return FakeRobotInterface|null
-     *
-     * @Assisted({"robot"})
      */
-    public function assistOne($a, $b, ?FakeRobotInterface $robot = null)
+    public function assistOne($a, $b, #[Assisted] ?FakeRobotInterface $robot = null)
     {
         unset($a, $b);
 
         return $robot;
     }
 
-    /**
-     * @Assisted({"var1"})
-     * @Named("var1=one")
-     */
-    public function assistWithName($a, $var1 = null)
+    public function assistWithName($a, #[Assisted] #[Named('one')] $var1 = null)
     {
         unset($a);
 
@@ -35,11 +29,8 @@ class FakeAssistedConsumer
     /**
      * @return (FakeRobotInterface|mixed|null)[]
      * @psalm-return array{0: mixed, 1: FakeRobotInterface|null}
-     *
-     * @Assisted({"var2", "robot"})
-     * @Named("var2=one")
      */
-    public function assistAny($var2 = null, ?FakeRobotInterface $robot = null)
+    public function assistAny(#[Assisted] #[Named('one')] $var2 = null, #[Assisted] ?FakeRobotInterface $robot = null)
     {
         return [$var2, $robot];
     }

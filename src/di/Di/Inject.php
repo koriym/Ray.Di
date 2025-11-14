@@ -5,14 +5,10 @@ declare(strict_types=1);
 namespace Ray\Di\Di;
 
 use Attribute;
-use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 
 /**
  * Annotates your class methods into which the Injector should inject values
  *
- * @Annotation
- * @Target("METHOD")
- * @NamedArgumentConstructor
  * @psalm-immutable
  */
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER)]
@@ -26,7 +22,7 @@ final class Inject implements InjectInterface
     public $optional;
 
     /**
-     * @SuppressWarnings(PHPMD.BooleanArgumentFlag) // @phpstan-ignore-line
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     public function __construct(bool $optional = false)
     {

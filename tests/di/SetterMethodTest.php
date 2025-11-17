@@ -104,10 +104,16 @@ class SetterMethodTest extends TestCase
         $setterMethod = new SetterMethod($method, new Name(Name::ANY));
         $setterMethod->setOptional();
 
-        $visitor = new class implements VisitorInterface
+        $exceptionThrown = false;
+        $visitor = new class ($exceptionThrown) implements VisitorInterface
         {
+            public function __construct(private bool &$exceptionThrown)
+            {
+            }
+
             public function visitSetterMethod(string $method, Arguments $arguments): void
             {
+                $this->exceptionThrown = true;
                 throw new Unbound(FakeTyreInterface::class);
             }
 
@@ -151,6 +157,7 @@ class SetterMethodTest extends TestCase
         };
 
         $setterMethod->accept($visitor);
-        // accept() returns void, just checking it doesn't throw
+        // Verify that exception was thrown but caught due to optional binding
+        $this->assertTrue($exceptionThrown, 'Unbound exception should have been thrown');
     }
 }

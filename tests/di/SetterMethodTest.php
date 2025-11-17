@@ -107,6 +107,7 @@ class SetterMethodTest extends TestCase
         $exceptionThrown = false;
         $visitor = new class ($exceptionThrown) implements VisitorInterface
         {
+            /** @phpstan-ignore-next-line */
             public function __construct(private bool &$exceptionThrown)
             {
             }
@@ -114,6 +115,7 @@ class SetterMethodTest extends TestCase
             public function visitSetterMethod(string $method, Arguments $arguments): void
             {
                 $this->exceptionThrown = true;
+
                 throw new Unbound(FakeTyreInterface::class);
             }
 

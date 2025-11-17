@@ -15,15 +15,11 @@ use function is_dir;
  */
 final class NullObjectDependency implements DependencyInterface
 {
-    /** @var class-string */
-    private $interface;
-
     /**
      * @param class-string $interface
      */
-    public function __construct(string $interface)
+    public function __construct(private string $interface)
     {
-        $this->interface = $interface;
     }
 
     /**
@@ -37,17 +33,15 @@ final class NullObjectDependency implements DependencyInterface
     /**
      * {@inheritdoc}
      */
-    public function inject(Container $container)
+    public function inject(Container $container): null
     {
         return null;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @return void
      */
-    public function register(array &$container, Bind $bind)
+    public function register(array &$container, Bind $bind): void
     {
         $container[(string) $bind] = $bind->getBound();
     }
@@ -55,7 +49,7 @@ final class NullObjectDependency implements DependencyInterface
     /**
      * {@inheritdoc}
      */
-    public function setScope($scope)
+    public function setScope($scope): void
     {
     }
 

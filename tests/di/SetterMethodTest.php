@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\Exception\Unbound;
 use ReflectionMethod;
 use ReflectionParameter;
+use stdClass;
 
 use function spl_object_hash;
 
@@ -104,10 +105,17 @@ class SetterMethodTest extends TestCase
         $setterMethod = new SetterMethod($method, new Name(Name::ANY));
         $setterMethod->setOptional();
 
-        $visitor = new class implements VisitorInterface
+        $state = (object) ['exceptionThrown' => false];
+        $visitor = new class ($state) implements VisitorInterface
         {
+            public function __construct(private stdClass $state)
+            {
+            }
+
             public function visitSetterMethod(string $method, Arguments $arguments): void
             {
+                $this->state->exceptionThrown = true;
+
                 throw new Unbound(FakeTyreInterface::class);
             }
 
@@ -150,7 +158,9 @@ class SetterMethodTest extends TestCase
             }
         };
 
-        $result = $setterMethod->accept($visitor);
-        $this->assertNull($result);
+        $setterMethod->accept($visitor);
+        // Verify that exception was thrown but caught due to optional binding
+        /** @phpstan-ignore-next-line */
+        $this->assertTrue($state->exceptionThrown, 'Unbound exception should have been thrown');
     }
 }

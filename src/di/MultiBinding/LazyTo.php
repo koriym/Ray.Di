@@ -11,15 +11,11 @@ use Ray\Di\InjectorInterface;
  */
 final class LazyTo implements LazyInterface
 {
-    /** @var class-string<T> */
-    private $class;
-
     /**
      * @param class-string<T> $class
      */
-    public function __construct(string $class)
+    public function __construct(private string $class)
     {
-        $this->class = $class;
     }
 
     /**

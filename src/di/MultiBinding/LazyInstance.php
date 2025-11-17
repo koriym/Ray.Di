@@ -12,15 +12,11 @@ use Ray\Di\InjectorInterface;
  */
 final class LazyInstance implements LazyInterface
 {
-    /** @var T */
-    private $instance;
-
     /**
-     * @param T $class
+     * @param T $instance
      */
-    public function __construct($class)
+    public function __construct(private $instance)
     {
-        $this->instance = $class;
     }
 
     /**

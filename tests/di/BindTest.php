@@ -51,7 +51,6 @@ class BindTest extends TestCase
     public function testInValidInterfaceBinding(): void
     {
         $this->expectException(NotFound::class);
-        /** @phpstan-ignore-next-line */
         new Bind(new Container(), 'invalid-interface');
     }
 

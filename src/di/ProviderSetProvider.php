@@ -13,24 +13,12 @@ use Ray\Di\Exception\SetNotFound;
  */
 final class ProviderSetProvider implements ProviderInterface
 {
-    /** @var InjectionPointInterface */
-    private $ip;
-
-    /** @var InjectorInterface */
-    private $injector;
-
-    public function __construct(
-        InjectionPointInterface $ip,
-        InjectorInterface $injector
-    ) {
-        $this->ip = $ip;
-        $this->injector = $injector;
+    public function __construct(private InjectionPointInterface $ip, private InjectorInterface $injector)
+    {
     }
 
-    /**
-     * @return mixed
-     */
-    public function get()
+    /** @phpstan-return ProviderProvider<object> */
+    public function get(): ProviderProvider
     {
         $param = $this->ip->getParameter();
         $setAttribute = $param->getAttributes(Set::class);

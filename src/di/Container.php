@@ -17,6 +17,7 @@ use function array_merge;
 use function class_exists;
 use function explode;
 use function ksort;
+use function sprintf;
 
 /**
  * @psalm-import-type DependencyContainer from Types
@@ -31,10 +32,10 @@ final class Container implements InjectorInterface
     public $multiBindings;
 
     /** @var DependencyContainer */
-    private $container = [];
+    private array $container = [];
 
     /** @var array<int, Pointcut> */
-    private $pointcuts = [];
+    private array $pointcuts = [];
 
     public function __construct()
     {
@@ -143,17 +144,15 @@ final class Container implements InjectorInterface
      * Return Unbound exception
      *
      * @param DependencyIndex $index {interface}-{bind name}
-     *
-     * @return Exception\Unbound|Exception\Untargeted
      */
-    public function unbound(string $index)
+    public function unbound(string $index): Untargeted|Unbound
     {
         [$class, $name] = explode('-', $index);
         if (class_exists($class) && ! (new ReflectionClass($class))->isAbstract()) {
             return new Untargeted($class);
         }
 
-        return new Unbound("{$class}-{$name}");
+        return new Unbound(sprintf('%s-%s', $class, $name));
     }
 
     /**
@@ -193,7 +192,7 @@ final class Container implements InjectorInterface
      */
     public function weaveAspects(CompilerInterface $compiler): void
     {
-        if (empty($this->pointcuts)) {
+        if ($this->pointcuts === []) {
             return;
         }
 

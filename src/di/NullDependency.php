@@ -19,19 +19,15 @@ final class NullDependency implements DependencyInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @return void
      */
-    public function inject(Container $container)
+    public function inject(Container $container): void
     {
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @return void
      */
-    public function register(array &$container, Bind $bind)
+    public function register(array &$container, Bind $bind): void
     {
         $container[(string) $bind] = $bind->getBound();
     }
@@ -39,7 +35,7 @@ final class NullDependency implements DependencyInterface
     /**
      * {@inheritdoc}
      */
-    public function setScope($scope)
+    public function setScope($scope): void
     {
     }
 }

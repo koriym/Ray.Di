@@ -12,17 +12,9 @@ use Ray\Di\Di\Set;
  */
 final class ProviderProvider implements ProviderInterface
 {
-    /** @var InjectorInterface  */
-    private $injector;
-
-    /** @var Set<T> */
-    private $set;
-
     /** @param Set<T> $set */
-    public function __construct(InjectorInterface $injector, Set $set)
+    public function __construct(private InjectorInterface $injector, private Set $set)
     {
-        $this->injector = $injector;
-        $this->set = $set;
     }
 
     /** @return mixed */

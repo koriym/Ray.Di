@@ -12,10 +12,8 @@ final class Untarget
      * @phpstan-var ReflectionClass<object>
      * @psalm-var ReflectionClass
      */
-    private $class;
-
-    /** @var string */
-    private $scope = Scope::PROTOTYPE;
+    private readonly ReflectionClass $class;
+    private string $scope = Scope::PROTOTYPE;
 
     /**
      * @param class-string $class
@@ -32,6 +30,7 @@ final class Untarget
     {
         $bound = (new DependencyFactory())->newAnnotatedDependency($this->class);
         $bound->setScope($this->scope);
+
         $bind->setBound($bound);
         $container->add($bind);
     }

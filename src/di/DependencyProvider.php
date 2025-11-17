@@ -9,26 +9,18 @@ use function sprintf;
 
 final class DependencyProvider implements DependencyInterface, AcceptInterface
 {
-    /** @var string */
-    public $context;
-
-    /**
-     * Provider dependency
-     *
-     * @var Dependency
-     */
-    private $dependency;
-
-    /** @var bool */
-    private $isSingleton = false;
+    private bool $isSingleton = false;
 
     /** @var ?mixed */
     private $instance;
 
-    public function __construct(Dependency $dependency, string $context)
-    {
-        $this->dependency = $dependency;
-        $this->context = $context;
+    public function __construct(
+        /**
+         * Provider dependency
+         */
+        private readonly Dependency $dependency,
+        public string $context
+    ) {
     }
 
     /**

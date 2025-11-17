@@ -17,21 +17,16 @@ use function str_replace;
  */
 final class Grapher
 {
-    /** @var ScriptDir */
-    private $classDir;
-
-    /** @var Container */
-    private $container;
+    private Container $container;
 
     /**
      * @param AbstractModule $module   Binding module
      * @param ScriptDir      $classDir Class directory
      */
-    public function __construct(AbstractModule $module, string $classDir)
+    public function __construct(AbstractModule $module, private string $classDir)
     {
         $module->install(new AssistedModule());
         $this->container = $module->getContainer();
-        $this->classDir = $classDir;
         /** @psalm-suppress InvalidArgument */
         $this->container->weaveAspects(new Compiler($this->classDir));
 

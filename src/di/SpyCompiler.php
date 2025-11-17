@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use LogicException;
 use Ray\Aop\BindInterface;
 use Ray\Aop\CompilerInterface;
 
@@ -20,12 +21,15 @@ final class SpyCompiler implements CompilerInterface
     /**
      * {@inheritDoc}
      *
+     * @phpstan-return never
+     *
      * @psalm-suppress InvalidReturnType
      * @template T of object
      */
     public function newInstance(string $class, array $args, BindInterface $bind)
     {
-        // never called  // @phpstan-ignore-line
+        // never called
+        throw new LogicException('SpyCompiler::newInstance() should never be called');
     }
 
     /**

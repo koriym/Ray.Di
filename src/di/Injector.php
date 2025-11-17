@@ -25,10 +25,8 @@ use function sys_get_temp_dir;
 final class Injector implements InjectorInterface
 {
     /** @var ScriptDir */
-    private $classDir;
-
-    /** @var Container */
-    private $container;
+    private readonly string $classDir;
+    private readonly Container $container;
 
     /**
      * @param AbstractModule|ModuleList|null $module Module(s)
@@ -72,7 +70,7 @@ final class Injector implements InjectorInterface
         try {
             /** @psalm-suppress MixedAssignment */
             $instance = $this->container->getInstance($interface, $name);
-        } catch (Untargeted $e) {
+        } catch (Untargeted) {
             /** @psalm-var class-string $interface */
             $this->bind($interface);
             /** @psalm-suppress MixedAssignment */

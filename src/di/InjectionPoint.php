@@ -14,11 +14,7 @@ use function class_exists;
 
 final class InjectionPoint implements InjectionPointInterface
 {
-    /** @var ?ReflectionParameter */
-    private $parameter;
-
-    /** @var string */
-    private $pClass;
+    private string $pClass;
 
     /** @var string */
     private $pFunction;
@@ -26,13 +22,12 @@ final class InjectionPoint implements InjectionPointInterface
     /** @var string */
     private $pName;
 
-    public function __construct(ReflectionParameter $parameter)
+    public function __construct(private ReflectionParameter $parameter)
     {
-        $this->parameter = $parameter;
-        $this->pFunction = $parameter->getDeclaringFunction()->name;
-        $class = $parameter->getDeclaringClass();
+        $this->pFunction = $this->parameter->getDeclaringFunction()->name;
+        $class = $this->parameter->getDeclaringClass();
         $this->pClass = $class instanceof ReflectionClass ? $class->name : '';
-        $this->pName = $parameter->name;
+        $this->pName = $this->parameter->name;
     }
 
     /**
@@ -40,7 +35,7 @@ final class InjectionPoint implements InjectionPointInterface
      */
     public function getParameter(): ReflectionParameter
     {
-        return $this->parameter ?? new ReflectionParameter([$this->pClass, $this->pFunction], $this->pName);
+        return $this->parameter;
     }
 
     /**

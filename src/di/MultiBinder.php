@@ -16,23 +16,16 @@ use Ray\Di\MultiBinding\MultiBindings;
  */
 final class MultiBinder
 {
-    /** @var Container */
-    private $container;
+    private readonly Container $container;
 
     /** @var MultiBindings */
     private $multiBindings;
+    private ?string $key = null;
 
-    /** @var string */
-    private $interface;
-
-    /** @var ?string  */
-    private $key;
-
-    private function __construct(AbstractModule $module, string $interface)
+    private function __construct(AbstractModule $module, private readonly string $interface)
     {
         $this->container = $module->getContainer();
         $this->multiBindings = $this->container->multiBindings;
-        $this->interface = $interface;
         $this->container->add(
             (new Bind($this->container, MultiBindings::class))->toInstance($this->multiBindings)
         );

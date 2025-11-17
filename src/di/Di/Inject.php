@@ -15,18 +15,14 @@ use Attribute;
 final class Inject implements InjectInterface
 {
     /**
-     * If true, and the appropriate binding is not found, the Injector will skip injection of this method or field rather than produce an error.
-     *
-     * @var bool
-     */
-    public $optional;
-
-    /**
      * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
-    public function __construct(bool $optional = false)
-    {
-        $this->optional = $optional;
+    public function __construct(
+        /**
+         * If true, and the appropriate binding is not found, the Injector will skip injection of this method or field rather than produce an error.
+         */
+        public bool $optional = false
+    ) {
     }
 
     /**

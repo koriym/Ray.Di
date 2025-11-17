@@ -51,7 +51,7 @@ final class DependencyFactory
         ?ReflectionMethod $postConstruct = null
     ): Dependency {
         assert(class_exists($class->name));
-        $setterMethods = $injectionPoints ? $injectionPoints($class->name) : new SetterMethods([]);
+        $setterMethods = $injectionPoints instanceof InjectionPoints ? $injectionPoints($class->name) : new SetterMethods([]);
         $newInstance = new NewInstance($class, $setterMethods, new Name($name));
 
         return new Dependency($newInstance, $postConstruct);

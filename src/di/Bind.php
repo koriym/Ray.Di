@@ -8,6 +8,7 @@ use Ray\Aop\MethodInterceptor;
 use Ray\Aop\ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Stringable;
 
 use function assert;
 use function class_exists;
@@ -18,25 +19,11 @@ use function interface_exists;
  * @psalm-import-type BindingName from Types
  * @psalm-import-type ParameterNameMapping from Types
  */
-final class Bind
+final class Bind implements Stringable
 {
-    /** @var Container */
-    private $container;
-
-    /**
-     * @var string|class-string
-     * @phpstan-var class-string<MethodInterceptor>|string
-     */
-    private $interface;
-
-    /** @var string */
-    private $name = Name::ANY;
-
-    /** @var DependencyInterface */
-    private $bound;
-
-    /** @var BindValidator */
-    private $validate;
+    private string $name = Name::ANY;
+    private DependencyInterface $bound;
+    private readonly BindValidator $validate;
 
     /** @var ?Untarget */
     private $untarget;
@@ -44,21 +31,24 @@ final class Bind
     /**
      * @param Container         $container dependency container
      * @param BindableInterface $interface interface or concrete class name
+     * @phpstan-param class-string<MethodInterceptor>|string $interface
      */
-    public function __construct(Container $container, string $interface)
-    {
-        $this->container = $container;
-        $this->interface = $interface;
+    public function __construct(
+        private readonly Container $container,
+        private readonly string $interface
+    ) {
         $this->validate = new BindValidator();
-        $bindUntarget = class_exists($interface) && ! (new \ReflectionClass($interface))->isAbstract() && ! $this->isRegistered($interface);
+        $bindUntarget = class_exists($this->interface) && ! (new \ReflectionClass($this->interface))->isAbstract() && ! $this->isRegistered($this->interface);
         $this->bound = new NullDependency();
         if ($bindUntarget) {
+            /** @var class-string $interface */
+            $interface = $this->interface;
             $this->untarget = new Untarget($interface);
 
             return;
         }
 
-        $this->validate->constructor($interface);
+        $this->validate->constructor($this->interface);
     }
 
     public function __destruct()
@@ -114,7 +104,7 @@ final class Bind
      *
      * @template T of object
      */
-    public function toConstructor(string $class, $name, ?InjectionPoints $injectionPoints = null, ?string $postConstruct = null): self
+    public function toConstructor(string $class, string|array $name, ?InjectionPoints $injectionPoints = null, ?string $postConstruct = null): self
     {
         $this->untarget = null;
         $postConstructRef = $postConstruct !== null ? new ReflectionMethod($class, $postConstruct) : null;

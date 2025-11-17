@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use function get_class;
 use function gettype;
 use function is_object;
 use function is_scalar;
@@ -12,15 +11,11 @@ use function sprintf;
 
 final class Instance implements DependencyInterface, AcceptInterface
 {
-    /** @var mixed */
-    public $value;
-
     /**
      * @param mixed $value
      */
-    public function __construct($value)
+    public function __construct(public $value)
     {
-        $this->value = $value;
     }
 
     public function __toString(): string
@@ -34,7 +29,7 @@ final class Instance implements DependencyInterface, AcceptInterface
         }
 
         if (is_object($this->value)) {
-            return '(object) ' . get_class($this->value);
+            return '(object) ' . $this->value::class;
         }
 
         return '(' . gettype($this->value) . ')';

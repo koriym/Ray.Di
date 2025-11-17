@@ -11,6 +11,7 @@ parameters:
     - tests/Di/tmp/*
     - tests/di/Fake/*
     - tests/di/Ray_Di_*
+    - tests/di/script/*
   ignoreErrors:
     - '#contains generic class ReflectionAttribute but does not specify its types:#'
     - '#generic class ReflectionAttribute but does not specify its types:#'

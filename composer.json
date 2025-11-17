@@ -12,13 +12,15 @@
     "require": {
         "php": "^8.2",
         "koriym/null-object": "^1.0",
-        "ray/aop": "dev-php82 as 2.19.0",
-        "ray/compiler": "^1.10.3"
+        "ray/aop": "^2.19"
     },
     "require-dev": {
         "ext-pdo": "*",
         "bamarni/composer-bin-plugin": "^1.4",
         "phpunit/phpunit": "^8.5.40 || ^9.5"
+    },
+    "suggest": {
+        "ray/compiler": "For compiling dependency injection container to improve performance"
     },
     "config": {
         "sort-packages": true,

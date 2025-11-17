@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use Ray\Aop\Compiler;
 use Ray\Di\Exception\DirectoryNotWritable;
 use Ray\Di\Exception\Untargeted;
@@ -86,8 +85,6 @@ final class Injector implements InjectorInterface
 
     /**
      * @param BindableInterface $class
-     *
-     * @throws AnnotationException
      */
     private function bind(string $class): void
     {

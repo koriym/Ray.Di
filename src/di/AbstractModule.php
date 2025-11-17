@@ -8,6 +8,7 @@ use Ray\Aop\AbstractMatcher;
 use Ray\Aop\Matcher;
 use Ray\Aop\Pointcut;
 use Ray\Aop\PriorityPointcut;
+use Stringable;
 
 use function assert;
 use function class_exists;
@@ -18,24 +19,21 @@ use function interface_exists;
  * @psalm-import-type PointcutList from Types
  * @psalm-import-type InterceptorClassList from Types
  */
-abstract class AbstractModule
+abstract class AbstractModule implements Stringable
 {
     /** @var Matcher */
     protected $matcher;
 
     /** @var ?AbstractModule */
     protected $lastModule;
-
-    /** @var ?Container */
-    private $container;
+    private ?Container $container = null;
 
     public function __construct(
         ?self $module = null
     ) {
         $this->lastModule = $module;
         $this->activate();
-        assert($this->container instanceof Container);
-        if ($module instanceof self) {
+        if ($module instanceof self && $this->container instanceof Container) {
             $this->container->merge($module->getContainer());
         }
     }
@@ -67,10 +65,11 @@ abstract class AbstractModule
      */
     public function getContainer(): Container
     {
-        if (! $this->container instanceof Container) {
+        if ($this->container === null) {
             $this->activate();
-            assert($this->container instanceof Container);
         }
+
+        assert($this->container instanceof Container);
 
         return $this->container;
     }

@@ -14,12 +14,8 @@ use function assert;
  */
 final class AspectBind implements AcceptInterface
 {
-    /** @var AopBind */
-    private $bind;
-
-    public function __construct(AopBind $bind)
+    public function __construct(private AopBind $bind)
     {
-        $this->bind = $bind;
     }
 
     /**
@@ -47,7 +43,7 @@ final class AspectBind implements AcceptInterface
     }
 
     /** @inheritDoc */
-    public function accept(VisitorInterface $visitor)
+    public function accept(VisitorInterface $visitor): void
     {
         $visitor->visitAspectBind($this->bind);
     }

@@ -8,25 +8,22 @@ use Ray\Aop\Bind as AopBind;
 use Ray\Aop\WeavedInterface;
 use ReflectionClass;
 use ReflectionException;
+use Stringable;
 
 use function assert;
 
 /**
  * @psalm-import-type MethodArguments from Types
  */
-final class NewInstance
+final class NewInstance implements Stringable
 {
     /** @var class-string */
-    private $class;
+    private string $class;
 
     /** @var SetterMethods */
     private $setterMethods;
-
-    /** @var ?Arguments */
-    private $arguments;
-
-    /** @var ?AspectBind */
-    private $bind;
+    private ?Arguments $arguments = null;
+    private ?AspectBind $bind = null;
 
     /**
      * @phpstan-param ReflectionClass<object> $class
@@ -61,7 +58,7 @@ final class NewInstance
     /**
      * @return class-string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->class;
     }

@@ -9,7 +9,6 @@ use LogicException;
 
 use function array_pop;
 use function array_reverse;
-use function get_class;
 use function implode;
 use function sprintf;
 
@@ -55,7 +54,7 @@ class Unbound extends LogicException implements ExceptionInterface
     {
         return sprintf(
             "exception '%s' with message '%s'\n",
-            get_class($e),
+            $e::class,
             $e->getMessage()
         );
     }

@@ -16,7 +16,6 @@ use ReflectionParameter;
 
 use function assert;
 use function call_user_func_array;
-use function get_class;
 use function in_array;
 use function is_callable;
 
@@ -32,16 +31,8 @@ use function is_callable;
  */
 final class AssistedInjectInterceptor implements MethodInterceptor
 {
-    /** @var InjectorInterface */
-    private $injector;
-
-    /** @var MethodInvocationProvider */
-    private $methodInvocationProvider;
-
-    public function __construct(InjectorInterface $injector, MethodInvocationProvider $methodInvocationProvider)
+    public function __construct(private InjectorInterface $injector, private MethodInvocationProvider $methodInvocationProvider)
     {
-        $this->injector = $injector;
-        $this->methodInvocationProvider = $methodInvocationProvider;
     }
 
     /**
@@ -98,7 +89,7 @@ final class AssistedInjectInterceptor implements MethodInterceptor
         $named = (string) $this->getName($param);
         $type = $param->getType();
         assert($type instanceof ReflectionNamedType || $type === null);
-        $typeName = $type ? $type->getName() : '';
+        $typeName = $type instanceof ReflectionNamedType ? $type->getName() : '';
         $interface = in_array($typeName, Argument::UNBOUND_TYPE) ? '' : $typeName;
 
         /** @var class-string $interface */
@@ -137,6 +128,6 @@ final class AssistedInjectInterceptor implements MethodInterceptor
         $inject = $injects[0]->newInstance();
         assert($inject instanceof InjectInterface);
 
-        return get_class($inject);
+        return $inject::class;
     }
 }

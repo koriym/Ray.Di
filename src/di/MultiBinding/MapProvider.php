@@ -15,23 +15,8 @@ use Ray\Di\ProviderInterface;
  */
 final class MapProvider implements ProviderInterface
 {
-    /** @var MultiBindings */
-    private $multiBindings;
-
-    /** @var InjectionPointInterface */
-    private $ip;
-
-    /** @var InjectorInterface */
-    private $injector;
-
-    public function __construct(
-        InjectionPointInterface $ip,
-        MultiBindings $multiBindings,
-        InjectorInterface $injector
-    ) {
-        $this->multiBindings = $multiBindings;
-        $this->ip = $ip;
-        $this->injector = $injector;
+    public function __construct(private readonly InjectionPointInterface $ip, private MultiBindings $multiBindings, private readonly InjectorInterface $injector)
+    {
     }
 
     /**

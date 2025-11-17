@@ -17,13 +17,13 @@ final class AnnotatedClassMethods
     public function getConstructorName(ReflectionClass $class): Name
     {
         $constructor = $class->getConstructor();
-        if (! $constructor) {
+        if (! $constructor instanceof \ReflectionMethod) {
             return new Name(Name::ANY);
         }
 
         $reflMethod = new \ReflectionMethod($class->getName(), '__construct');
         $name = Name::withAttributes($reflMethod);
-        if ($name) {
+        if ($name instanceof Name) {
             return $name;
         }
 
@@ -49,7 +49,7 @@ final class AnnotatedClassMethods
     private function getName(ReflectionMethod $method): Name
     {
         $name = Name::withAttributes($method);
-        if ($name) {
+        if ($name instanceof Name) {
             return $name;
         }
 

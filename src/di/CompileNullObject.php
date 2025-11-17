@@ -11,7 +11,7 @@ final class CompileNullObject
 {
     public function __invoke(Container $container, string $scriptDir): void
     {
-        $container->map(static function (DependencyInterface $dependency) use ($scriptDir) {
+        $container->map(static function (DependencyInterface $dependency) use ($scriptDir): Dependency|DependencyInterface {
             if ($dependency instanceof NullObjectDependency) {
                 return $dependency->toNull($scriptDir);
             }

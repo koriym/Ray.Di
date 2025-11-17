@@ -23,19 +23,11 @@ use function count;
  */
 final class Map implements IteratorAggregate, ArrayAccess, Countable
 {
-    /** @var array<array-key, LazyInterface> $lazies */
-    private $lazies;
-
-    /** @var InjectorInterface */
-    private $injector;
-
     /**
      * @param array<array-key, LazyInterface> $lazies
      */
-    public function __construct(array $lazies, InjectorInterface $injector)
+    public function __construct(private array $lazies, private readonly InjectorInterface $injector)
     {
-        $this->lazies = $lazies;
-        $this->injector = $injector;
     }
 
     /**
@@ -74,7 +66,7 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
      * @codeCoverageIgnore
      */
     #[ReturnTypeWillChange]
-    public function offsetSet($offset, $value)
+    public function offsetSet($offset, $value): void
     {
         unset($offset, $value);
 
@@ -89,7 +81,7 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
      * @codeCoverageIgnore
      */
     #[ReturnTypeWillChange]
-    public function offsetUnset($offset)
+    public function offsetUnset($offset): void
     {
         unset($offset);
 

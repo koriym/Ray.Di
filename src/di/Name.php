@@ -13,7 +13,6 @@ use ReflectionMethod;
 use ReflectionParameter;
 
 use function class_exists;
-use function get_class;
 use function is_string;
 
 /**
@@ -26,8 +25,7 @@ final class Name
      */
     public const ANY = '';
 
-    /** @var string */
-    private $name = '';
+    private string $name = '';
 
     /**
      * Named database
@@ -36,7 +34,7 @@ final class Name
      *
      * @var ParameterNameMapping
      */
-    private $names;
+    private array $names = [];
 
     /**
      * @param string|ParameterNameMapping $name
@@ -70,7 +68,7 @@ final class Name
             }
         }
 
-        if ($names) {
+        if ($names !== []) {
             return new self($names);
         }
 
@@ -95,7 +93,7 @@ final class Name
 
         $isQualifier = (bool) (new ReflectionClass($attribute))->getAttributes(Qualifier::class);
         if ($isQualifier) {
-            return get_class($attribute);
+            return $attribute::class;
         }
 
         return '';

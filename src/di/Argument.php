@@ -8,6 +8,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
+use Stringable;
 
 use function assert;
 use function in_array;
@@ -16,24 +17,18 @@ use function sprintf;
 /**
  * @psalm-import-type DependencyIndex from Types
  */
-final class Argument implements AcceptInterface
+final class Argument implements AcceptInterface, Stringable
 {
     public const UNBOUND_TYPE = ['bool', 'int', 'float', 'string', 'array', 'resource', 'callable', 'iterable'];
 
     /** @var DependencyIndex */
-    private $index;
-
-    /** @var bool */
-    private $isDefaultAvailable;
+    private string $index;
+    private bool $isDefaultAvailable;
 
     /** @var mixed */
     private $default;
-
-    /** @var string */
-    private $meta;
-
-    /** @var ReflectionParameter */
-    private $reflection;
+    private string $meta;
+    private ReflectionParameter $reflection;
 
     public function __construct(ReflectionParameter $parameter, string $name)
     {
@@ -131,7 +126,7 @@ final class Argument implements AcceptInterface
     }
 
     /** @inheritDoc */
-    public function accept(VisitorInterface $visitor)
+    public function accept(VisitorInterface $visitor): void
     {
         $visitor->visitArgument(
             $this->index,
@@ -150,7 +145,7 @@ final class Argument implements AcceptInterface
         try {
             $this->default = $parameter->getDefaultValue();
             // @codeCoverageIgnoreStart
-        } catch (ReflectionException $e) {
+        } catch (ReflectionException) {
             $this->default = null;
             // @codeCoverageIgnoreEnd
         }

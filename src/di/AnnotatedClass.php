@@ -10,8 +10,7 @@ use ReflectionMethod;
 
 final class AnnotatedClass
 {
-    /** @var AnnotatedClassMethods */
-    private $injectionMethod;
+    private AnnotatedClassMethods $injectionMethod;
 
     public function __construct()
     {

@@ -11,15 +11,11 @@ use Exception;
  */
 final class SetterMethods implements AcceptInterface
 {
-    /** @var SetterMethodsList */
-    private $setterMethods;
-
     /**
      * @param SetterMethodsList $setterMethods
      */
-    public function __construct(array $setterMethods)
+    public function __construct(private array $setterMethods)
     {
-        $this->setterMethods = $setterMethods;
     }
 
     /**
@@ -34,7 +30,7 @@ final class SetterMethods implements AcceptInterface
 
     public function add(?SetterMethod $setterMethod = null): void
     {
-        if (! $setterMethod) {
+        if (! $setterMethod instanceof SetterMethod) {
             return;
         }
 
@@ -42,7 +38,7 @@ final class SetterMethods implements AcceptInterface
     }
 
     /** @inheritDoc */
-    public function accept(VisitorInterface $visitor)
+    public function accept(VisitorInterface $visitor): void
     {
         $visitor->visitSetterMethods($this->setterMethods);
     }

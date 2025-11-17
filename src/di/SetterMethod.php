@@ -14,18 +14,13 @@ use function is_callable;
 
 final class SetterMethod implements AcceptInterface
 {
-    /** @var string */
-    private $method;
-
-    /** @var Arguments */
-    private $arguments;
+    private readonly string $method;
+    private readonly Arguments $arguments;
 
     /**
      * Is optional binding ?
-     *
-     * @var bool
      */
-    private $isOptional = false;
+    private bool $isOptional = false;
 
     public function __construct(ReflectionMethod $method, Name $name)
     {
@@ -43,12 +38,12 @@ final class SetterMethod implements AcceptInterface
     {
         try {
             $parameters = $this->arguments->inject($container);
-        } catch (Unbound $e) {
+        } catch (Unbound $unbound) {
             if ($this->isOptional) {
                 return;
             }
 
-            throw $e;
+            throw $unbound;
         }
 
         $callable = [$instance, $this->method];
@@ -65,18 +60,18 @@ final class SetterMethod implements AcceptInterface
     }
 
     /** @inheritDoc */
-    public function accept(VisitorInterface $visitor)
+    public function accept(VisitorInterface $visitor): void
     {
         try {
             $visitor->visitSetterMethod($this->method, $this->arguments);
-        } catch (Unbound $e) {
+        } catch (Unbound $unbound) {
             if ($this->isOptional) {
                 // Return when no dependency given and @Inject(optional=true) annotated to setter method.
                 return;
             }
 
             // Throw exception when no dependency given and @Inject(optional=false) annotated to setter method.
-            throw $e;
+            throw $unbound;
         }
     }
 }

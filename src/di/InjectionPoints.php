@@ -18,7 +18,7 @@ final class InjectionPoints
      *
      * @var InjectionPointsList
      */
-    private $points = [];
+    private array $points = [];
 
     /**
      * @param class-string $class

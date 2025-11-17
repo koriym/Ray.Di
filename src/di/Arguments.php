@@ -14,7 +14,7 @@ use ReflectionMethod;
 final class Arguments implements AcceptInterface
 {
     /** @var ArgumentsList */
-    private $arguments = [];
+    private array $arguments = [];
 
     public function __construct(ReflectionMethod $method, Name $name)
     {
@@ -42,7 +42,7 @@ final class Arguments implements AcceptInterface
         return $parameters;
     }
 
-    public function accept(VisitorInterface $visitor)
+    public function accept(VisitorInterface $visitor): void
     {
         $visitor->visitArguments($this->arguments);
     }
@@ -57,12 +57,12 @@ final class Arguments implements AcceptInterface
         $this->bindInjectionPoint($container, $argument);
         try {
             return $container->getDependency((string) $argument);
-        } catch (Unbound $e) {
+        } catch (Unbound $unbound) {
             if ($argument->isDefaultAvailable()) {
                 return $argument->getDefaultValue();
             }
 
-            throw new Unbound($argument->getMeta(), 0, $e);
+            throw new Unbound($argument->getMeta(), 0, $unbound);
         }
     }
 

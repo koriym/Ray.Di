@@ -13,6 +13,7 @@ use Ray\Di\Exception\NotFound;
 
 use function class_exists;
 use function interface_exists;
+use function sprintf;
 
 final class BindValidator
 {
@@ -39,7 +40,7 @@ final class BindValidator
         }
 
         if (! $this->isNullInterceptorBinding($class, $interface) && interface_exists($interface) && ! (new ReflectionClass($class))->implementsInterface($interface)) {
-            throw new InvalidType("[{$class}] is no implemented [{$interface}] interface");
+            throw new InvalidType(sprintf('[%s] is no implemented [%s] interface', $class, $interface));
         }
 
         return new ReflectionClass($class);

@@ -150,7 +150,7 @@ class SetterMethodTest extends TestCase
             }
         };
 
-        $result = $setterMethod->accept($visitor);
-        $this->assertNull($result);
+        $setterMethod->accept($visitor);
+        // accept() returns void, just checking it doesn't throw
     }
 }

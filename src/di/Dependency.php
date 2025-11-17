@@ -26,9 +26,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
 
     /** @var ?string */
     private $postConstruct;
-
-    /** @var bool */
-    private $isSingleton = false;
+    private bool $isSingleton = false;
 
     /** @var ?mixed */
     private $instance;

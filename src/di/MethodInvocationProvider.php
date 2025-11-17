@@ -13,7 +13,7 @@ use Ray\Di\Exception\MethodInvocationNotAvailable;
 final class MethodInvocationProvider implements ProviderInterface
 {
     /** @var ?MethodInvocation<object> */
-    private $invocation;
+    private ?MethodInvocation $invocation = null;
 
     /**
      * @param MethodInvocation<object> $invocation

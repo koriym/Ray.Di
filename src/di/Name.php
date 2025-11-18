@@ -14,6 +14,7 @@ use ReflectionParameter;
 
 use function class_exists;
 use function is_string;
+use function preg_match;
 
 /**
  * @psalm-import-type ParameterNameMapping from Types
@@ -123,6 +124,15 @@ final class Name
 
         // single name
         // @Named(name)
-        $this->name = $name;
+        if ($name === self::ANY || preg_match('/^\w+$/', $name)) {
+            $this->name = $name;
+
+            return;
+        }
+
+        // name list (backward compatibility)
+        // @Named(varName1=name1, varName2=name2) or toConstructor string format
+        /** @psalm-suppress DeprecatedClass */
+        $this->names = LegacyStringParser::parse($name);
     }
 }

@@ -6,10 +6,7 @@ namespace Ray\Di;
 
 use function explode;
 use function substr;
-use function trigger_error;
 use function trim;
-
-use const E_USER_DEPRECATED;
 
 /**
  * Legacy string format parser for toConstructor() method
@@ -32,11 +29,6 @@ final class LegacyStringParser
      */
     public static function parse(string $name): array
     {
-        trigger_error(
-            'String format in toConstructor() is deprecated. Use parameter-level attributes (#[Named(\'name\')]) or array format ([\'param\' => \'name\']) instead.',
-            E_USER_DEPRECATED,
-        );
-
         $names = [];
         $keyValues = explode(',', $name);
         foreach ($keyValues as $keyValue) {

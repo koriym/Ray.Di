@@ -66,4 +66,12 @@ class NameTest extends TestCase
         $boundName = $name($parameter);
         $this->assertSame(Name::ANY, $boundName);
     }
+
+    public function testKeyValuePairWithDollarPrefix(): void
+    {
+        $name = new Name('$engine=engine_name,$var=var_name');
+        $parameter = new ReflectionParameter([FakeCar::class, '__construct'], 'engine');
+        $boundName = $name($parameter);
+        $this->assertSame('engine_name', $boundName);
+    }
 }

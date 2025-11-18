@@ -13,11 +13,8 @@ use ReflectionMethod;
 use ReflectionParameter;
 
 use function class_exists;
-use function explode;
 use function is_string;
 use function preg_match;
-use function substr;
-use function trim;
 
 /**
  * @psalm-import-type ParameterNameMapping from Types
@@ -135,34 +132,6 @@ final class Name
 
         // name list (backward compatibility)
         // @Named(varName1=name1, varName2=name2) or toConstructor string format
-        $this->names = $this->parseName($name);
-    }
-
-    /**
-     * Parse "key=value,key=value" format (backward compatibility)
-     *
-     * @return ParameterNameMapping
-     *
-     * @psalm-pure
-     */
-    private function parseName(string $name): array
-    {
-        $names = [];
-        $keyValues = explode(',', $name);
-        foreach ($keyValues as $keyValue) {
-            $exploded = explode('=', $keyValue);
-            if (isset($exploded[1])) {
-                [$key, $value] = $exploded;
-                if (isset($key[0]) && $key[0] === '$') {
-                    $key = substr($key, 1);
-                }
-
-                $trimedKey = trim($key);
-
-                $names[$trimedKey] = trim($value);
-            }
-        }
-
-        return $names;
+        $this->names = LegacyStringParser::parse($name);
     }
 }

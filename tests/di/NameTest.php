@@ -52,8 +52,8 @@ class NameTest extends TestCase
     public function keyPairStringProvider(): array
     {
         return [
-            ['engine=engine_name,var=va_name'],
-            ['engine=engine_name, var=va_name'],
+            ['engine=engine_name,var=var_name'],
+            ['engine=engine_name, var=var_name'],
             ['var=var_name,engine=engine_name'],
             ['var=var_name, engine=engine_name'],
         ];

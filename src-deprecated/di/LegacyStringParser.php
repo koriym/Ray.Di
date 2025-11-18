@@ -40,6 +40,9 @@ final class LegacyStringParser
                 }
 
                 $trimmedKey = trim($key);
+                if ($trimmedKey === '') {
+                    continue;
+                }
 
                 $names[$trimmedKey] = trim($value);
             }

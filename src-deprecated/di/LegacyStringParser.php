@@ -32,16 +32,16 @@ final class LegacyStringParser
         $names = [];
         $keyValues = explode(',', $name);
         foreach ($keyValues as $keyValue) {
-            $exploded = explode('=', $keyValue);
+            $exploded = explode('=', $keyValue, 2);
             if (isset($exploded[1])) {
                 [$key, $value] = $exploded;
                 if (isset($key[0]) && $key[0] === '$') {
                     $key = substr($key, 1);
                 }
 
-                $trimedKey = trim($key);
+                $trimmedKey = trim($key);
 
-                $names[$trimedKey] = trim($value);
+                $names[$trimmedKey] = trim($value);
             }
         }
 

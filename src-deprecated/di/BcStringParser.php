@@ -9,7 +9,7 @@ use function substr;
 use function trim;
 
 /**
- * Legacy string format parser for toConstructor() method
+ * Backward compatible string format parser for toConstructor() method
  *
  * Parses "key=value,key=value" string format for backward compatibility.
  * This format is deprecated. Use parameter-level attributes or array format instead.
@@ -18,7 +18,7 @@ use function trim;
  *
  * @internal
  */
-final class LegacyStringParser
+final class BcStringParser
 {
     /**
      * Parse "key=value,key=value" format

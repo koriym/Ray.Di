@@ -139,6 +139,6 @@ final class Name
         // name list (backward compatibility)
         // @Named(varName1=name1, varName2=name2) or toConstructor string format
         /** @psalm-suppress DeprecatedClass */
-        $this->names = LegacyStringParser::parse($name);
+        $this->names = BcStringParser::parse($name);
     }
 }

@@ -10,49 +10,49 @@ use ReflectionMethod;
 
 class LegacyMethodQualifierInferenceTest extends TestCase
 {
-    public function testInferQualifierFromMethodLevelAttribute(): void
+    public function testInferNamesFromMethodLevelAttribute(): void
     {
         $method = new ReflectionMethod(FakeLegacyMethodQualifierClass::class, 'setSingleParam');
         /** @psalm-suppress DeprecatedClass */
-        $qualifier = LegacyMethodQualifierInference::inferQualifier($method);
+        $names = LegacyMethodQualifierInference::inferNames($method);
 
-        $this->assertSame(FakeInjectOne::class, $qualifier);
+        $this->assertSame(['param' => FakeInjectOne::class], $names);
     }
 
     public function testNoInferenceForMultipleParameters(): void
     {
         $method = new ReflectionMethod(FakeLegacyMethodQualifierClass::class, 'setMultipleParams');
         /** @psalm-suppress DeprecatedClass */
-        $qualifier = LegacyMethodQualifierInference::inferQualifier($method);
+        $names = LegacyMethodQualifierInference::inferNames($method);
 
-        $this->assertSame('', $qualifier);
+        $this->assertSame([], $names);
     }
 
     public function testNoInferenceWhenParameterHasQualifier(): void
     {
         $method = new ReflectionMethod(FakeLegacyMethodQualifierClass::class, 'setSingleParamWithQualifier');
         /** @psalm-suppress DeprecatedClass */
-        $qualifier = LegacyMethodQualifierInference::inferQualifier($method);
+        $names = LegacyMethodQualifierInference::inferNames($method);
 
-        $this->assertSame('', $qualifier);
+        $this->assertSame([], $names);
     }
 
     public function testNoInferenceForNonQualifierAttribute(): void
     {
         $method = new ReflectionMethod(FakeLegacyMethodQualifierClass::class, 'setSingleParamWithInjectOnly');
         /** @psalm-suppress DeprecatedClass */
-        $qualifier = LegacyMethodQualifierInference::inferQualifier($method);
+        $names = LegacyMethodQualifierInference::inferNames($method);
 
-        $this->assertSame('', $qualifier);
+        $this->assertSame([], $names);
     }
 
     public function testNoInferenceForMethodWithoutInjectInterface(): void
     {
         $method = new ReflectionMethod(FakeLegacyMethodQualifierClass::class, 'setSingleParamNoInject');
         /** @psalm-suppress DeprecatedClass */
-        $qualifier = LegacyMethodQualifierInference::inferQualifier($method);
+        $names = LegacyMethodQualifierInference::inferNames($method);
 
-        $this->assertSame('', $qualifier);
+        $this->assertSame([], $names);
     }
 
     public function testNoInferenceForTargetMethodOnly(): void
@@ -61,8 +61,8 @@ class LegacyMethodQualifierInferenceTest extends TestCase
         // It's meant for Provider/InjectionPoint pattern, not parameter binding
         $method = new ReflectionMethod(FakeLegacyMethodQualifierClass::class, 'setSingleParamMethodOnly');
         /** @psalm-suppress DeprecatedClass */
-        $qualifier = LegacyMethodQualifierInference::inferQualifier($method);
+        $names = LegacyMethodQualifierInference::inferNames($method);
 
-        $this->assertSame('', $qualifier);
+        $this->assertSame([], $names);
     }
 }

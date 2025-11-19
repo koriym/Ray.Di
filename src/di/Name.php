@@ -13,7 +13,6 @@ use ReflectionMethod;
 use ReflectionParameter;
 
 use function class_exists;
-use function count;
 use function is_string;
 use function preg_match;
 
@@ -73,10 +72,7 @@ final class Name
         // Legacy: Infer qualifier from method-level attribute for single-parameter methods
         if ($names === []) {
             /** @psalm-suppress DeprecatedClass */
-            $inferredQualifier = LegacyMethodQualifierInference::inferQualifier($method);
-            if ($inferredQualifier !== '' && count($params) === 1) {
-                $names[$params[0]->name] = $inferredQualifier;
-            }
+            $names = LegacyMethodQualifierInference::inferNames($method);
         }
 
         if ($names !== []) {

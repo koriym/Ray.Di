@@ -39,6 +39,36 @@ use function count;
 final class LegacyMethodQualifierInference
 {
     /**
+     * Infer parameter names from method-level attribute if applicable
+     *
+     * Returns parameter name mapping if:
+     * 1. Method has exactly one parameter
+     * 2. Parameter has no qualifier attribute
+     * 3. Method has an attribute implementing both InjectInterface and Qualifier
+     * 4. The attribute supports TARGET_PARAMETER (not just TARGET_METHOD)
+     *
+     * @param ReflectionMethod $method The setter method to analyze
+     *
+     * @return array<string, string> Parameter name to qualifier mapping (empty if not applicable)
+     */
+    public static function inferNames(ReflectionMethod $method): array
+    {
+        $params = $method->getParameters();
+
+        // Only for single-parameter methods
+        if (count($params) !== 1) {
+            return [];
+        }
+
+        $qualifier = self::inferQualifier($method);
+        if ($qualifier === '') {
+            return [];
+        }
+
+        return [$params[0]->name => $qualifier];
+    }
+
+    /**
      * Infer parameter qualifier from method-level attribute if applicable
      *
      * Returns the qualifier name if:
@@ -51,7 +81,7 @@ final class LegacyMethodQualifierInference
      *
      * @return string The inferred qualifier class name, or empty string if not applicable
      */
-    public static function inferQualifier(ReflectionMethod $method): string
+    private static function inferQualifier(ReflectionMethod $method): string
     {
         $params = $method->getParameters();
 

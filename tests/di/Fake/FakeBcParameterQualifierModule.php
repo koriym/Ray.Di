@@ -6,7 +6,7 @@ namespace Ray\Di;
 
 use Ray\Di\Annotation\FakeInjectOne;
 
-class FakeLegacyInferenceModule extends AbstractModule
+class FakeBcParameterQualifierModule extends AbstractModule
 {
     protected function configure(): void
     {

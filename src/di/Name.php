@@ -69,10 +69,10 @@ final class Name
             }
         }
 
-        // Legacy: Infer qualifier from method-level attribute for single-parameter methods
+        // Backward compatibility: Get parameter qualifiers from method-level attribute
         if ($names === []) {
             /** @psalm-suppress DeprecatedClass */
-            $names = LegacyMethodQualifierInference::inferNames($method);
+            $names = BcParameterQualifier::getNames($method);
         }
 
         if ($names !== []) {

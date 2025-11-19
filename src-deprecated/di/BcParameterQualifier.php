@@ -13,7 +13,7 @@ use ReflectionMethod;
 use function count;
 
 /**
- * Legacy method-level qualifier inference for single-parameter setters
+ * Backward compatible parameter qualifier for single-parameter setters
  *
  * Automatically applies method-level InjectInterface+Qualifier attributes to parameters
  * when the method has only one parameter and no parameter-level qualifier is specified.
@@ -36,10 +36,10 @@ use function count;
  *
  * @internal
  */
-final class LegacyMethodQualifierInference
+final class BcParameterQualifier
 {
     /**
-     * Infer parameter names from method-level attribute if applicable
+     * Get parameter qualifier names from method-level attribute if applicable
      *
      * Returns parameter name mapping if:
      * 1. Method has exactly one parameter
@@ -51,7 +51,7 @@ final class LegacyMethodQualifierInference
      *
      * @return array<string, string> Parameter name to qualifier mapping (empty if not applicable)
      */
-    public static function inferNames(ReflectionMethod $method): array
+    public static function getNames(ReflectionMethod $method): array
     {
         $params = $method->getParameters();
 
@@ -60,7 +60,7 @@ final class LegacyMethodQualifierInference
             return [];
         }
 
-        $qualifier = self::inferQualifier($method);
+        $qualifier = self::getQualifier($method);
         if ($qualifier === '') {
             return [];
         }
@@ -69,7 +69,7 @@ final class LegacyMethodQualifierInference
     }
 
     /**
-     * Infer parameter qualifier from method-level attribute if applicable
+     * Get parameter qualifier from method-level attribute if applicable
      *
      * Returns the qualifier name if:
      * 1. Method has exactly one parameter
@@ -79,9 +79,9 @@ final class LegacyMethodQualifierInference
      *
      * @param ReflectionMethod $method The setter method to analyze
      *
-     * @return string The inferred qualifier class name, or empty string if not applicable
+     * @return string The qualifier class name, or empty string if not applicable
      */
-    private static function inferQualifier(ReflectionMethod $method): string
+    private static function getQualifier(ReflectionMethod $method): string
     {
         $params = $method->getParameters();
 

@@ -7,7 +7,7 @@ namespace Ray\Di;
 use Ray\Di\Annotation\FakeInjectOne;
 use Ray\Di\Di\Inject;
 
-class FakeLegacyMethodQualifierClass
+class FakeBcParameterQualifierClass
 {
     public $singleParam;
     public $multipleParams1;
@@ -18,7 +18,7 @@ class FakeLegacyMethodQualifierClass
 
     /**
      * Single parameter with method-level InjectInterface+Qualifier
-     * This should trigger legacy inference (FakeInjectOne supports TARGET_PARAMETER)
+     * This should trigger BC parameter qualifier (FakeInjectOne supports TARGET_PARAMETER)
      */
     #[FakeInjectOne]
     public function setSingleParam(FakeGearStickInterface $param): void

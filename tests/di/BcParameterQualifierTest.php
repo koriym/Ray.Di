@@ -6,6 +6,7 @@ namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Annotation\FakeInjectOne;
+use Ray\Di\Annotation\FakeQualifierOnly;
 use ReflectionMethod;
 
 class BcParameterQualifierTest extends TestCase
@@ -55,14 +56,25 @@ class BcParameterQualifierTest extends TestCase
         $this->assertSame([], $names);
     }
 
-    public function testNoNamesForTargetMethodOnly(): void
+    public function testNamesForTargetMethodOnly(): void
     {
-        // FakeGearStickInject has TARGET_METHOD only, not TARGET_PARAMETER
-        // It's meant for Provider/InjectionPoint pattern, not parameter binding
+        // FakeGearStickInject has TARGET_METHOD only
+        // BC parameter qualifier now supports TARGET_METHOD-only attributes for backward compatibility
         $method = new ReflectionMethod(FakeBcParameterQualifierClass::class, 'setSingleParamMethodOnly');
         /** @psalm-suppress DeprecatedClass */
         $names = BcParameterQualifier::getNames($method);
 
-        $this->assertSame([], $names);
+        $this->assertSame(['param' => FakeGearStickInject::class], $names);
+    }
+
+    public function testConstructorWithQualifierOnly(): void
+    {
+        // Constructor with Qualifier-only attribute (no InjectInterface)
+        // BC parameter qualifier should apply for constructors (InjectInterface is implicit)
+        $method = new ReflectionMethod(FakeBcConstructorQualifierClass::class, '__construct');
+        /** @psalm-suppress DeprecatedClass */
+        $names = BcParameterQualifier::getNames($method);
+
+        $this->assertSame(['param' => FakeQualifierOnly::class], $names);
     }
 }

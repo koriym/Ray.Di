@@ -29,7 +29,7 @@ class AnnotatedClassTest extends TestCase
         (new Bind($container, FakeHandleInterface::class))->toProvider(FakeHandleProvider::class);
         (new Bind($container, FakeMirrorInterface::class))->annotatedWith('right')->to(FakeMirrorRight::class);
         (new Bind($container, FakeMirrorInterface::class))->annotatedWith('left')->to(FakeMirrorRight::class);
-        (new Bind($container, FakeGearStickInterface::class))->toProvider(FakeGearStickProvider::class);
+        (new Bind($container, FakeGearStickInterface::class))->annotatedWith(FakeGearStickInject::class)->toProvider(FakeGearStickProvider::class);
         $car = $newInstance($container);
         if (! $car instanceof FakeCar) {
             throw new LogicException();

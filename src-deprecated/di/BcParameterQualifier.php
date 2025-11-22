@@ -13,10 +13,13 @@ use ReflectionMethod;
 use function count;
 
 /**
- * Backward compatible parameter qualifier for single-parameter setters
+ * Backward compatible parameter qualifier for single-parameter methods
  *
- * Automatically applies method-level InjectInterface+Qualifier attributes to parameters
- * when the method has only one parameter and no parameter-level qualifier is specified.
+ * Automatically applies method-level Qualifier attributes to parameters when:
+ * - Method has exactly one parameter
+ * - Parameter has no explicit qualifier
+ * - For constructors: Method has a Qualifier attribute (InjectInterface is implicit)
+ * - For setters: Method has an attribute implementing both InjectInterface and Qualifier
  *
  * This behavior is deprecated for the following reasons:
  * - Violates Single Responsibility Principle (one attribute serving dual purposes)
@@ -44,10 +47,10 @@ final class BcParameterQualifier
      * Returns parameter name mapping if:
      * 1. Method has exactly one parameter
      * 2. Parameter has no qualifier attribute
-     * 3. Method has an attribute implementing both InjectInterface and Qualifier
-     * 4. The attribute supports TARGET_PARAMETER (not just TARGET_METHOD)
+     * 3. For setters: Method has an attribute implementing both InjectInterface and Qualifier
+     * 4. For constructors: Method has a Qualifier attribute (InjectInterface is implicit)
      *
-     * @param ReflectionMethod $method The setter method to analyze
+     * @param ReflectionMethod $method The method to analyze
      *
      * @return array<string, string> Parameter name to qualifier mapping (empty if not applicable)
      */
@@ -74,10 +77,10 @@ final class BcParameterQualifier
      * Returns the qualifier name if:
      * 1. Method has exactly one parameter
      * 2. Parameter has no qualifier attribute
-     * 3. Method has an attribute implementing both InjectInterface and Qualifier
-     * 4. The attribute supports TARGET_PARAMETER (not just TARGET_METHOD)
+     * 3. For setters: Method has an attribute implementing both InjectInterface and Qualifier
+     * 4. For constructors: Method has a Qualifier attribute (InjectInterface is implicit)
      *
-     * @param ReflectionMethod $method The setter method to analyze
+     * @param ReflectionMethod $method The method to analyze
      *
      * @return string The qualifier class name, or empty string if not applicable
      */
@@ -97,33 +100,29 @@ final class BcParameterQualifier
             return '';
         }
 
-        // Check method-level attributes for InjectInterface+Qualifier combination
+        $isConstructor = $method->name === '__construct';
+
+        // Check method-level attributes for Qualifier
         $methodAttributes = $method->getAttributes();
         foreach ($methodAttributes as $attr) {
             $instance = $attr->newInstance();
-
-            // Must implement InjectInterface
-            if (! $instance instanceof InjectInterface) {
-                continue;
-            }
-
-            // Must also be marked with Qualifier
             $attrClass = new ReflectionClass($attr->getName());
             $qualifierAttr = $attrClass->getAttributes(Qualifier::class);
 
+            // Skip if not a Qualifier
             if ($qualifierAttr === []) {
                 continue;
             }
 
-            // IMPORTANT: Only infer if attribute supports TARGET_PARAMETER
-            // If it's TARGET_METHOD only, it's meant for Provider/InjectionPoint pattern
-            if (! self::supportsParameterTarget($attrClass)) {
-                continue;
+            // For constructors: Qualifier alone is sufficient (InjectInterface is implicit)
+            if ($isConstructor) {
+                return $attr->getName();
             }
 
-            // Found a method-level attribute that is both Inject and Qualifier
-            // AND supports being used at parameter level
-            return $attr->getName();
+            // For setters: Must also implement InjectInterface
+            if ($instance instanceof InjectInterface) {
+                return $attr->getName();
+            }
         }
 
         return '';
@@ -146,26 +145,5 @@ final class BcParameterQualifier
         }
 
         return false;
-    }
-
-    /**
-     * Check if attribute supports TARGET_PARAMETER
-     *
-     * @param ReflectionClass<object> $attrClass
-     */
-    private static function supportsParameterTarget(ReflectionClass $attrClass): bool
-    {
-        $attributeAttrs = $attrClass->getAttributes(\Attribute::class);
-        if ($attributeAttrs === []) {
-            return false;
-        }
-
-        $attributeInstance = $attributeAttrs[0]->newInstance();
-        if (! $attributeInstance instanceof \Attribute) {
-            return false;
-        }
-
-        // Check if Attribute::TARGET_PARAMETER is included in the flags
-        return ($attributeInstance->flags & \Attribute::TARGET_PARAMETER) !== 0;
     }
 }

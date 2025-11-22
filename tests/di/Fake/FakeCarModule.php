@@ -18,7 +18,7 @@ class FakeCarModule extends AbstractModule
         $this->bind(FakeMirrorInterface::class)->annotatedWith('left')->to(FakeMirrorLeft::class)->in(Scope::SINGLETON); // named binding
         $this->bind('')->annotatedWith('logo')->toInstance('momo');
         $this->bind(FakeHandleInterface::class)->toProvider(FakeHandleProvider::class);
-        $this->bind(FakeGearStickInterface::class)->to(FakeLeatherGearStick::class);
+        $this->bind(FakeGearStickInterface::class)->annotatedWith(FakeGearStickInject::class)->to(FakeLeatherGearStick::class);
         $this->bindInterceptor(
             $this->matcher->any(),
             $this->matcher->any('start'),

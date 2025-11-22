@@ -21,7 +21,7 @@ class FakePhp8CarModule extends AbstractModule
         $this->bind(FakeMirrorInterface::class)->annotatedWith(FakeRight::class)->to(FakeMirrorRight::class); // named binding
         $this->bind('')->annotatedWith('logo')->toInstance('momo');
         $this->bind(FakeHandleInterface::class)->toProvider(FakeHandleProvider::class);
-        $this->bind(FakeGearStickInterface::class)->toProvider(FakeGearStickProvider::class);
+        $this->bind(FakeGearStickInterface::class)->annotatedWith(FakeGearStickInject::class)->toProvider(FakeGearStickProvider::class);
         $this->bind()->annotatedWith(FakeInjectOne::class)->toInstance(1);
     }
 }

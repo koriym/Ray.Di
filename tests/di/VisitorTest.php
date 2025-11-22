@@ -173,7 +173,7 @@ class VisitorTest extends TestCase
 
         $this->dependency->accept($visitor);
         $this->assertStringContainsString('Ray\Di\FakeCar', $collector->newInstance);
-        $this->assertStringContainsString('(prototype.Ray\Di\FakeGearStickInterface-)', $collector->newInstance);
+        $this->assertStringContainsString('(prototype.Ray\Di\FakeGearStickInterface-Ray\Di\FakeGearStickInject)', $collector->newInstance);
         $this->assertSame('setTires(prototype.Ray\Di\FakeEngineInterface-)', $collector->methods[0]);
         $this->assertSame('setHardtop(prototype.Ray\Di\FakeTyreInterface-,prototype.Ray\Di\FakeTyreInterface-)', $collector->methods[1]);
     }

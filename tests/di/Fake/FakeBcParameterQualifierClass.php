@@ -18,7 +18,7 @@ class FakeBcParameterQualifierClass
 
     /**
      * Single parameter with method-level InjectInterface+Qualifier
-     * This should trigger BC parameter qualifier (FakeInjectOne supports TARGET_PARAMETER)
+     * This should trigger BC parameter qualifier
      */
     #[FakeInjectOne]
     public function setSingleParam(FakeGearStickInterface $param): void
@@ -63,12 +63,12 @@ class FakeBcParameterQualifierClass
     }
 
     /**
-     * Method-level attribute with TARGET_METHOD only (Provider pattern)
-     * Should NOT infer because it doesn't support TARGET_PARAMETER
+     * Method-level attribute with TARGET_METHOD only
+     * BC parameter qualifier now supports this for backward compatibility
      */
     #[FakeGearStickInject('test')]
     public function setSingleParamMethodOnly(FakeGearStickInterface $param): void
     {
-        // This is for Provider/InjectionPoint pattern, not parameter binding
+        $this->singleParam = $param;
     }
 }

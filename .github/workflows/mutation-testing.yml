@@ -35,7 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer install --no-interaction --prefer-dist
-          composer bin tools install --no-interaction --prefer-dist
+          composer bin tools update --no-interaction --prefer-dist
 
       - name: Create build directory
         run: mkdir -p build

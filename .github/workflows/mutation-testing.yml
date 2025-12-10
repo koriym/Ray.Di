@@ -39,8 +39,22 @@ jobs:
           composer install --no-interaction --prefer-dist
           composer bin tools install --no-interaction --prefer-dist
 
+      - name: Create build directory
+        run: mkdir -p build
+
       - name: Run Infection
         run: |
           vendor-bin/tools/vendor/bin/infection --threads=4 --logger-github --min-msi=0 --min-covered-msi=0
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
+
+      - name: Upload mutation testing results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: infection-results
+          path: |
+            build/infection.json
+            build/infection.log
+            build/infection-summary.log
+          retention-days: 30

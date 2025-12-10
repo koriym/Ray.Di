@@ -8,7 +8,8 @@
     "logs": {
         "text": "build/infection.log",
         "html": "build/infection.html",
-        "summary": "build/infection-summary.log"
+        "summary": "build/infection-summary.log",
+        "json": "build/infection.json"
     },
     "mutators": {
         "@default": true

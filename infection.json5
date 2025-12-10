@@ -1,0 +1,20 @@
+{
+    "$schema": "https://raw.githubusercontent.com/infection/infection/0.29.0/resources/schema.json",
+    "source": {
+        "directories": [
+            "src/di"
+        ]
+    },
+    "logs": {
+        "text": "build/infection.log",
+        "html": "build/infection.html",
+        "summary": "build/infection-summary.log"
+    },
+    "mutators": {
+        "@default": true
+    },
+    "minMsi": 0,
+    "minCoveredMsi": 0,
+    "testFramework": "phpunit",
+    "testFrameworkOptions": "--testsuite='Ray.Di Test Suite'"
+}

@@ -1,6 +1,7 @@
 {
     "require-dev": {
         "doctrine/coding-standard": "^9.0",
+        "infection/infection": "^0.29",
         "phpmd/phpmd": "^2.9",
         "phpmetrics/phpmetrics": "^2.7 || v3.0.0rc8",
         "phpstan/phpstan": "^2.0",

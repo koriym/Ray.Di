@@ -16,5 +16,8 @@
     "minMsi": 0,
     "minCoveredMsi": 0,
     "testFramework": "phpunit",
+    "phpUnit": {
+        "customPath": "vendor/bin/phpunit"
+    },
     "testFrameworkOptions": "--testsuite='Ray.Di Test Suite'"
 }

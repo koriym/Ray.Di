@@ -43,7 +43,7 @@ final class Argument implements AcceptInterface, Stringable
         $this->index = $type . '-' . $name;
         $this->reflection = $parameter;
         $this->meta = sprintf(
-            "dependency '%s' with name '%s' used in %s:%d ($%s)",
+            "'%s-%s' in %s:%d ($%s)",
             $type,
             $name,
             $this->reflection->getDeclaringFunction()->getFileName(),

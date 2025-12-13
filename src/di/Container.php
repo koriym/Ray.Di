@@ -8,6 +8,7 @@ use BadMethodCallException;
 use Ray\Aop\Compiler;
 use Ray\Aop\CompilerInterface;
 use Ray\Aop\Pointcut;
+use Ray\Di\Exception\NoHint;
 use Ray\Di\Exception\Unbound;
 use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
@@ -152,7 +153,11 @@ final class Container implements InjectorInterface
             return new Untargeted($class);
         }
 
-        return new Unbound(sprintf('%s-%s', $class, $name));
+        if ($class === '' && $name === '') {
+            return new NoHint();
+        }
+
+        return new Unbound(sprintf("'%s-%s'", $class, $name));
     }
 
     /**

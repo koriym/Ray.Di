@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 class A
 {
-    public function __construct(B $dep)
+    public function __construct(B $b)
     {
     }
 }

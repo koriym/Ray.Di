@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use Ray\Di\Exception\NoHint;
 use Ray\Di\Exception\Unbound;
 use ReflectionMethod;
+
+use function sprintf;
 
 /**
  * @psalm-import-type ArgumentsList from Types
@@ -62,6 +65,10 @@ final class Arguments implements AcceptInterface
                 return $argument->getDefaultValue();
             }
 
+            if ($unbound instanceof NoHint) {
+                throw new NoHint($this->getNoHintMsg($argument), 0, $unbound);
+            }
+
             throw new Unbound($argument->getMeta(), 0, $unbound);
         }
     }
@@ -74,5 +81,19 @@ final class Arguments implements AcceptInterface
         }
 
         (new Bind($container, InjectionPointInterface::class))->toInstance(new InjectionPoint($argument->get()));
+    }
+
+    private function getNoHintMsg(Argument $argument): string
+    {
+        $ref = $argument->get();
+        $func = $ref->getDeclaringFunction();
+        $fileName = $func->getFileName();
+
+        return sprintf(
+            '$%s (%s:%d)',
+            $ref->getName(),
+            $fileName !== false ? $fileName : 'unknown file',
+            $func->getStartLine()
+        );
     }
 }

@@ -12,6 +12,16 @@ use function array_reverse;
 use function implode;
 use function sprintf;
 
+/**
+ * Exception thrown when a binding is not found
+ *
+ * Message format: '{type}-{name}' in file:line ($var)
+ *
+ * Examples:
+ * - "'FooInterface-' in file.php:10 ($foo)" - FooInterface with no name
+ * - "'FooInterface-db' in file.php:10 ($foo)" - FooInterface with name 'db'
+ * - "'-db' in file.php:10 ($foo)" - no type with name 'db'
+ */
 class Unbound extends LogicException implements ExceptionInterface
 {
     public function __toString(): string

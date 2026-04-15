@@ -13,6 +13,7 @@ use Stringable;
 use function assert;
 use function class_exists;
 use function interface_exists;
+use function is_array;
 
 /**
  * @psalm-import-type BindableInterface from Types
@@ -106,6 +107,10 @@ final class Bind implements Stringable
      */
     public function toConstructor(string $class, string|array $name, ?InjectionPoints $injectionPoints = null, ?string $postConstruct = null): self
     {
+        if (is_array($name)) {
+            $name = LegacyAttributeHelper::convertArrayToStringWithWarning($name);
+        }
+
         $this->untarget = null;
         $postConstructRef = $postConstruct !== null ? new ReflectionMethod($class, $postConstruct) : null;
         /** @var ReflectionClass<object> $reflection */

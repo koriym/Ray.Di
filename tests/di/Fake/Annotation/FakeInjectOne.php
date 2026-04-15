@@ -8,7 +8,7 @@ use Attribute;
 use Ray\Di\Di\InjectInterface;
 use Ray\Di\Di\Qualifier;
 
-#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER), Qualifier]
+#[Attribute, Qualifier]
 final class FakeInjectOne implements InjectInterface
 {
     public function isOptional()

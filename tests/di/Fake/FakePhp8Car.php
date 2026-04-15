@@ -96,8 +96,8 @@ class FakePhp8Car implements FakeCarInterface
         }
     }
 
-    #[Inject]
-    public function setOne(#[FakeInjectOne] int $one)
+    #[FakeInjectOne]
+    public function setOne(int $one)
     {
         $this->one = $one;
     }

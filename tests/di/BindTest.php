@@ -74,11 +74,12 @@ class BindTest extends TestCase
     }
 
     /**
-     * @return array<int, array<int, array<string, string>>>
+     * @return array<int, array<int, array<string, string>|string>>
      */
     public function nameProvider(): array
     {
         return [
+            ['tmpDir=tmp_dir,leg=left'],
             [['tmpDir' => 'tmp_dir', 'leg' => 'left']],
         ];
     }

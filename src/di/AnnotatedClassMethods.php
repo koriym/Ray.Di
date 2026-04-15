@@ -27,7 +27,7 @@ final class AnnotatedClassMethods
             return $name;
         }
 
-        return new Name(Name::ANY);
+        return LegacyAttributeHelper::getNameFromMethod($reflMethod) ?? new Name(Name::ANY);
     }
 
     public function getSetterMethod(ReflectionMethod $method): ?SetterMethod
@@ -53,6 +53,6 @@ final class AnnotatedClassMethods
             return $name;
         }
 
-        return new Name(Name::ANY);
+        return LegacyAttributeHelper::getNameFromMethod($method) ?? new Name(Name::ANY);
     }
 }

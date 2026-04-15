@@ -136,9 +136,8 @@ final class Name
             return;
         }
 
-        // name list (backward compatibility)
+        // name list (deprecated)
         // @Named(varName1=name1, varName2=name2) or toConstructor string format
-        /** @psalm-suppress DeprecatedClass */
-        $this->names = BcStringParser::parse($name);
+        $this->names = LegacyAttributeHelper::parseNameWithWarning($name);
     }
 }

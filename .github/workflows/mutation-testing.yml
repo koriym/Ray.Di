@@ -33,16 +33,14 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: |
-          composer install --no-interaction --prefer-dist
-          composer bin tools update --no-interaction --prefer-dist
+        run: composer install --no-interaction --prefer-dist
 
       - name: Create build directory
         run: mkdir -p build
 
       - name: Run Infection
         run: |
-          vendor-bin/tools/vendor/bin/infection --threads=4 --logger-github --min-msi=0 --min-covered-msi=0
+          vendor/bin/infection --threads=4 --logger-github --min-msi=0 --min-covered-msi=0
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
 

@@ -35,12 +35,18 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Verify infection installed
+        run: |
+          ls -la vendor/bin/infection || echo "infection not found"
+          php -v
+          php -m | grep -i pcov || echo "pcov not loaded"
+
       - name: Create build directory
         run: mkdir -p build
 
       - name: Run Infection
         run: |
-          vendor/bin/infection --threads=4 --logger-github --min-msi=0 --min-covered-msi=0
+          vendor/bin/infection --threads=4 --logger-github --min-msi=0 --min-covered-msi=0 -vvv
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
 

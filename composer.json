@@ -52,7 +52,12 @@
         "sa": ["vendor-bin/tools/vendor/vimeo/psalm/psalm -m -c psalm.xml --show-info=false", "vendor-bin/tools/vendor/phpstan/phpstan/phpstan analyse -c phpstan.neon --no-progress "],
         "metrics": ["@test", "vendor-bin/tools/vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-html=build/metrics --exclude=Exception --log-junit=build/junit.xml --junit=build/junit.xml src"],
         "phpmd": ["vendor-bin/tools/vendor/phpmd/phpmd/src/bin/phpmd src/di text ./phpmd.xml"],
-        "infection": ["php -dextension=pcov.so -d pcov.enabled=1 vendor/bin/infection --threads=4"],
+        "infection": [
+            "rm -rf build/coverage-xml",
+            "mkdir -p build/coverage-xml",
+            "php -d pcov.enabled=1 vendor/bin/phpunit --testsuite='Ray.Di Test Suite' --coverage-xml=build/coverage-xml --log-junit=build/coverage-xml/junit.xml",
+            "vendor/bin/infection --coverage=build/coverage-xml --threads=4 --min-msi=0 --min-covered-msi=0 --skip-initial-tests"
+        ],
         "build": ["@cs", "@sa", "@pcov", "@metrics"],
         "baseline": ["vendor-bin/tools/vendor/phpstan/phpstan/phpstan analyse -c phpstan.neon --generate-baseline", "vendor-bin/tools/vendor/vimeo/psalm/psalm --set-baseline=psalm-baseline.xml"]
     },

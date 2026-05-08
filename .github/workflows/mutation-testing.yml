@@ -42,11 +42,15 @@ jobs:
           php -m | grep -i pcov || echo "pcov not loaded"
 
       - name: Create build directory
-        run: mkdir -p build
+        run: mkdir -p build/coverage-xml
+
+      - name: Generate coverage
+        run: |
+          php -d pcov.enabled=1 vendor/bin/phpunit --testsuite "Ray.Di Test Suite" --coverage-xml=build/coverage-xml --log-junit=build/coverage-xml/junit.xml
 
       - name: Run Infection
         run: |
-          vendor/bin/infection --threads=4 --logger-github --min-msi=0 --min-covered-msi=0 -vvv
+          vendor/bin/infection --coverage=build/coverage-xml --threads=4 --logger-github --min-msi=0 --min-covered-msi=0 --skip-initial-tests --no-progress
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
 
@@ -59,4 +63,5 @@ jobs:
             build/infection.json
             build/infection.log
             build/infection-summary.log
+            build/infection.html
           retention-days: 30

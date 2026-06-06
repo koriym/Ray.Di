@@ -105,8 +105,8 @@ final class BcParameterQualifier
         // Check method-level attributes for Qualifier
         $methodAttributes = $method->getAttributes();
         foreach ($methodAttributes as $attr) {
-            $instance = $attr->newInstance();
-            $attrClass = new ReflectionClass($attr->getName());
+            $attributeName = $attr->getName();
+            $attrClass = new ReflectionClass($attributeName);
             $qualifierAttr = $attrClass->getAttributes(Qualifier::class);
 
             // Skip if not a Qualifier
@@ -116,12 +116,12 @@ final class BcParameterQualifier
 
             // For constructors: Qualifier alone is sufficient (InjectInterface is implicit)
             if ($isConstructor) {
-                return $attr->getName();
+                return $attributeName;
             }
 
             // For setters: Must also implement InjectInterface
-            if ($instance instanceof InjectInterface) {
-                return $attr->getName();
+            if ($attrClass->implementsInterface(InjectInterface::class)) {
+                return $attributeName;
             }
         }
 

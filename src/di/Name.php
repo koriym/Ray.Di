@@ -12,6 +12,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionParameter;
 
+use function assert;
 use function class_exists;
 use function is_string;
 use function preg_match;
@@ -93,14 +94,18 @@ final class Name
     private static function getName(array $attributes): string
     {
         $refAttribute = $attributes[0];
-        $attribute = $refAttribute->newInstance();
-        if ($attribute instanceof Named) {
+        /** @var class-string $attributeName */
+        $attributeName = $refAttribute->getName();
+        if ($attributeName === Named::class) {
+            $attribute = $refAttribute->newInstance();
+            assert($attribute instanceof Named);
+
             return $attribute->value;
         }
 
-        $isQualifier = (bool) (new ReflectionClass($attribute))->getAttributes(Qualifier::class);
+        $isQualifier = (bool) (new ReflectionClass($attributeName))->getAttributes(Qualifier::class);
         if ($isQualifier) {
-            return $attribute::class;
+            return $attributeName;
         }
 
         return '';

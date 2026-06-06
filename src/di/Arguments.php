@@ -80,7 +80,7 @@ final class Arguments implements AcceptInterface
             return;
         }
 
-        (new Bind($container, InjectionPointInterface::class))->toInstance(new InjectionPoint($argument->get()));
+        $container->setInjectionPoint(new InjectionPoint($argument->get()));
     }
 
     private function getNoHintMsg(Argument $argument): string

@@ -9,7 +9,6 @@ use LogicException;
 use Ray\Di\Exception\Unbound;
 use ReflectionMethod;
 
-use function call_user_func_array;
 use function is_callable;
 
 final class SetterMethod implements AcceptInterface
@@ -51,7 +50,7 @@ final class SetterMethod implements AcceptInterface
             throw new LogicException(); // @codeCoverageIgnore
         }
 
-        call_user_func_array($callable, $parameters);
+        $instance->{$this->method}(...$parameters);
     }
 
     public function setOptional(): void

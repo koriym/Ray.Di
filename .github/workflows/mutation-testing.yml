@@ -2,6 +2,7 @@ name: Mutation Testing
 
 on:
   push:
+    branches: [2.x]
   pull_request:
   workflow_dispatch:
 
@@ -13,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -29,28 +32,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.json') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Verify infection installed
-        run: |
-          ls -la vendor/bin/infection || echo "infection not found"
-          php -v
-          php -m | grep -i pcov || echo "pcov not loaded"
-
-      - name: Create build directory
-        run: mkdir -p build/coverage-xml
-
-      - name: Generate coverage
-        run: |
-          php -d pcov.enabled=1 vendor/bin/phpunit --testsuite "Ray.Di Test Suite" --coverage-xml=build/coverage-xml --log-junit=build/coverage-xml/junit.xml
-
       - name: Run Infection
-        run: |
-          vendor/bin/infection --coverage=build/coverage-xml --threads=4 --logger-github --min-msi=0 --min-covered-msi=0 --skip-initial-tests --no-progress
+        run: composer mutation
         env:
           INFECTION_BADGE_API_KEY: ${{ secrets.INFECTION_BADGE_API_KEY }}
 
@@ -60,8 +49,8 @@ jobs:
         with:
           name: infection-results
           path: |
-            build/infection.json
             build/infection.log
             build/infection-summary.log
+            build/infection.json
             build/infection.html
           retention-days: 30

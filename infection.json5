@@ -14,11 +14,10 @@
     "mutators": {
         "@default": true
     },
-    "minMsi": 0,
-    "minCoveredMsi": 0,
+    "minMsi": 80,
+    "minCoveredMsi": 80,
     "testFramework": "phpunit",
     "phpUnit": {
         "customPath": "vendor/bin/phpunit"
-    },
-    "testFrameworkOptions": "--testsuite='Ray.Di Test Suite'"
+    }
 }

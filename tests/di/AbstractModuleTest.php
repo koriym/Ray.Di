@@ -61,6 +61,28 @@ class AbstractModuleTest extends TestCase
     }
 
     /**
+     * bindInterceptor() must register EVERY interceptor in the list, not just
+     * the first one. If the loop short-circuits (returns) after binding the
+     * first class interceptor, the second one is never registered and resolving
+     * it throws Unbound.
+     *
+     * @covers \Ray\Di\AbstractModule::bindInterceptor
+     */
+    public function testBindInterceptorRegistersAllInterceptors(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+            }
+        };
+        $module->bindInterceptor((new Matcher())->any(), (new Matcher())->any(), [FakeDoubleInterceptor::class, FakeAnnoInterceptor1::class]);
+
+        $container = $module->getContainer();
+        $this->assertInstanceOf(FakeDoubleInterceptor::class, $container->getInstance(FakeDoubleInterceptor::class, Name::ANY));
+        $this->assertInstanceOf(FakeAnnoInterceptor1::class, $container->getInstance(FakeAnnoInterceptor1::class, Name::ANY));
+    }
+
+    /**
      * bindPriorityInterceptor() likewise registers each interceptor as a
      * singleton in the container.
      *

@@ -72,15 +72,18 @@ final class Dependency implements DependencyInterface, AcceptInterface
         }
 
         // create dependency injected instance
-        $this->instance = ($this->newInstance)($container);
+        $instance = ($this->newInstance)($container);
+        if ($this->isSingleton) {
+            $this->instance = $instance;
+        }
 
         // @PostConstruct
         if ($this->postConstruct !== null) {
-            assert(method_exists($this->instance, $this->postConstruct));
-            $this->instance->{$this->postConstruct}();
+            assert(method_exists($instance, $this->postConstruct));
+            $instance->{$this->postConstruct}();
         }
 
-        return $this->instance;
+        return $instance;
     }
 
     /**
@@ -96,15 +99,18 @@ final class Dependency implements DependencyInterface, AcceptInterface
         }
 
         // create dependency injected instance
-        $this->instance = $this->newInstance->newInstanceArgs($container, $params);
+        $instance = $this->newInstance->newInstanceArgs($container, $params);
+        if ($this->isSingleton) {
+            $this->instance = $instance;
+        }
 
         // @PostConstruct
         if ($this->postConstruct !== null) {
-            assert(method_exists($this->instance, $this->postConstruct));
-            $this->instance->{$this->postConstruct}();
+            assert(method_exists($instance, $this->postConstruct));
+            $instance->{$this->postConstruct}();
         }
 
-        return $this->instance;
+        return $instance;
     }
 
     /**
@@ -123,12 +129,13 @@ final class Dependency implements DependencyInterface, AcceptInterface
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {
         $class = (string) $this->newInstance;
-        if ((new ReflectionClass($class))->isFinal()) {
+        $reflection = new ReflectionClass($class);
+        if ($reflection->isFinal()) {
             return;
         }
 
-        $isInterceptor = (new ReflectionClass($class))->implementsInterface(MethodInterceptor::class);
-        $isWeaved = (new ReflectionClass($class))->implementsInterface(WeavedInterface::class);
+        $isInterceptor = $reflection->implementsInterface(MethodInterceptor::class);
+        $isWeaved = $reflection->implementsInterface(WeavedInterface::class);
         if ($isInterceptor || $isWeaved) {
             return;
         }

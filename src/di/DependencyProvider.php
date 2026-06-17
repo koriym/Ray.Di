@@ -62,9 +62,13 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
             $this->setContext($provider);
         }
 
-        $this->instance = $provider->get();
+        /** @psalm-suppress MixedAssignment */
+        $instance = $provider->get();
+        if ($this->isSingleton) {
+            $this->instance = $instance;
+        }
 
-        return $this->instance;
+        return $instance;
     }
 
     /**

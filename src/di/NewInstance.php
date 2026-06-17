@@ -7,7 +7,6 @@ namespace Ray\Di;
 use Ray\Aop\Bind as AopBind;
 use Ray\Aop\WeavedInterface;
 use ReflectionClass;
-use ReflectionException;
 use Stringable;
 
 use function assert;
@@ -43,14 +42,12 @@ final class NewInstance implements Stringable
         $this->setterMethods = $setterMethods;
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function __invoke(Container $container): object
     {
-        $reflection = new ReflectionClass($this->class);
+        /** @var class-string $class */
+        $class = $this->class;
         /** @psalm-suppress MixedMethodCall */
-        $instance = $this->arguments instanceof Arguments ? $reflection->newInstanceArgs($this->arguments->inject($container)) : new $this->class();
+        $instance = $this->arguments instanceof Arguments ? new $class(...$this->arguments->inject($container)) : new $class();
 
         return $this->postNewInstance($container, $instance);
     }
@@ -65,12 +62,13 @@ final class NewInstance implements Stringable
 
     /**
      * @param MethodArguments $params
-     *
-     * @throws ReflectionException
      */
     public function newInstanceArgs(Container $container, array $params): object
     {
-        $instance = (new ReflectionClass($this->class))->newInstanceArgs($params);
+        /** @var class-string $class */
+        $class = $this->class;
+        /** @psalm-suppress MixedMethodCall */
+        $instance = new $class(...$params);
 
         return $this->postNewInstance($container, $instance);
     }

@@ -61,6 +61,14 @@ final class Container implements InjectorInterface
     }
 
     /**
+     * @internal
+     */
+    public function setInjectionPoint(InjectionPointInterface $ip): void
+    {
+        $this->container[InjectionPointInterface::class . '-' . Name::ANY] = new Instance($ip);
+    }
+
+    /**
      * Add Pointcut to container
      */
     public function addPointcut(Pointcut $pointcut): void

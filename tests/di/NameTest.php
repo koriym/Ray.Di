@@ -74,4 +74,30 @@ class NameTest extends TestCase
         $boundName = $name($parameter);
         $this->assertSame('engine_name', $boundName);
     }
+
+    /**
+     * When a parameter has its own named binding, that specific name wins over
+     * the catch-all (Name::ANY) entry. This pins the lookup order of
+     * names[$parameterName] ?? names[ANY] ?? ANY.
+     */
+    public function testSpecificNameWinsOverAnyFallback(): void
+    {
+        $name = new Name(['engine' => 'specific_engine', Name::ANY => 'fallback']);
+        $parameter = new ReflectionParameter([FakeCar::class, '__construct'], 'engine');
+        $boundName = $name($parameter);
+        $this->assertSame('specific_engine', $boundName);
+    }
+
+    /**
+     * When a parameter has no specific named binding, the Name::ANY entry is
+     * used as the fallback (not the empty Name::ANY constant). This pins the
+     * middle term of names[$parameterName] ?? names[ANY] ?? ANY.
+     */
+    public function testAnyEntryUsedAsFallbackForUnnamedParameter(): void
+    {
+        $name = new Name(['gear' => 'specific_gear', Name::ANY => 'fallback']);
+        $parameter = new ReflectionParameter([FakeCar::class, '__construct'], 'engine');
+        $boundName = $name($parameter);
+        $this->assertSame('fallback', $boundName);
+    }
 }

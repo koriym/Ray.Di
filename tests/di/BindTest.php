@@ -63,6 +63,28 @@ class BindTest extends TestCase
         $this->assertArrayHasKey(FakeEngine::class . '-' . Name::ANY, $container);
     }
 
+    /**
+     * A concrete class that is already registered must NOT be re-bound as an
+     * untargeted binding. The constructor checks isRegistered("{interface}-ANY")
+     * to detect this. If the registry key is computed wrongly, the existing
+     * explicit binding would be silently overwritten by an auto-constructed one.
+     *
+     * @covers \Ray\Di\Bind::__construct
+     */
+    public function testAlreadyRegisteredConcreteClassIsNotOverwritten(): void
+    {
+        $container = new Container();
+        $engine = new FakeEngine();
+        (new Bind($container, FakeEngine::class))->toInstance($engine);
+
+        // Re-declaring a Bind for the same already-registered concrete class
+        // must be a no-op (no untargeted binding overwrites the instance).
+        $bind = new Bind($container, FakeEngine::class);
+        unset($bind);
+
+        $this->assertSame($engine, $container->getInstance(FakeEngine::class, Name::ANY));
+    }
+
     public function testUntargetedBindSingleton(): void
     {
         $container = new Container();

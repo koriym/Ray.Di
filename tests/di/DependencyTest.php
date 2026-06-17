@@ -122,24 +122,66 @@ class DependencyTest extends TestCase
     }
 
     /**
+     * @PostConstruct must run on the assisted-injection (args) path.
+     *
+     * FakeCar::postConstruct() sets isConstructed = true only when both the
+     * constructor-injected engine and the setter-injected front tyre are present.
+     * If the postConstruct call in injectWithArgs() is removed, isConstructed
+     * stays false.
      * @dataProvider containerProvider
      * @covers \Ray\Di\Dependency::injectWithArgs
      */
     public function testInjectWithArgsPostConstruct(Container $container): void
     {
         $car = $this->dependency->injectWithArgs($container, [new FakeEngine()]);
+        assert($car instanceof FakeCar);
         $this->assertInstanceOf(FakeCar::class, $car);
+        $this->assertTrue($car->isConstructed);
     }
 
     /**
+     * The singleton fast-path of injectWithArgs() must return the very same
+     * instance on repeated calls. If the early `return $this->instance` is
+     * removed, a fresh instance is built every time and the two differ.
+     *
      * @dataProvider containerProvider
      * @covers \Ray\Di\Dependency::injectWithArgs
      */
     public function testInjectWithArgsSingleton(Container $container): void
     {
         $this->dependency->setScope(Scope::SINGLETON);
-        $this->dependency->injectWithArgs($container, [new FakeEngine()]);
-        $car = $this->dependency->injectWithArgs($container, [new FakeEngine()]);
-        $this->assertInstanceOf(FakeCar::class, $car);
+        $car1 = $this->dependency->injectWithArgs($container, [new FakeEngine()]);
+        $car2 = $this->dependency->injectWithArgs($container, [new FakeEngine()]);
+        assert(is_object($car1) && is_object($car2));
+        $this->assertInstanceOf(FakeCar::class, $car2);
+        $this->assertSame($car1, $car2);
+    }
+
+    /**
+     * @PostConstruct must run exactly once for a singleton on the args path,
+     * even though injectWithArgs() is called repeatedly. The recorded
+     * postConstruct invocation count proves the cached instance short-circuits
+     * before postConstruct runs again.
+     * @covers \Ray\Di\Dependency::injectWithArgs
+     */
+    public function testInjectWithArgsSingletonPostConstructRunsOnce(): void
+    {
+        /** @var ReflectionClass<object> $class */
+        $class = new ReflectionClass(FakePostConstructCounter::class);
+        $newInstance = new NewInstance($class, new SetterMethods([]));
+        $dependency = new Dependency($newInstance, new ReflectionMethod(FakePostConstructCounter::class, 'onPostConstruct'));
+        $dependency->setScope(Scope::SINGLETON);
+        $container = new Container();
+
+        $first = $dependency->injectWithArgs($container, ['first']);
+        $second = $dependency->injectWithArgs($container, ['second']);
+        assert($first instanceof FakePostConstructCounter);
+        assert($second instanceof FakePostConstructCounter);
+
+        $this->assertSame($first, $second);
+        // value comes from the FIRST call's arg, proving the second call was short-circuited
+        $this->assertSame('first', $second->value);
+        // postConstruct ran exactly once, not on every injectWithArgs() call
+        $this->assertSame(1, $second->postConstructCount);
     }
 }

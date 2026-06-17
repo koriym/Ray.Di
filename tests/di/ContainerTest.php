@@ -226,6 +226,21 @@ class ContainerTest extends TestCase
         (new Container())->getInstanceWithArgs(FakeEngineInterface::class, []);
     }
 
+    /**
+     * unbound() splits "{interface}-{name}" on the FIRST hyphen only. A bind
+     * name that itself contains a hyphen (e.g. "type-bool") must be preserved
+     * whole in the resulting Unbound message; splitting on every hyphen
+     * truncates the name to its first segment.
+     *
+     * @covers \Ray\Di\Container::unbound
+     */
+    public function testUnboundPreservesHyphenatedBindName(): void
+    {
+        $exception = (new Container())->unbound('Acme\Missing-type-bool');
+        $this->assertInstanceOf(Unbound::class, $exception);
+        $this->assertStringContainsString('type-bool', $exception->getMessage());
+    }
+
     public function testWeaveAspectsWithEmptyPointcuts(): void
     {
         $container = new Container();

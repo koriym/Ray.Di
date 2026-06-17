@@ -45,7 +45,7 @@ final class MultiBinder
 
     public function setBinding(?string $key = null): self
     {
-        $this->container->multiBindings->exchangeArray([]);
+        $this->multiBindings->offsetUnset($this->interface);
         $this->key = $key;
 
         return $this;

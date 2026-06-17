@@ -45,4 +45,19 @@ class InjectionPointTest extends TestCase
         $this->assertCount(1, $annotations);
         $this->assertInstanceOf(FakeConstant::class, $annotations[0]);
     }
+
+    /**
+     * getQualifiers() must return every qualifier annotation on the method, not
+     * just the first one. With two qualifier attributes both must be returned.
+     */
+    public function testGetQualifiersReturnsAllQualifiers(): void
+    {
+        $parameter = new ReflectionParameter([FakeMultiQualifierConsumer::class, '__construct'], 'engine');
+        $ip = new InjectionPoint($parameter);
+        $qualifiers = $ip->getQualifiers();
+        $this->assertCount(2, $qualifiers);
+        $classes = [$qualifiers[0]::class, $qualifiers[1]::class];
+        $this->assertContains(FakeLeft::class, $classes);
+        $this->assertContains(FakeRight::class, $classes);
+    }
 }

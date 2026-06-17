@@ -40,4 +40,37 @@ class ArgumentTest extends TestCase
         $class = $argument->get()->getDeclaringFunction();
         $this->assertInstanceOf(ReflectionMethod::class, $class);
     }
+
+    /**
+     * A required (non-optional, no default) parameter has no default available.
+     */
+    public function testRequiredParameterHasNoDefault(): void
+    {
+        $argument = new Argument(new ReflectionParameter([FakeCar::class, '__construct'], 'engine'), Name::ANY);
+        $this->assertFalse($argument->isDefaultAvailable());
+    }
+
+    /**
+     * A parameter with an explicit default value exposes that default.
+     */
+    public function testParameterWithDefaultValue(): void
+    {
+        $argument = new Argument(new ReflectionParameter([FakeHandleProvider::class, '__construct'], 'logo'), Name::ANY);
+        $this->assertTrue($argument->isDefaultAvailable());
+        $this->assertSame('nardi', $argument->getDefaultValue());
+    }
+
+    /**
+     * A variadic parameter is optional yet has no retrievable default value.
+     *
+     * This pins the `isDefaultValueAvailable() || isOptional()` contract: a
+     * variadic is optional (so the default must be considered available) even
+     * though isDefaultValueAvailable() is false. Replacing the OR with an AND
+     * would wrongly report the default as unavailable.
+     */
+    public function testVariadicParameterIsDefaultAvailable(): void
+    {
+        $argument = new Argument(new ReflectionParameter([FakeVariadicConstructor::class, '__construct'], 'engines'), Name::ANY);
+        $this->assertTrue($argument->isDefaultAvailable());
+    }
 }

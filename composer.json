@@ -47,7 +47,7 @@
         "pcov": ["php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-xml=build/coverage-xml --coverage-clover=coverage.xml"],
         "mutation": [
             "php -dextension=pcov.so -r \"extension_loaded('pcov') || (fwrite(STDERR, 'pcov required for mutation testing (dev-only). Install: pecl install pcov'.PHP_EOL) && exit(1));\"",
-            "php -dextension=pcov.so -d pcov.enabled=1 vendor/bin/infection --threads=2 --min-msi=80 --min-covered-msi=80 --no-progress"
+            "php -dextension=pcov.so -d pcov.enabled=1 vendor/bin/infection --threads=2 --min-msi=90 --min-covered-msi=90 --no-progress"
         ],
         "cs": ["vendor-bin/tools/vendor/squizlabs/php_codesniffer/bin/phpcs --standard=./phpcs.xml src tests"],
         "cs-fix": ["vendor-bin/tools/vendor/squizlabs/php_codesniffer/bin/phpcbf src tests"],

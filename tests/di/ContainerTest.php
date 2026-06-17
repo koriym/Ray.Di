@@ -12,8 +12,10 @@ use Ray\Aop\Pointcut;
 use Ray\Di\Exception\Unbound;
 use Throwable;
 
+use function array_keys;
 use function assert;
 use function get_class;
+use function sort;
 use function sys_get_temp_dir;
 
 class ContainerTest extends TestCase
@@ -134,6 +136,53 @@ class ContainerTest extends TestCase
     {
         $this->expectException(Unbound::class);
         $this->container->move(FakeEngineInterface::class, 'invalid', FakeEngineInterface::class, 'new');
+    }
+
+    /**
+     * move() must build the source index as "{interface}-{name}". With a
+     * non-empty source name the order of interface, separator and name matters:
+     * a wrong key format would fail to locate the existing named binding.
+     *
+     * @covers \Ray\Di\Container::move
+     */
+    public function testMoveNamedBinding(): void
+    {
+        $engine = new FakeEngine();
+        (new Bind($this->container, FakeEngineInterface::class))->annotatedWith('source')->toInstance($engine);
+        $this->container->move(FakeEngineInterface::class, 'source', FakeEngineInterface::class, 'target');
+
+        // moved to the new index
+        $moved = $this->container->getInstance(FakeEngineInterface::class, 'target');
+        $this->assertSame($engine, $moved);
+
+        // and removed from the old index
+        $array = $this->container->getContainer();
+        $this->assertArrayNotHasKey(FakeEngineInterface::class . '-source', $array);
+        $this->assertArrayHasKey(FakeEngineInterface::class . '-target', $array);
+    }
+
+    /**
+     * sort() must order the container by key (ksort). Bindings added out of
+     * lexicographic order must end up sorted afterwards.
+     *
+     * @covers \Ray\Di\Container::sort
+     */
+    public function testSort(): void
+    {
+        $container = new Container();
+        (new Bind($container, FakeRobotInterface::class))->to(FakeRobot::class);
+        (new Bind($container, FakeEngineInterface::class))->toInstance(new FakeEngine());
+        (new Bind($container, FakeCarInterface::class))->to(FakeCar::class);
+
+        $beforeKeys = array_keys($container->getContainer());
+        $container->sort();
+        $afterKeys = array_keys($container->getContainer());
+
+        $sorted = $beforeKeys;
+        sort($sorted);
+        $this->assertSame($sorted, $afterKeys);
+        // guard: the fixture is genuinely out of order so the test can detect a no-op sort()
+        $this->assertNotSame($beforeKeys, $afterKeys);
     }
 
     public function testAbstractClassUnbound(): void

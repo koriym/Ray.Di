@@ -42,6 +42,20 @@ class InjectorTest extends TestCase
         $this->assertSame($engine, $injector->getInstance(FakeEngine::class));
     }
 
+    /**
+     * An unbound concrete class is auto-registered as an untargeted binding:
+     * getInstance() catches Untargeted, binds the class on the fly, then
+     * resolves it. Removing that self-bind makes the retry recurse endlessly.
+     *
+     * @covers \Ray\Di\Injector::getInstance
+     */
+    public function testGetUnboundConcreteClassIsAutoBound(): void
+    {
+        $injector = new Injector(new FakeInstanceBindModule());
+        $instance = $injector->getInstance(FakeEngine::class);
+        $this->assertInstanceOf(FakeEngine::class, $instance);
+    }
+
     public function testUnbound(): void
     {
         $this->expectException(Unbound::class);

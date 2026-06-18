@@ -312,6 +312,26 @@ class InjectorTest extends TestCase
         $this->assertSame(4, $result);
     }
 
+    /**
+     * Multiple interceptors bound in a SINGLE bindInterceptor() call must all be
+     * registered so the woven proxy can resolve every one. Before the fix the
+     * loop returned after the first class interceptor, leaving the rest unbound;
+     * building the proxy then threw an uncaught Untargeted during weaving. Here
+     * the woven instance must build AND both interceptors must run.
+     *
+     * @covers \Ray\Di\AbstractModule::bindInterceptor
+     */
+    public function testBindInterceptorWeavesAllInterceptors(): void
+    {
+        $injector = new Injector(new FakeMultiInterceptorModule());
+        $instance = $injector->getInstance(FakeAop::class);
+        // returnSame(2) wrapped by FakeDoubleInterceptor (*2) then
+        // FakeIncrementInterceptor (+1): (2 + 1) * 2 = 6. A result of 6 proves
+        // BOTH interceptors ran; 4 would mean only the first, 2 means neither.
+        $result = $instance->returnSame(2);
+        $this->assertSame(6, $result);
+    }
+
     public function testBindOrder(): void
     {
         $injector = new Injector(new FakeAnnoModule());

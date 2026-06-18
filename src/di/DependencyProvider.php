@@ -10,6 +10,7 @@ use function sprintf;
 final class DependencyProvider implements DependencyInterface, AcceptInterface
 {
     private bool $isSingleton = false;
+    private bool $isInstantiated = false;
 
     /** @var ?mixed */
     private $instance;
@@ -52,7 +53,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
      */
     public function inject(Container $container)
     {
-        if ($this->isSingleton && $this->instance !== null) {
+        if ($this->isSingleton && $this->isInstantiated) {
             return $this->instance;
         }
 
@@ -66,6 +67,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
         $instance = $provider->get();
         if ($this->isSingleton) {
             $this->instance = $instance;
+            $this->isInstantiated = true;
         }
 
         return $instance;

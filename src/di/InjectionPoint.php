@@ -7,6 +7,7 @@ namespace Ray\Di;
 use Ray\Aop\ReflectionClass;
 use Ray\Aop\ReflectionMethod;
 use Ray\Di\Di\Qualifier;
+use ReflectionClass as CoreReflectionClass;
 use ReflectionParameter;
 
 use function assert;
@@ -26,7 +27,7 @@ final class InjectionPoint implements InjectionPointInterface
     {
         $this->pFunction = $this->parameter->getDeclaringFunction()->name;
         $class = $this->parameter->getDeclaringClass();
-        $this->pClass = $class instanceof ReflectionClass ? $class->name : '';
+        $this->pClass = $class instanceof CoreReflectionClass ? $class->name : '';
         $this->pName = $this->parameter->name;
     }
 
@@ -43,7 +44,6 @@ final class InjectionPoint implements InjectionPointInterface
      */
     public function getMethod(): ReflectionMethod
     {
-        $this->parameter = $this->getParameter();
         $class = $this->parameter->getDeclaringClass();
         $method = $this->parameter->getDeclaringFunction()->getShortName();
         assert($class instanceof \ReflectionClass);
@@ -57,7 +57,6 @@ final class InjectionPoint implements InjectionPointInterface
      */
     public function getClass(): ReflectionClass
     {
-        $this->parameter = $this->getParameter();
         $class = $this->parameter->getDeclaringClass();
         assert($class instanceof \ReflectionClass);
 
@@ -90,10 +89,19 @@ final class InjectionPoint implements InjectionPointInterface
     }
 
     /**
+     * Rebuild the ReflectionParameter dropped by serialization.
+     *
+     * The enclosing container is serialized (e.g. by ModuleString and
+     * compiled-container caches), so a restored InjectionPoint must stay usable;
+     * the typed $parameter would otherwise be left uninitialized.
+     *
      * @param array<string> $array
      */
     public function __unserialize(array $array): void
     {
         [$this->pClass, $this->pFunction, $this->pName] = $array;
+        if ($this->pClass !== '') {
+            $this->parameter = new ReflectionParameter([$this->pClass, $this->pFunction], $this->pName);
+        }
     }
 }

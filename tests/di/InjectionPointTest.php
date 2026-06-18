@@ -7,6 +7,9 @@ namespace Ray\Di;
 use PHPUnit\Framework\TestCase;
 use ReflectionParameter;
 
+use function serialize;
+use function unserialize;
+
 class InjectionPointTest extends TestCase
 {
     /** @var InjectionPointInterface */
@@ -44,6 +47,26 @@ class InjectionPointTest extends TestCase
         $annotations = $this->ip->getQualifiers();
         $this->assertCount(1, $annotations);
         $this->assertInstanceOf(FakeConstant::class, $annotations[0]);
+    }
+
+    /**
+     * An InjectionPoint is serialized into the compiled container. After
+     * unserialize() the ReflectionParameter must be reconstructed; otherwise
+     * the typed $parameter property stays uninitialized and getParameter()/
+     * getMethod()/getClass() raise an Error on first access.
+     *
+     * @covers \Ray\Di\InjectionPoint::__unserialize
+     * @covers \Ray\Di\InjectionPoint::__serialize
+     */
+    public function testSerializeRoundTripRestoresParameter(): void
+    {
+        /** @var InjectionPoint $restored */
+        $restored = unserialize(serialize($this->ip));
+
+        $this->assertInstanceOf(ReflectionParameter::class, $restored->getParameter());
+        $this->assertSame('rightLeg', $restored->getParameter()->name);
+        $this->assertSame((string) $this->parameter->getDeclaringFunction(), (string) $restored->getMethod());
+        $this->assertSame((string) $this->parameter->getDeclaringClass(), (string) $restored->getClass());
     }
 
     /**

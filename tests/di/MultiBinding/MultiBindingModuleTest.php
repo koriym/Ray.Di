@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Ray\Di\MultiBinding;
 
 use ArrayAccess;
-use LogicException;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
+use Ray\Di\Exception\ReadOnlyMapAccess;
 use Ray\Di\Exception\SetNotFound;
 use Ray\Di\FakeEngine;
 use Ray\Di\FakeEngine2;
@@ -104,7 +104,7 @@ class MultiBindingModuleTest extends TestCase
      */
     public function testOffsetSet(Map $map): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(ReadOnlyMapAccess::class);
         $map['one'] = 1;
     }
 
@@ -115,7 +115,7 @@ class MultiBindingModuleTest extends TestCase
      */
     public function testOffsetUnset(Map $map): void
     {
-        $this->expectException(LogicException::class);
+        $this->expectException(ReadOnlyMapAccess::class);
         unset($map['one']);
     }
 

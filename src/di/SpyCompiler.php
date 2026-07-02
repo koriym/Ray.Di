@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use LogicException;
 use Ray\Aop\BindInterface;
 use Ray\Aop\CompilerInterface;
+use Ray\Di\Exception\SpyCompilerNotInstantiable;
 
 use function array_keys;
 use function implode;
@@ -29,7 +29,7 @@ final class SpyCompiler implements CompilerInterface
     public function newInstance(string $class, array $args, BindInterface $bind)
     {
         // never called
-        throw new LogicException('SpyCompiler::newInstance() should never be called');
+        throw new SpyCompilerNotInstantiable(sprintf('%s should never be instantiated', $class));
     }
 
     /**

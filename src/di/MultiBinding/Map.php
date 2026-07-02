@@ -9,12 +9,14 @@ use Countable;
 use Generator;
 use Iterator;
 use IteratorAggregate;
-use LogicException;
+use Ray\Di\Exception\ReadOnlyMapAccess;
 use Ray\Di\InjectorInterface;
 use ReturnTypeWillChange;
 
 use function array_key_exists;
 use function count;
+use function is_scalar;
+use function sprintf;
 
 /**
  * @template T
@@ -68,9 +70,9 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     #[ReturnTypeWillChange]
     public function offsetSet($offset, $value): void
     {
-        unset($offset, $value);
+        unset($value);
 
-        throw new LogicException();
+        throw new ReadOnlyMapAccess(sprintf('Cannot set offset "%s" on a read-only Map', $this->offsetToString($offset)));
     }
 
     /**
@@ -83,9 +85,7 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     #[ReturnTypeWillChange]
     public function offsetUnset($offset): void
     {
-        unset($offset);
-
-        throw new LogicException();
+        throw new ReadOnlyMapAccess(sprintf('Cannot unset offset "%s" on a read-only Map', $this->offsetToString($offset)));
     }
 
     /** @return Generator<array-key, T, void, void> */
@@ -102,5 +102,21 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     public function count(): int
     {
         return count($this->lazies);
+    }
+
+    /**
+     * @param mixed $offset array-key at the type level, but ArrayAccess allows null (e.g. `$map[] = $value`)
+     */
+    private function offsetToString($offset): string
+    {
+        if ($offset === null) {
+            return 'null';
+        }
+
+        if (is_scalar($offset)) {
+            return (string) $offset;
+        }
+
+        return ''; // @codeCoverageIgnore
     }
 }

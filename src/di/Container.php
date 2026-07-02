@@ -8,15 +8,18 @@ use BadMethodCallException;
 use Ray\Aop\Compiler;
 use Ray\Aop\CompilerInterface;
 use Ray\Aop\Pointcut;
+use Ray\Di\Exception\CircularDependency;
 use Ray\Di\Exception\NoHint;
 use Ray\Di\Exception\Unbound;
 use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionClass;
 
+use function array_keys;
 use function array_merge;
 use function class_exists;
 use function explode;
+use function implode;
 use function ksort;
 use function sprintf;
 
@@ -37,6 +40,15 @@ final class Container implements InjectorInterface
 
     /** @var array<int, Pointcut> */
     private array $pointcuts = [];
+
+    /**
+     * Dependency indexes currently being resolved, used to detect circular dependencies
+     *
+     * Not serialized: resolution state is always empty between getInstance() calls.
+     *
+     * @var array<string, true>
+     */
+    private array $resolving = [];
 
     public function __construct()
     {
@@ -131,7 +143,16 @@ final class Container implements InjectorInterface
             throw $this->unbound($index);
         }
 
-        return $this->container[$index]->inject($this);
+        if (isset($this->resolving[$index])) {
+            throw new CircularDependency(sprintf("'%s'", implode(' -> ', [...array_keys($this->resolving), $index])));
+        }
+
+        $this->resolving[$index] = true;
+        try {
+            return $this->container[$index]->inject($this);
+        } finally {
+            unset($this->resolving[$index]);
+        }
     }
 
     /**

@@ -15,7 +15,9 @@ use ReflectionMethod;
 use function assert;
 use function is_object;
 use function property_exists;
+use function serialize;
 use function spl_object_hash;
+use function unserialize;
 
 class DependencyTest extends TestCase
 {
@@ -102,6 +104,43 @@ class DependencyTest extends TestCase
         $car2 = $this->dependency->inject($container);
         assert(is_object($car1) && is_object($car2));
         $this->assertSame(spl_object_hash($car1), spl_object_hash($car2));
+    }
+
+    /**
+     * A singleton must resolve to a fresh instance after the very first
+     * inject() call following unserialize(), because $isInstantiated is not
+     * listed in __sleep() and therefore resets to false. From then on, the
+     * unserialized instance must cache and return the same object like any
+     * other singleton. Tracking instantiation through `$instance !== null`
+     * instead of an explicit flag would behave the same way here (the
+     * instance is also dropped by __sleep()), but this test pins the
+     * DependencyProvider-aligned $isInstantiated behaviour explicitly.
+     *
+     * @covers \Ray\Di\Dependency::inject
+     */
+    public function testSingletonAfterUnserializeReinstantiatesOnceThenCaches(): void
+    {
+        /** @var ReflectionClass<object> $class */
+        $class = new ReflectionClass(FakeAop::class);
+        $dependency = new Dependency(new NewInstance($class, new SetterMethods([])));
+        $dependency->setScope(Scope::SINGLETON);
+        $container = new Container();
+
+        $before = $dependency->inject($container);
+
+        $serialized = serialize($dependency);
+        $unserialized = unserialize($serialized);
+        assert($unserialized instanceof Dependency);
+
+        $first = $unserialized->inject($container);
+        $second = $unserialized->inject($container);
+
+        assert(is_object($before) && is_object($first) && is_object($second));
+        // The unserialized dependency lost its cached instance, so it must
+        // build a new one rather than resurrecting the pre-serialization object.
+        $this->assertNotSame(spl_object_hash($before), spl_object_hash($first));
+        // Once rebuilt, the instance must be cached like a normal singleton.
+        $this->assertSame(spl_object_hash($first), spl_object_hash($second));
     }
 
     public function testInjectInterceptor(): void

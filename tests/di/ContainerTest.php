@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Ray\Aop\Compiler;
 use Ray\Aop\Matcher;
 use Ray\Aop\Pointcut;
+use Ray\Di\Exception\RenameTargetAlreadyBound;
 use Ray\Di\Exception\Unbound;
 use Throwable;
 
@@ -159,6 +160,22 @@ class ContainerTest extends TestCase
         $array = $this->container->getContainer();
         $this->assertArrayNotHasKey(FakeEngineInterface::class . '-source', $array);
         $this->assertArrayHasKey(FakeEngineInterface::class . '-target', $array);
+    }
+
+    /**
+     * move() must refuse to overwrite an existing binding at the target
+     * index. Silently overwriting it would destroy that binding with no way
+     * to recover it, so the conflict is reported via an exception instead.
+     *
+     * @covers \Ray\Di\Container::move
+     */
+    public function testMoveThrowsWhenTargetAlreadyBound(): void
+    {
+        $newName = 'new';
+        (new Bind($this->container, FakeEngineInterface::class))->annotatedWith($newName)->toInstance(new FakeEngine());
+
+        $this->expectException(RenameTargetAlreadyBound::class);
+        $this->container->move(FakeEngineInterface::class, Name::ANY, FakeEngineInterface::class, $newName);
     }
 
     /**

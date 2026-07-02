@@ -116,6 +116,8 @@ abstract class AbstractModule implements Stringable
      * @param string $newName         New binding name
      * @param string $sourceName      Original binding name
      * @param string $targetInterface Original interface
+     *
+     * @deprecated Use renameBinding() instead. rename() silently no-ops unless a module was passed to the constructor, and never affects bindings introduced via install() or override().
      */
     public function rename(string $interface, string $newName, string $sourceName = Name::ANY, string $targetInterface = ''): void
     {
@@ -123,6 +125,27 @@ abstract class AbstractModule implements Stringable
         if ($this->lastModule instanceof self) {
             $this->lastModule->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
         }
+    }
+
+    /**
+     * Rename a binding in this module's own container
+     *
+     * Unlike rename(), this operates on getContainer() directly, so it works
+     * uniformly for bindings introduced via constructor chaining, install(),
+     * or override(). Call it after the install() that provides the source
+     * binding.
+     *
+     * @param string  $interface       Source interface
+     * @param string  $sourceName      Source binding name
+     * @param string  $newName         New binding name
+     * @param ?string $targetInterface New interface (default: same as $interface)
+     *
+     * @throws Exception\Unbound                 When no binding exists at $interface-$sourceName.
+     * @throws Exception\RenameTargetAlreadyBound When a binding already exists at the target index.
+     */
+    public function renameBinding(string $interface, string $sourceName, string $newName, ?string $targetInterface = null): void
+    {
+        $this->getContainer()->move($interface, $sourceName, $targetInterface ?? $interface, $newName);
     }
 
     /**

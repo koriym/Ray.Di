@@ -10,6 +10,7 @@ use Ray\Aop\CompilerInterface;
 use Ray\Aop\Pointcut;
 use Ray\Di\Exception\CircularDependency;
 use Ray\Di\Exception\NoHint;
+use Ray\Di\Exception\RenameTargetAlreadyBound;
 use Ray\Di\Exception\Unbound;
 use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
@@ -157,6 +158,9 @@ final class Container implements InjectorInterface
 
     /**
      * Rename existing dependency interface + name
+     *
+     * @throws Unbound                  When no binding exists at the source index.
+     * @throws RenameTargetAlreadyBound When a binding already exists at the target index.
      */
     public function move(string $sourceInterface, string $sourceName, string $targetInterface, string $targetName): void
     {
@@ -166,6 +170,10 @@ final class Container implements InjectorInterface
         }
 
         $targetIndex = $targetInterface . '-' . $targetName;
+        if (isset($this->container[$targetIndex])) {
+            throw new RenameTargetAlreadyBound(sprintf("'%s'", $targetIndex));
+        }
+
         $this->container[$targetIndex] = $this->container[$sourceIndex];
         unset($this->container[$sourceIndex]);
     }

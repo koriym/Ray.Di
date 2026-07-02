@@ -34,8 +34,6 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
 
     /**
      * @param array-key $offset
-     *
-     * @codeCoverageIgnore
      */
     #[ReturnTypeWillChange]
     public function offsetExists($offset): bool
@@ -47,8 +45,6 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
      * @param array-key $offset
      *
      * @return T
-     *
-     * @codeCoverageIgnore
      */
     #[ReturnTypeWillChange]
     public function offsetGet($offset)
@@ -60,12 +56,10 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     }
 
     /**
-     * @param array-key $offset
-     * @param mixed     $value
+     * @param array-key|null $offset null when called via `$map[] = $value`
+     * @param mixed          $value
      *
      * @return never
-     *
-     * @codeCoverageIgnore
      */
     #[ReturnTypeWillChange]
     public function offsetSet($offset, $value): void
@@ -76,11 +70,9 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     }
 
     /**
-     * @param array-key $offset
+     * @param array-key|null $offset
      *
      * @return never
-     *
-     * @codeCoverageIgnore
      */
     #[ReturnTypeWillChange]
     public function offsetUnset($offset): void

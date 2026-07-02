@@ -25,6 +25,7 @@ use Ray\Di\MultiBinder;
 use Ray\Di\NullModule;
 
 use function count;
+use function iterator_to_array;
 
 /**
  * @requires PHP 8.0
@@ -84,6 +85,12 @@ class MultiBindingModuleTest extends TestCase
         $this->assertContainsOnlyInstancesOf(FakeEngineInterface::class, $map);
 
         $this->assertSame(3, count($map));
+
+        $items = iterator_to_array($map);
+        $this->assertArrayHasKey('one', $items);
+        $this->assertArrayHasKey('two', $items);
+        $this->assertInstanceOf(FakeEngine::class, $items['one']);
+        $this->assertInstanceOf(FakeEngine2::class, $items['two']);
     }
 
     /**
@@ -105,6 +112,7 @@ class MultiBindingModuleTest extends TestCase
     public function testOffsetSet(Map $map): void
     {
         $this->expectException(ReadOnlyMapAccess::class);
+        $this->expectExceptionMessage('Cannot set offset "one" on a read-only Map');
         $map['one'] = 1;
     }
 
@@ -116,7 +124,34 @@ class MultiBindingModuleTest extends TestCase
     public function testOffsetUnset(Map $map): void
     {
         $this->expectException(ReadOnlyMapAccess::class);
+        $this->expectExceptionMessage('Cannot unset offset "one" on a read-only Map');
         unset($map['one']);
+    }
+
+    /**
+     * `$map[] = $value` invokes offsetSet() with a null offset.
+     *
+     * @param Map<object> $map
+     *
+     * @depends testInjectMap
+     */
+    public function testOffsetSetWithNullOffset(Map $map): void
+    {
+        $this->expectException(ReadOnlyMapAccess::class);
+        $this->expectExceptionMessage('Cannot set offset "null" on a read-only Map');
+        $map[] = new FakeEngine();
+    }
+
+    /**
+     * @param Map<object> $map
+     *
+     * @depends testInjectMap
+     */
+    public function testOffsetUnsetWithNullOffset(Map $map): void
+    {
+        $this->expectException(ReadOnlyMapAccess::class);
+        $this->expectExceptionMessage('Cannot unset offset "null" on a read-only Map');
+        $map->offsetUnset(null);
     }
 
     public function testAnotherBinder(): void

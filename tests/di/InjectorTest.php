@@ -56,6 +56,34 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(FakeEngine::class, $instance);
     }
 
+    /**
+     * @covers \Ray\Di\Injector::getInstance
+     */
+    public function testUnboundConcreteClassIsConstructedOnlyOnce(): void
+    {
+        FakeConstructCounter::$constructCount = 0;
+        $injector = new Injector(new FakeInstanceBindModule());
+        $instance = $injector->getInstance(FakeConstructCounter::class);
+
+        $this->assertInstanceOf(FakeConstructCounter::class, $instance);
+        $this->assertSame(1, FakeConstructCounter::$constructCount);
+    }
+
+    /**
+     * A named request cannot be satisfied by just-in-time binding (which
+     * registers under Name::ANY only), so it fails fast as Unbound.
+     *
+     * @covers \Ray\Di\Injector::getInstance
+     */
+    public function testUnboundConcreteClassWithNameThrowsUnbound(): void
+    {
+        $injector = new Injector(new FakeInstanceBindModule());
+
+        $this->expectException(Unbound::class);
+        $this->expectExceptionMessage(FakeConstructCounter::class . '-no-such-name');
+        $injector->getInstance(FakeConstructCounter::class, 'no-such-name');
+    }
+
     public function testUnbound(): void
     {
         $this->expectException(Unbound::class);

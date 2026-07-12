@@ -9,7 +9,7 @@ use Stringable;
 use function array_diff_key;
 use function array_fill_keys;
 use function array_map;
-use function array_merge;
+use function array_push;
 use function implode;
 
 /**
@@ -72,13 +72,18 @@ final class BindingLog implements Stringable
      * surviving and the discarded side, and provenance is adopted only for the
      * indexes actually taken over — colliding indexes keep their owner.
      *
+     * Merging the same log instance twice (e.g. installing one module object
+     * two times) replays its events verbatim: the duplicate lines are a
+     * faithful trace of the duplicate merge, not distinct writes.
+     *
      * @param list<string>          $collidingIndexes      Indexes present on both sides (existing wins)
      * @param array<string, string> $keptDependencies      Colliding index => surviving dependency string
      * @param array<string, string> $discardedDependencies Colliding index => discarded incoming dependency string
      */
     public function merge(self $other, array $collidingIndexes, array $keptDependencies, array $discardedDependencies): void
     {
-        $this->events = array_merge($this->events, $other->events);
+        // in-place append of event object refs: O(adopted), no list re-copy
+        array_push($this->events, ...$other->events);
         foreach ($collidingIndexes as $index) {
             $this->events[] = new BindingEvent(
                 BindingEvent::KEEP,

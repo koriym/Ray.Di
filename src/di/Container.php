@@ -291,7 +291,8 @@ final class Container implements InjectorInterface
     public function merge(self $container): void
     {
         $otherContainer = $container->getContainer();
-        $collidingIndexes = array_keys(array_intersect_key($this->container, $otherContainer));
+        // iterate the incoming (usually smaller) side: O(incoming), not O(accumulated)
+        $collidingIndexes = array_keys(array_intersect_key($otherContainer, $this->container));
         $keptDependencies = [];
         $discardedDependencies = [];
         foreach ($collidingIndexes as $index) {

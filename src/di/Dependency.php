@@ -131,27 +131,60 @@ final class Dependency implements DependencyInterface, AcceptInterface
      */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {
-        $class = (string) $this->newInstance;
-        $reflection = new ReflectionClass($class);
-        if ($reflection->isFinal()) {
+        $bind = $this->aopBind($pointcuts);
+        if (! $bind instanceof AopBind) {
             return;
         }
 
-        $isInterceptor = $reflection->implementsInterface(MethodInterceptor::class);
-        $isWeaved = $reflection->implementsInterface(WeavedInterface::class);
-        if ($isInterceptor || $isWeaved) {
-            return;
+        $className = (string) $this->newInstance;
+        $class = $compiler->compile($className, $bind);
+        $this->newInstance->weaveAspects($class, $bind);
+    }
+
+    /**
+     * Read-only counterpart of weaveAspects() for introspection
+     *
+     * Returns the same '(dependency) ClassName (aop) +method(...)' string that
+     * stringifying a spy-woven dependency produces, but WITHOUT mutating $this
+     * — so callers (ModuleString) no longer need to deep-copy the container to
+     * protect it from the spy weave.
+     *
+     * @param PointcutList $pointcuts
+     */
+    public function describe(array $pointcuts): string
+    {
+        $className = (string) $this->newInstance;
+        $bind = $this->aopBind($pointcuts);
+        if ($bind instanceof AopBind) {
+            $className = (new SpyCompiler())->compile($className, $bind);
+        }
+
+        return sprintf('(dependency) %s', $className);
+    }
+
+    /**
+     * Match pointcuts against this dependency's class, read-only
+     *
+     * @param PointcutList $pointcuts
+     *
+     * @return ?AopBind the matched bindings, or null when nothing is intercepted
+     */
+    private function aopBind(array $pointcuts): ?AopBind
+    {
+        $className = (string) $this->newInstance;
+        $reflection = new ReflectionClass($className);
+        if ($reflection->isFinal()) {
+            return null;
+        }
+
+        if ($reflection->implementsInterface(MethodInterceptor::class) || $reflection->implementsInterface(WeavedInterface::class)) {
+            return null;
         }
 
         $bind = new AopBind();
-        $className = (string) $this->newInstance;
         $bind->bind($className, $pointcuts);
-        if (! $bind->getBindings()) {
-            return;
-        }
 
-        $class = $compiler->compile($className, $bind);
-        $this->newInstance->weaveAspects($class, $bind);
+        return $bind->getBindings() ? $bind : null;
     }
 
     /** @inheritDoc */

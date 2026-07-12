@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use function assert;
 use function implode;
-use function serialize;
 use function sort;
 use function sprintf;
-use function unserialize;
 
 use const PHP_EOL;
 
@@ -24,19 +21,15 @@ final class ModuleString
     public function __invoke(Container $container, array $pointcuts): string
     {
         $log = [];
-        /** @psalm-suppress MixedAssignment */
-        $container = unserialize(serialize($container), ['allowed_classes' => true]);
-        assert($container instanceof Container);
-        $spy = new SpyCompiler();
         foreach ($container->getContainer() as $dependencyIndex => $dependency) {
-            if ($dependency instanceof Dependency) {
-                $dependency->weaveAspects($spy, $pointcuts);
-            }
-
+            // Dependency::describe() computes the AOP annotation read-only, so —
+            // unlike the former spy weave — the container is neither mutated nor
+            // serialize()-deep-copied to protect it (which also threw on
+            // unserializable instances such as closures bound via toInstance()).
             $log[] = sprintf(
                 '%s => %s',
                 $dependencyIndex,
-                (string) $dependency
+                $dependency instanceof Dependency ? $dependency->describe($pointcuts) : (string) $dependency
             );
         }
 

@@ -65,4 +65,24 @@ Ray\Di\FakeAopInterface- => (dependency) Ray\Di\FakeAop (aop) +returnSame(Ray\Di
 Ray\Di\FakeDoubleInterceptor- => (dependency) Ray\Di\FakeDoubleInterceptor
 Ray\Di\FakeRobotInterface- => (provider) (dependency) Ray\Di\FakeRobotProvider'), $normalize($string));
     }
+
+    /**
+     * A closure bound via toInstance() must not break introspection. The old
+     * ModuleString deep-copied the whole container with serialize(), which
+     * threw "Serialization of 'Closure' is not allowed"; describe() reads the
+     * container in place, so an unserializable instance renders as an object.
+     *
+     * @covers \Ray\Di\ModuleString::__invoke
+     */
+    public function testToStringWithClosureInstanceDoesNotThrow(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind('')->annotatedWith('callback')->toInstance(static fn (): int => 1);
+            }
+        };
+
+        $this->assertStringContainsString('-callback => (object) Closure', (string) $module);
+    }
 }

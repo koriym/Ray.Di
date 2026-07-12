@@ -45,6 +45,7 @@ abstract class AbstractModule implements Stringable
         /** @psalm-suppress DeprecatedProperty kept for BC */
         $this->lastModule = $module;
         $this->container = new Container();
+        $this->container->setSource(static::class);
         $this->matcher = new Matcher();
         $this->isConfiguring = true;
         $this->configure();
@@ -90,6 +91,7 @@ abstract class AbstractModule implements Stringable
     {
         $module->getContainer()->merge($this->getContainer());
         $this->container = $module->getContainer();
+        $this->container->setSource(static::class); // subsequent binds attribute to this module
     }
 
     /**
@@ -196,6 +198,7 @@ abstract class AbstractModule implements Stringable
     private function activate(): void
     {
         $this->container = new Container();
+        $this->container->setSource(static::class);
         $this->matcher = new Matcher();
         $this->isConfiguring = true;
         $this->configure();

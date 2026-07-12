@@ -27,6 +27,7 @@ layer exists so that class of change can never again pass silently.
 | Singleton identity, serialization lifecycle | `DependencyTest`, `InjectorTest` |
 | JIT (untargeted) binding: single construction, named requests fail fast | `InjectorTest` |
 | Module-list merging (`new Injector([$m1, $m2])`): first module wins | `ModuleMergerTest` |
+| Binding provenance & collision history | `BindingLogTest` |
 
 ## The precedence rules (formerly folklore, now written down)
 

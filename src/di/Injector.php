@@ -43,6 +43,7 @@ final class Injector implements InjectorInterface
 
         $this->classDir = $classDir;
         $this->container = (new ContainerFactory())($module, $this->classDir);
+        $this->container->setSource(self::class); // builtin + JIT bindings attribute to the Injector
         // Bind injector (built-in bindings)
         (new Bind($this->container, InjectorInterface::class))->toInstance($this);
         $this->container->sort();

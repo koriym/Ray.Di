@@ -54,6 +54,9 @@ final class Injector implements InjectorInterface
      */
     public function __wakeup()
     {
+        // the binding log's source is not serialized; restore it so JIT
+        // bindings by a cached injector keep attributing to the Injector
+        $this->container->setSource(self::class);
         spl_autoload_register(
             function (string $class): void {
                 $file = sprintf('%s/%s.php', $this->classDir, str_replace('\\', '_', $class));

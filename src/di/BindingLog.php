@@ -25,7 +25,7 @@ use function implode;
  * Composition-time only: the log observes writes and never influences
  * resolution, and it is excluded from Container serialization — a revived
  * container starts with an empty log and attributes later writes 'unknown'.
- * Pointcuts and MultiBindings are NOT logged in v1.
+ * Pointcuts and MultiBindings are not logged.
  */
 final class BindingLog implements Stringable
 {

@@ -19,7 +19,6 @@ use ReflectionClass;
 use function array_keys;
 use function array_merge;
 use function class_exists;
-use function explode;
 use function implode;
 use function ksort;
 use function sprintf;
@@ -195,8 +194,7 @@ final class Container implements InjectorInterface
      */
     public function unbound(string $index): Untargeted|Unbound
     {
-        /** @psalm-suppress PossiblyUndefinedArrayOffset -- $index is always "{interface}-{name}" */
-        [$class, $name] = explode('-', $index, 2);
+        [$class, $name] = BindingIndex::parse($index);
         if (class_exists($class) && ! (new ReflectionClass($class))->isAbstract()) {
             return new Untargeted($class);
         }

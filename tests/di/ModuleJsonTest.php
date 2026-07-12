@@ -128,6 +128,27 @@ class ModuleJsonTest extends TestCase
         $this->assertNull($binding['to']);
     }
 
+    /**
+     * BindingIndex::parse() is shared with Container::unbound(): both split
+     * '{interface}-{name}' on the FIRST hyphen, because class names cannot
+     * contain hyphens but bind names can. Splitting on the last hyphen would
+     * report interface '-type' / name 'bool' here.
+     */
+    public function testHyphenatedBindNameKeptWholeInIndex(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind()->annotatedWith('type-bool')->toInstance(true);
+            }
+        };
+        /** @var array{bindings: list<array{interface: string, name: string, type: string, to: mixed}>} $decoded */
+        $decoded = json_decode($module->toJson(), true);
+
+        $this->assertSame('', $decoded['bindings'][0]['interface']);
+        $this->assertSame('type-bool', $decoded['bindings'][0]['name']);
+    }
+
     public function testVisitDependencyReturnsBoundClass(): void
     {
         $container = (new FakeLogStringModule())->getContainer()->getContainer();

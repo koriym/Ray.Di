@@ -32,10 +32,12 @@ abstract class AbstractModule implements Stringable
         ?self $module = null
     ) {
         $this->lastModule = $module;
-        $this->activate();
-        if ($module instanceof self && $this->container instanceof Container) {
+        $this->container = new Container();
+        $this->matcher = new Matcher();
+        if ($module instanceof self) {
             $this->container->merge($module->getContainer());
         }
+        $this->configure();
     }
 
     public function __toString(): string
@@ -108,45 +110,28 @@ abstract class AbstractModule implements Stringable
             (new Bind($this->getContainer(), $interceptor))->to($interceptor)->in(Scope::SINGLETON);
         }
     }
-
     /**
-     * Rename binding name
+     * Rename a binding
+     *
+     * Renames an existing binding from $sourceName to $newName, optionally
+     * moving it to a different interface. Works on the module's own container,
+     * so bindings introduced via constructor chaining, install(), or override()
+     * are all reachable.
      *
      * @param string $interface       Interface
      * @param string $newName         New binding name
      * @param string $sourceName      Original binding name
-     * @param string $targetInterface Original interface
-     *
-     * @deprecated Use renameBinding() instead. rename() silently no-ops unless a module was passed to the constructor, and never affects bindings introduced via install() or override().
-     */
-    public function rename(string $interface, string $newName, string $sourceName = Name::ANY, string $targetInterface = ''): void
-    {
-        $targetInterface = $targetInterface ?: $interface;
-        if ($this->lastModule instanceof self) {
-            $this->lastModule->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
-        }
-    }
-
-    /**
-     * Rename a binding in this module's own container
-     *
-     * Unlike rename(), this operates on getContainer() directly, so it works
-     * uniformly for bindings introduced via constructor chaining, install(),
-     * or override(). Call it after the install() that provides the source
-     * binding.
-     *
-     * @param string  $interface       Source interface
-     * @param string  $sourceName      Source binding name
-     * @param string  $newName         New binding name
-     * @param ?string $targetInterface New interface (default: same as $interface)
+     * @param string $targetInterface Original interface (default: same as $interface)
      *
      * @throws Exception\Unbound                 When no binding exists at $interface-$sourceName.
      * @throws Exception\RenameTargetAlreadyBound When a binding already exists at the target index.
      */
-    public function renameBinding(string $interface, string $sourceName, string $newName, ?string $targetInterface = null): void
+    public function rename(string $interface, string $newName, string $sourceName = Name::ANY, string $targetInterface = ''): void
     {
-        $this->getContainer()->move($interface, $sourceName, $targetInterface ?? $interface, $newName);
+        $targetInterface = $targetInterface ?: $interface;
+        $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
     }
+
 
     /**
      * Configure binding

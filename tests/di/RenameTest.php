@@ -8,15 +8,15 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\Exception\RenameTargetAlreadyBound;
 use Ray\Di\Exception\Unbound;
 
-class RenameBindingTest extends TestCase
+class RenameTest extends TestCase
 {
     /**
-     * renameBinding() must operate on getContainer() directly, so a binding
+     * rename() must operate on getContainer() directly, so a binding
      * introduced via install() -- not just constructor chaining -- can be
      * renamed. After the move, the new name resolves and the old (unnamed)
      * index is gone.
      *
-     * @covers \Ray\Di\AbstractModule::renameBinding
+     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testRenamesBindingIntroducedByInstall(): void
     {
@@ -24,7 +24,7 @@ class RenameBindingTest extends TestCase
             protected function configure(): void
             {
                 $this->install(new FakeToBindModule());
-                $this->renameBinding(FakeRobotInterface::class, Name::ANY, 'renamed');
+                $this->rename(FakeRobotInterface::class, 'renamed');
             }
         };
         $container = $module->getContainer();
@@ -38,11 +38,11 @@ class RenameBindingTest extends TestCase
 
     /**
      * override() replaces $this->container with the target module's (merged)
-     * container. renameBinding() reads getContainer() lazily at call time, so
+     * container. rename() reads getContainer() lazily at call time, so
      * calling it after override() must act on that merged container, not on
      * a stale reference captured before the swap.
      *
-     * @covers \Ray\Di\AbstractModule::renameBinding
+     * @covers \Ray\Di\AbstractModule::rename
      * @covers \Ray\Di\AbstractModule::override
      */
     public function testRenamesBindingAfterOverride(): void
@@ -57,7 +57,7 @@ class RenameBindingTest extends TestCase
                         $this->bind(FakeEngineInterface::class)->toInstance(new FakeEngine());
                     }
                 });
-                $this->renameBinding(FakeRobotInterface::class, Name::ANY, 'renamed');
+                $this->rename(FakeRobotInterface::class, 'renamed');
             }
         };
         $container = $module->getContainer();
@@ -71,10 +71,10 @@ class RenameBindingTest extends TestCase
     }
 
     /**
-     * When no binding exists at the source index, renameBinding() must
+     * When no binding exists at the source index, rename() must
      * surface Container::move()'s Unbound rather than silently no-op.
      *
-     * @covers \Ray\Di\AbstractModule::renameBinding
+     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testThrowsUnboundWhenSourceMissing(): void
     {
@@ -84,7 +84,7 @@ class RenameBindingTest extends TestCase
             protected function configure(): void
             {
                 $this->install(new FakeToBindModule());
-                $this->renameBinding(FakeRobotInterface::class, 'does-not-exist', 'renamed');
+                $this->rename(FakeRobotInterface::class, 'renamed', 'does-not-exist');
             }
         };
         $module->getContainer();
@@ -96,7 +96,7 @@ class RenameBindingTest extends TestCase
      * target index must remain resolvable afterward, proving move() aborted
      * before mutating the container.
      *
-     * @covers \Ray\Di\AbstractModule::renameBinding
+     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testThrowsWhenTargetAlreadyBoundAndPreservesExistingBinding(): void
     {
@@ -111,7 +111,7 @@ class RenameBindingTest extends TestCase
 
         $threw = false;
         try {
-            $module->renameBinding(FakeRobotInterface::class, Name::ANY, 'renamed');
+            $module->rename(FakeRobotInterface::class, 'renamed');
         } catch (RenameTargetAlreadyBound $e) {
             $threw = true;
         }
@@ -131,7 +131,7 @@ class RenameBindingTest extends TestCase
      * With $targetInterface omitted, the rename must stay within the same
      * interface -- only the binding name changes.
      *
-     * @covers \Ray\Di\AbstractModule::renameBinding
+     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testRenameWithinSameInterfaceWhenTargetInterfaceOmitted(): void
     {
@@ -139,7 +139,7 @@ class RenameBindingTest extends TestCase
             protected function configure(): void
             {
                 $this->install(new FakeToBindModule());
-                $this->renameBinding(FakeRobotInterface::class, Name::ANY, 'renamed');
+                $this->rename(FakeRobotInterface::class, 'renamed');
             }
         };
         $container = $module->getContainer();
@@ -154,7 +154,7 @@ class RenameBindingTest extends TestCase
      * interface index entirely, not just get a new name under the source
      * interface.
      *
-     * @covers \Ray\Di\AbstractModule::renameBinding
+     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testMovesToDifferentInterfaceWhenTargetInterfaceSpecified(): void
     {
@@ -162,7 +162,7 @@ class RenameBindingTest extends TestCase
             protected function configure(): void
             {
                 $this->install(new FakeToBindModule());
-                $this->renameBinding(FakeRobotInterface::class, Name::ANY, 'moved', FakeCarInterface::class);
+                $this->rename(FakeRobotInterface::class, 'moved', Name::ANY, FakeCarInterface::class);
             }
         };
         $container = $module->getContainer();

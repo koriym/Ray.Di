@@ -31,6 +31,7 @@ final class SetterMethod implements AcceptInterface
      * @param object $instance
      *
      * @throws Unbound
+     * @throws UncallableSetterMethod
      * @throws Exception
      */
     public function __invoke($instance, Container $container): void

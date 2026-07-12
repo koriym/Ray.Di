@@ -170,6 +170,10 @@ final class Container implements InjectorInterface
         }
 
         $targetIndex = $targetInterface . '-' . $targetName;
+        if ($targetIndex === $sourceIndex) {
+            return;
+        }
+
         if (isset($this->container[$targetIndex])) {
             throw new RenameTargetAlreadyBound(sprintf("'%s'", $targetIndex));
         }

@@ -156,7 +156,9 @@ LOG;
         $this->assertNull($log->getSource(FakeRobotInterface::class . '-'));
 
         (new Bind($revived, FakeRobotInterface::class))->to(FakeRobot2::class);
-        $events = $log->getEvents();
+        // the lazily created log is a live instance, not a per-call copy
+        $this->assertSame($log, $revived->getBindingLog());
+        $events = $revived->getBindingLog()->getEvents();
         $this->assertCount(1, $events);
         $replace = $events[0];
         $this->assertSame(BindingEvent::REPLACE, $replace->type);

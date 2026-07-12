@@ -16,6 +16,7 @@ use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionClass;
 
+use function array_intersect_key;
 use function array_keys;
 use function array_merge;
 use function class_exists;
@@ -51,6 +52,22 @@ final class Container implements InjectorInterface
      */
     private array $resolving = [];
 
+    /**
+     * Composition-time binding history
+     *
+     * Not serialized: the __sleep() whitelist excludes it, so a revived
+     * container starts with an empty log (see getBindingLog()).
+     */
+    private ?BindingLog $log = null;
+
+    /**
+     * Module FQCN whose writes are currently being recorded
+     *
+     * Not serialized: attribution is composition-time state; writes after
+     * unserialize() are attributed 'unknown'.
+     */
+    private string $source = '';
+
     public function __construct()
     {
         $this->multiBindings = new MultiBindings();
@@ -65,12 +82,45 @@ final class Container implements InjectorInterface
     }
 
     /**
+     * Set the module FQCN to which subsequent binding writes are attributed
+     */
+    public function setSource(string $module): void
+    {
+        $this->source = $module;
+    }
+
+    /**
+     * Return the composition-time binding log
+     *
+     * Lazy-initialized so an unserialize()d container — whose whitelist-based
+     * __sleep() dropped the log, leaving the property at its default — still
+     * returns a usable (empty) log.
+     */
+    public function getBindingLog(): BindingLog
+    {
+        if (! isset($this->log)) {
+            $this->log = new BindingLog();
+        }
+
+        return $this->log;
+    }
+
+    /**
      * Add binding to a container
      */
     public function add(Bind $bind): void
     {
+        $index = (string) $bind;
+        $previous = $this->container[$index] ?? null;
         $dependency = $bind->getBound();
         $dependency->register($this->container, $bind);
+        /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyContainer alias unexpanded */
+        $this->getBindingLog()->register(
+            $index,
+            (string) $this->container[$index],
+            $previous === null ? null : (string) $previous,
+            $this->source !== '' ? $this->source : 'unknown'
+        );
     }
 
     /**
@@ -185,6 +235,7 @@ final class Container implements InjectorInterface
 
             $this->container[$targetIndex] = $this->container[$sourceIndex];
             unset($this->container[$sourceIndex]);
+            $this->getBindingLog()->move($sourceIndex, $targetIndex);
         }
     }
 
@@ -232,11 +283,26 @@ final class Container implements InjectorInterface
 
     /**
      * Merge container
+     *
+     * The collision history is recorded first: `+=` lets existing entries win
+     * and silently discards the incoming side, so each colliding index is
+     * logged as a keep event before the merge makes the discard invisible.
      */
     public function merge(self $container): void
     {
+        $otherContainer = $container->getContainer();
+        $collidingIndexes = array_keys(array_intersect_key($this->container, $otherContainer));
+        $keptDependencies = [];
+        $discardedDependencies = [];
+        foreach ($collidingIndexes as $index) {
+            $keptDependencies[$index] = (string) $this->container[$index];
+            $discardedDependencies[$index] = (string) $otherContainer[$index];
+        }
+
+        $this->getBindingLog()->merge($container->getBindingLog(), $collidingIndexes, $keptDependencies, $discardedDependencies);
+
         $this->multiBindings->merge($container->multiBindings);
-        $this->container += $container->getContainer();
+        $this->container += $otherContainer;
         $this->pointcuts = array_merge($this->pointcuts, $container->getPointcuts());
     }
 

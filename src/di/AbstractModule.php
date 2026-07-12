@@ -14,11 +14,11 @@ use function assert;
 use function class_exists;
 use function interface_exists;
 
-    /**
-     * @psalm-import-type BindableInterface from Types
-     * @psalm-import-type PointcutList from Types
-     * @psalm-import-type InterceptorClassList from Types
-     */
+/**
+ * @psalm-import-type BindableInterface from Types
+ * @psalm-import-type PointcutList from Types
+ * @psalm-import-type InterceptorClassList from Types
+ */
 abstract class AbstractModule implements Stringable
 {
     /** @var Matcher */
@@ -26,7 +26,7 @@ abstract class AbstractModule implements Stringable
 
     /**
      * @var ?AbstractModule
-     * @deprecated Unused since rename() now operates on getContainer(). Will be removed in the next major version.
+     * @deprecated Unused since rename() now operates on getContainer().
      */
     protected $lastModule;
     private ?Container $container = null;

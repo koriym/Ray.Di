@@ -32,6 +32,7 @@ final class AnnotatedClassMethods
 
     public function getSetterMethod(ReflectionMethod $method): ?SetterMethod
     {
+        /** @psalm-suppress TooManyArguments ray/aop 2.19+ accepts this flag */
         $inject = $method->getAnnotation(InjectInterface::class, ReflectionAttribute::IS_INSTANCEOF);
         if (! $inject instanceof InjectInterface) {
             return null;

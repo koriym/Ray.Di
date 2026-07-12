@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use Exception;
-use LogicException;
 use Ray\Di\Exception\Unbound;
+use Ray\Di\Exception\UncallableSetterMethod;
 use ReflectionMethod;
 
 use function is_callable;
@@ -31,6 +31,7 @@ final class SetterMethod implements AcceptInterface
      * @param object $instance
      *
      * @throws Unbound
+     * @throws UncallableSetterMethod
      * @throws Exception
      */
     public function __invoke($instance, Container $container): void
@@ -47,7 +48,7 @@ final class SetterMethod implements AcceptInterface
 
         $callable = [$instance, $this->method];
         if (! is_callable($callable)) {
-            throw new LogicException(); // @codeCoverageIgnore
+            throw new UncallableSetterMethod($this->method); // @codeCoverageIgnore
         }
 
         $instance->{$this->method}(...$parameters);

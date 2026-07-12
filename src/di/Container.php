@@ -8,15 +8,19 @@ use BadMethodCallException;
 use Ray\Aop\Compiler;
 use Ray\Aop\CompilerInterface;
 use Ray\Aop\Pointcut;
+use Ray\Di\Exception\CircularDependency;
 use Ray\Di\Exception\NoHint;
+use Ray\Di\Exception\RenameTargetAlreadyBound;
 use Ray\Di\Exception\Unbound;
 use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionClass;
 
+use function array_keys;
 use function array_merge;
 use function class_exists;
 use function explode;
+use function implode;
 use function ksort;
 use function sprintf;
 
@@ -37,6 +41,15 @@ final class Container implements InjectorInterface
 
     /** @var array<int, Pointcut> */
     private array $pointcuts = [];
+
+    /**
+     * Dependency indexes currently being resolved, used to detect circular dependencies
+     *
+     * Not serialized: resolution state is always empty between getInstance() calls.
+     *
+     * @var array<string, true>
+     */
+    private array $resolving = [];
 
     public function __construct()
     {
@@ -157,11 +170,31 @@ final class Container implements InjectorInterface
             throw $this->unbound($index);
         }
 
-        return $this->container[$index]->inject($this);
+        if (isset($this->resolving[$index])) {
+            $dependency = $this->container[$index];
+            // An already-instantiated singleton satisfies re-entrant requests
+            // (e.g. from a @PostConstruct method) with its cached instance,
+            // without recursing — not a cycle.
+            if ($dependency instanceof Dependency && $dependency->isInstantiated()) {
+                return $dependency->inject($this);
+            }
+
+            throw new CircularDependency(sprintf("'%s'", implode(' -> ', [...array_keys($this->resolving), $index])));
+        }
+
+        $this->resolving[$index] = true;
+        try {
+            return $this->container[$index]->inject($this);
+        } finally {
+            unset($this->resolving[$index]);
+        }
     }
 
     /**
      * Rename existing dependency interface + name
+     *
+     * @throws Unbound                  When no binding exists at the source index.
+     * @throws RenameTargetAlreadyBound When a binding already exists at the target index.
      */
     public function move(string $sourceInterface, string $sourceName, string $targetInterface, string $targetName): void
     {
@@ -171,8 +204,14 @@ final class Container implements InjectorInterface
         }
 
         $targetIndex = $targetInterface . '-' . $targetName;
-        $this->container[$targetIndex] = $this->container[$sourceIndex];
-        unset($this->container[$sourceIndex]);
+        if ($targetIndex !== $sourceIndex) {
+            if (isset($this->container[$targetIndex])) {
+                throw new RenameTargetAlreadyBound(sprintf("'%s'", $targetIndex));
+            }
+
+            $this->container[$targetIndex] = $this->container[$sourceIndex];
+            unset($this->container[$sourceIndex]);
+        }
     }
 
     /**

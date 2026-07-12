@@ -7,6 +7,7 @@ namespace Ray\Di;
 use Throwable;
 
 use function file_put_contents;
+use function sprintf;
 
 /**
  * Emit the composed container as bindings.md next to the generated classes
@@ -21,9 +22,11 @@ final class BindingsMarkdown
     public function __invoke(Container $container, string $classDir): void
     {
         try {
-            $markdown = "# Ray.Di bindings\n\n"
-                . "## Provenance\n\n" . (string) $container->log . "\n\n"
-                . "## Bindings\n\n" . (new ModuleString())($container, $container->getPointcuts()) . "\n";
+            $markdown = sprintf(
+                "# Ray.Di bindings\n\n## Provenance\n\n%s\n\n## Bindings\n\n%s\n",
+                $container->log,
+                (new ModuleString())($container, $container->getPointcuts())
+            );
             file_put_contents($classDir . '/bindings.md', $markdown);
         } catch (Throwable) { // @codeCoverageIgnoreStart
             // best-effort: never break construction for a diagnostics file

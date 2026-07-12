@@ -45,8 +45,10 @@ class BindingsMarkdownTest extends TestCase
         $markdown = file_get_contents($this->classDir . '/bindings.md');
         assert(is_string($markdown));
 
-        $this->assertStringContainsString('## Provenance', $markdown);
-        $this->assertStringContainsString('## Bindings', $markdown);
+        // exact section structure, so a dropped separator or section is caught
+        $this->assertStringStartsWith("# Ray.Di bindings\n\n## Provenance\n\n", $markdown);
+        $this->assertStringContainsString("\n\n## Bindings\n\n", $markdown);
+        $this->assertStringEndsWith("\n", $markdown);
         // provenance names the module that bound it
         $this->assertStringContainsString('@' . FakeLogStringModule::class, $markdown);
         // bindings list the resolved target

@@ -11,16 +11,18 @@ use function str_replace;
 
 class ModuleTest extends TestCase
 {
-    public function testNew(): void
+    public function testConstructionRegistersBindings(): void
     {
         $module = new FakeInstanceBindModule();
-        $this->assertInstanceOf(AbstractModule::class, $module);
+        $this->assertSame(1, $module->getContainer()->getInstance('', 'one'));
     }
 
     public function testInstall(): void
     {
         $module = new FakeInstallModule();
-        $this->assertInstanceOf(AbstractModule::class, $module);
+        // both installed modules' bindings are resolvable with their bound values
+        $this->assertSame(1, $module->getContainer()->getInstance('', 'one'));
+        $this->assertSame(2, $module->getContainer()->getInstance('', 'two'));
     }
 
     public function testToInvalidClass(): void
@@ -38,20 +40,16 @@ class ModuleTest extends TestCase
         $this->assertInstanceOf(FakeRobot::class, $instance);
     }
 
-    public function testConstructorCallModule(): void
+    public function testModuleWithoutParentConstructorCall(): void
     {
-        $module = new FakelNoConstructorCallModule();
-        $container = $module->getContainer();
-        $this->assertInstanceOf(Container::class, $container);
+        $module = new FakeNoConstructorCallModule();
+        // configure() never ran in the constructor; getContainer() must
+        // activate the module lazily so its bindings resolve
+        $instance = $module->getContainer()->getInstance(FakeRobotInterface::class, Name::ANY);
+        $this->assertInstanceOf(FakeRobot::class, $instance);
     }
 
-    public function testActivate(): void
-    {
-        $module = new FakeInstanceBindModule();
-        $this->assertInstanceOf(Container::class, $module->getContainer());
-    }
-
-    public function testtoString(): void
+    public function testToString(): void
     {
         $string = (string) new FakeLogStringModule();
         $normalize = static function (string $str): string {

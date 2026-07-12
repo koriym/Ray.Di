@@ -24,6 +24,7 @@ use Ray\Di\Injector;
 use Ray\Di\MultiBinder;
 use Ray\Di\NullModule;
 
+use function array_keys;
 use function count;
 use function iterator_to_array;
 
@@ -87,10 +88,11 @@ class MultiBindingModuleTest extends TestCase
         $this->assertSame(3, count($map));
 
         $items = iterator_to_array($map);
-        $this->assertArrayHasKey('one', $items);
-        $this->assertArrayHasKey('two', $items);
+        // iteration order is declaration order; an unnamed addBinding() appends numerically
+        $this->assertSame(['one', 'two', 0], array_keys($items));
         $this->assertInstanceOf(FakeEngine::class, $items['one']);
         $this->assertInstanceOf(FakeEngine2::class, $items['two']);
+        $this->assertInstanceOf(FakeEngine3::class, $items[0]);
     }
 
     /**

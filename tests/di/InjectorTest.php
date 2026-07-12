@@ -429,10 +429,14 @@ class InjectorTest extends TestCase
             protected function configure()
             {
                 $this->bind(FakeTyreInterface::class)->toNull();
+                $this->bind(FakeAopInterface::class)->toNull();
             }
         }));
         $nullObject = $injector->getInstance(FakeTyreInterface::class);
         $this->assertInstanceOf(FakeTyreInterface::class, $nullObject);
+        // a null object stubs every interface method to a no-op returning null
+        $aopNull = $injector->getInstance(FakeAopInterface::class);
+        $this->assertNull($aopNull->returnSame(2));
     }
 
     public function testBindInterfeceInterceptor(): void

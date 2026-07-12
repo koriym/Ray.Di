@@ -65,6 +65,10 @@ abstract class AbstractModule implements Stringable
 
     /**
      * Return module bindings as JSON string
+     *
+     * Introspection deep-copies the container via serialize()/unserialize()
+     * (as __toString() does), so modules holding unserializable instances —
+     * e.g. a closure bound with toInstance() — are not supported.
      */
     public function toJson(): string
     {

@@ -194,6 +194,29 @@ class ModuleJsonTest extends TestCase
     }
 
     /**
+     * A binding whose instance value is not valid UTF-8 must not erase the
+     * whole report: json_encode() substitutes the bad byte (U+FFFD) instead
+     * of failing, and every binding stays listed.
+     */
+    public function testInvalidUtf8InstanceValueDoesNotEraseReport(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind('')->annotatedWith('bin')->toInstance("\xB1\x31");
+                $this->bind(FakeRobotInterface::class)->to(FakeRobot::class);
+            }
+        };
+        /** @var array{bindings: list<array{interface: string, name: string, type: string, to: mixed}>} $decoded */
+        $decoded = json_decode($module->toJson(), true);
+
+        $this->assertCount(2, $decoded['bindings']);
+        $binding = $this->findBindingByName($decoded['bindings'], 'bin');
+        $this->assertNotNull($binding);
+        $this->assertSame("\u{FFFD}1", $binding['to']);
+    }
+
+    /**
      * @return list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}>
      */
     private function decodeBindings(): array

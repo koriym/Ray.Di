@@ -11,6 +11,7 @@ use function json_encode;
 use function serialize;
 use function unserialize;
 
+use const JSON_INVALID_UTF8_SUBSTITUTE;
 use const JSON_PRETTY_PRINT;
 use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
@@ -36,7 +37,9 @@ final class ModuleJson
     {
         $bindings = $this->getBindings($container, $pointcuts);
 
-        $json = json_encode($bindings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        // JSON_INVALID_UTF8_SUBSTITUTE: one binary toInstance() value must not
+        // erase the whole diagnostics report
+        $json = json_encode($bindings, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         if ($json === false) {
             return '{"bindings":[]}'; // @codeCoverageIgnore
         }

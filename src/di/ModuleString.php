@@ -22,10 +22,6 @@ final class ModuleString
     {
         $log = [];
         foreach ($container->getContainer() as $dependencyIndex => $dependency) {
-            // Dependency::describe() computes the AOP annotation read-only, so —
-            // unlike the former spy weave — the container is neither mutated nor
-            // serialize()-deep-copied to protect it (which also threw on
-            // unserializable instances such as closures bound via toInstance()).
             $log[] = sprintf(
                 '%s => %s',
                 $dependencyIndex,

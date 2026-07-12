@@ -142,12 +142,10 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * Read-only counterpart of weaveAspects() for introspection
+     * Render this dependency as '(dependency) ClassName (aop) +method(...)'
      *
-     * Returns the same '(dependency) ClassName (aop) +method(...)' string that
-     * stringifying a spy-woven dependency produces, but WITHOUT mutating $this
-     * — so callers (ModuleString) no longer need to deep-copy the container to
-     * protect it from the spy weave.
+     * Resolves the AOP annotation read-only; the introspection counterpart of
+     * weaveAspects(), which mutates the instance for real injection.
      *
      * @param PointcutList $pointcuts
      */

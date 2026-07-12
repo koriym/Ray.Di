@@ -43,9 +43,8 @@ final class Injector implements InjectorInterface
 
         $this->classDir = $classDir;
         $this->container = (new ContainerFactory())($module, $this->classDir);
-        $this->container->setSource(self::class); // builtin + JIT bindings attribute to the Injector
         // Bind injector (built-in bindings)
-        (new Bind($this->container, InjectorInterface::class))->toInstance($this);
+        (new Bind($this->container, InjectorInterface::class, self::class))->toInstance($this);
         $this->container->sort();
     }
 
@@ -54,9 +53,6 @@ final class Injector implements InjectorInterface
      */
     public function __wakeup()
     {
-        // the binding log's source is not serialized; restore it so JIT
-        // bindings by a cached injector keep attributing to the Injector
-        $this->container->setSource(self::class);
         spl_autoload_register(
             function (string $class): void {
                 $file = sprintf('%s/%s.php', $this->classDir, str_replace('\\', '_', $class));
@@ -100,7 +96,7 @@ final class Injector implements InjectorInterface
      */
     private function bind(string $class)
     {
-        new Bind($this->container, $class);
+        new Bind($this->container, $class, self::class);
         $bound = $this->container->getContainer()[$class . '-' . Name::ANY];
         assert($bound instanceof Dependency);
 

@@ -55,22 +55,15 @@ final class Container implements InjectorInterface
     /**
      * Composition-time binding history
      *
-     * Not serialized: the __sleep() whitelist excludes it, so a revived
-     * container starts with an empty log (see getBindingLog()).
+     * Not serialized (excluded from __sleep()); re-created empty on __wakeup()
+     * so a revived container never carries build-time history into runtime.
      */
-    private ?BindingLog $log = null;
-
-    /**
-     * Module FQCN whose writes are currently being recorded
-     *
-     * Not serialized: attribution is composition-time state; writes after
-     * unserialize() are attributed 'unknown'.
-     */
-    private string $source = '';
+    private BindingLog $log;
 
     public function __construct()
     {
         $this->multiBindings = new MultiBindings();
+        $this->log = new BindingLog();
     }
 
     /**
@@ -81,27 +74,16 @@ final class Container implements InjectorInterface
         return ['container', 'pointcuts', 'multiBindings'];
     }
 
-    /**
-     * Set the module FQCN to which subsequent binding writes are attributed
-     */
-    public function setSource(string $module): void
+    public function __wakeup(): void
     {
-        $this->source = $module;
+        $this->log = new BindingLog();
     }
 
     /**
      * Return the composition-time binding log
-     *
-     * Lazy-initialized so an unserialize()d container — whose whitelist-based
-     * __sleep() dropped the log, leaving the property at its default — still
-     * returns a usable (empty) log.
      */
     public function getBindingLog(): BindingLog
     {
-        if (! isset($this->log)) {
-            $this->log = new BindingLog();
-        }
-
         return $this->log;
     }
 
@@ -114,12 +96,13 @@ final class Container implements InjectorInterface
         $previous = $this->container[$index] ?? null;
         $dependency = $bind->getBound();
         $dependency->register($this->container, $bind);
+        $source = $bind->getSource();
         /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyContainer alias unexpanded */
-        $this->getBindingLog()->register(
+        $this->log->register(
             $index,
             (string) $this->container[$index],
             $previous === null ? null : (string) $previous,
-            $this->source !== '' ? $this->source : 'unknown'
+            $source !== '' ? $source : 'unknown'
         );
     }
 

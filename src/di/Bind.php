@@ -31,11 +31,13 @@ final class Bind implements Stringable
     /**
      * @param Container         $container dependency container
      * @param BindableInterface $interface interface or concrete class name
+     * @param string            $source    FQCN of the module (or Injector) that created this binding
      * @phpstan-param class-string<MethodInterceptor>|string $interface
      */
     public function __construct(
         private readonly Container $container,
-        private readonly string $interface
+        private readonly string $interface,
+        private readonly string $source = ''
     ) {
         $this->validate = new BindValidator();
         $bindUntarget = class_exists($this->interface) && ! (new \ReflectionClass($this->interface))->isAbstract() && ! $this->isRegistered($this->interface);
@@ -177,6 +179,14 @@ final class Bind implements Stringable
     public function getBound(): DependencyInterface
     {
         return $this->bound;
+    }
+
+    /**
+     * FQCN of the module (or Injector) that created this binding, '' when unknown
+     */
+    public function getSource(): string
+    {
+        return $this->source;
     }
 
     public function setBound(DependencyInterface $bound): void

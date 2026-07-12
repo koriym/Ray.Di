@@ -37,6 +37,7 @@ abstract class AbstractModule implements Stringable
         if ($module instanceof self) {
             $this->container->merge($module->getContainer());
         }
+
         $this->configure();
     }
 
@@ -110,6 +111,7 @@ abstract class AbstractModule implements Stringable
             (new Bind($this->getContainer(), $interceptor))->to($interceptor)->in(Scope::SINGLETON);
         }
     }
+
     /**
      * Rename a binding
      *
@@ -131,7 +133,6 @@ abstract class AbstractModule implements Stringable
         $targetInterface = $targetInterface ?: $interface;
         $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
     }
-
 
     /**
      * Configure binding

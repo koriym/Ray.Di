@@ -7,6 +7,8 @@ namespace Ray\Di;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Exception\CircularDependency;
 
+use function assert;
+
 class CircularDependencyTest extends TestCase
 {
     public function testMutualCircularDependencyIsDetected(): void
@@ -98,5 +100,28 @@ class CircularDependencyTest extends TestCase
 
         // Resolution state is cleaned up: an unrelated binding resolves normally afterwards
         $this->assertInstanceOf(FakeDiamondShared::class, $injector->getInstance(FakeDiamondSharedInterface::class));
+    }
+
+    /**
+     * A singleton caches its instance before @PostConstruct runs, so a
+     * PostConstruct method resolving a class that depends back on the
+     * singleton receives the cached instance. This is the supported way to
+     * break a cycle and must not be reported as a circular dependency.
+     */
+    public function testSingletonPostConstructReentryIsNotACycle(): void
+    {
+        $injector = new Injector(new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeWarmup::class)->in(Scope::SINGLETON);
+                $this->bind(FakeWarmupDependent::class);
+            }
+        });
+
+        $warmup = $injector->getInstance(FakeWarmup::class);
+        $dependent = $warmup->dependent;
+        assert($dependent instanceof FakeWarmupDependent);
+
+        $this->assertSame($warmup, $dependent->warmup);
     }
 }

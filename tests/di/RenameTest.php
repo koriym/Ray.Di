@@ -87,7 +87,6 @@ class RenameTest extends TestCase
                 $this->rename(FakeRobotInterface::class, 'renamed', 'does-not-exist');
             }
         };
-        $module->getContainer();
     }
 
     /**
@@ -174,6 +173,7 @@ class RenameTest extends TestCase
         $instance = $container->getInstance(FakeCarInterface::class, 'moved');
         $this->assertInstanceOf(FakeRobot::class, $instance);
     }
+
     /**
      * Renaming a binding to its own current name must be a no-op, not an
      * error. The existing binding must remain resolvable under the same name.
@@ -194,5 +194,4 @@ class RenameTest extends TestCase
         $instance = $container->getInstance(FakeRobotInterface::class, Name::ANY);
         $this->assertInstanceOf(FakeRobot::class, $instance);
     }
-
 }

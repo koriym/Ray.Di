@@ -126,7 +126,7 @@ abstract class AbstractModule implements Stringable
      * @param string $interface       Interface
      * @param string $newName         New binding name
      * @param string $sourceName      Original binding name
-     * @param string $targetInterface Original interface (default: same as $interface)
+     * @param string $targetInterface Target interface to move the binding to (default: same as $interface)
      *
      * @throws Exception\Unbound                 When no binding exists at $interface-$sourceName.
      * @throws Exception\RenameTargetAlreadyBound When a binding already exists at the target index.

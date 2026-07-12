@@ -168,4 +168,9 @@ final class Dependency implements DependencyInterface, AcceptInterface
     {
         return $this->isSingleton;
     }
+
+    public function isInstantiated(): bool
+    {
+        return $this->isInstantiated;
+    }
 }

@@ -145,6 +145,14 @@ final class Container implements InjectorInterface
         }
 
         if (isset($this->resolving[$index])) {
+            $dependency = $this->container[$index];
+            // An already-instantiated singleton satisfies re-entrant requests
+            // (e.g. from a @PostConstruct method) with its cached instance,
+            // without recursing — not a cycle.
+            if ($dependency instanceof Dependency && $dependency->isInstantiated()) {
+                return $dependency->inject($this);
+            }
+
             throw new CircularDependency(sprintf("'%s'", implode(' -> ', [...array_keys($this->resolving), $index])));
         }
 

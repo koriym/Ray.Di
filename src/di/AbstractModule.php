@@ -31,6 +31,14 @@ abstract class AbstractModule implements Stringable
     protected $lastModule;
     private ?Container $container = null;
 
+    /**
+     * Renames requested while configure() runs, applied after composition completes
+     *
+     * @var list<array{string, string, string, string}> [$interface, $newName, $sourceName, $targetInterface]
+     */
+    private array $pendingRenames = [];
+    private bool $isConfiguring = false;
+
     public function __construct(
         ?self $module = null
     ) {
@@ -38,11 +46,16 @@ abstract class AbstractModule implements Stringable
         $this->lastModule = $module;
         $this->container = new Container();
         $this->matcher = new Matcher();
+        $this->isConfiguring = true;
+        $this->configure();
+        // Merged after configure() so that everything configure() declared —
+        // bind(), install()ed bindings, pointcuts — takes priority over the
+        // chained module's, as in `new ProdModule(new AppModule())`.
         if ($module instanceof self) {
-            $this->container->merge($module->getContainer());
+            $this->getContainer()->merge($module->getContainer());
         }
 
-        $this->configure();
+        $this->applyPendingRenames();
     }
 
     public function __toString(): string
@@ -122,7 +135,9 @@ abstract class AbstractModule implements Stringable
      * Renames an existing binding from $sourceName to $newName, optionally
      * moving it to a different interface. Works on the module's own container,
      * so bindings introduced via constructor chaining, install(), or override()
-     * are all reachable.
+     * are all reachable. Inside configure() the rename is deferred until module
+     * composition completes (the constructor-chained module is merged after
+     * configure()); the exceptions below then surface from the constructor.
      *
      * @param string $interface       Interface
      * @param string $newName         New binding name
@@ -135,6 +150,12 @@ abstract class AbstractModule implements Stringable
     public function rename(string $interface, string $newName, string $sourceName = Name::ANY, string $targetInterface = ''): void
     {
         $targetInterface = $targetInterface ?: $interface;
+        if ($this->isConfiguring) {
+            $this->pendingRenames[] = [$interface, $newName, $sourceName, $targetInterface];
+
+            return;
+        }
+
         $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
     }
 
@@ -164,6 +185,18 @@ abstract class AbstractModule implements Stringable
     {
         $this->container = new Container();
         $this->matcher = new Matcher();
+        $this->isConfiguring = true;
         $this->configure();
+        $this->applyPendingRenames();
+    }
+
+    private function applyPendingRenames(): void
+    {
+        $this->isConfiguring = false;
+        foreach ($this->pendingRenames as [$interface, $newName, $sourceName, $targetInterface]) {
+            $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
+        }
+
+        $this->pendingRenames = [];
     }
 }

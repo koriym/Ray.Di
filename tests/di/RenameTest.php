@@ -174,4 +174,25 @@ class RenameTest extends TestCase
         $instance = $container->getInstance(FakeCarInterface::class, 'moved');
         $this->assertInstanceOf(FakeRobot::class, $instance);
     }
+    /**
+     * Renaming a binding to its own current name must be a no-op, not an
+     * error. The existing binding must remain resolvable under the same name.
+     *
+     * @covers \Ray\Di\AbstractModule::rename
+     */
+    public function testSelfRenameIsNoOp(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->install(new FakeToBindModule());
+                $this->rename(FakeRobotInterface::class, Name::ANY, Name::ANY);
+            }
+        };
+        $container = $module->getContainer();
+
+        $instance = $container->getInstance(FakeRobotInterface::class, Name::ANY);
+        $this->assertInstanceOf(FakeRobot::class, $instance);
+    }
+
 }

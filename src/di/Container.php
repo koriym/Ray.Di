@@ -170,16 +170,14 @@ final class Container implements InjectorInterface
         }
 
         $targetIndex = $targetInterface . '-' . $targetName;
-        if ($targetIndex === $sourceIndex) {
-            return;
-        }
+        if ($targetIndex !== $sourceIndex) {
+            if (isset($this->container[$targetIndex])) {
+                throw new RenameTargetAlreadyBound(sprintf("'%s'", $targetIndex));
+            }
 
-        if (isset($this->container[$targetIndex])) {
-            throw new RenameTargetAlreadyBound(sprintf("'%s'", $targetIndex));
+            $this->container[$targetIndex] = $this->container[$sourceIndex];
+            unset($this->container[$sourceIndex]);
         }
-
-        $this->container[$targetIndex] = $this->container[$sourceIndex];
-        unset($this->container[$sourceIndex]);
     }
 
     /**

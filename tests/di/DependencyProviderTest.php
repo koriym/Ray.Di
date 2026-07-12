@@ -35,4 +35,19 @@ class DependencyProviderTest extends TestCase
         $this->assertNull($second);
         $this->assertSame(1, FakeNullProvider::$count);
     }
+
+    /**
+     * __toString() is the human-readable diagnostic form of a binding.
+     * ModuleString/ModuleJson extract targets structurally via
+     * BindingTargetVisitor, so this contract is pinned here directly.
+     */
+    public function testToStringShowsProviderClass(): void
+    {
+        /** @var ReflectionClass<object> $class */
+        $class = new ReflectionClass(FakeNullProvider::class);
+        $dependency = new Dependency(new NewInstance($class, new SetterMethods([])));
+        $dependencyProvider = new DependencyProvider($dependency, 'context');
+
+        $this->assertSame('(provider) (dependency) ' . FakeNullProvider::class, (string) $dependencyProvider);
+    }
 }

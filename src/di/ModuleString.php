@@ -13,7 +13,6 @@ use function is_object;
 use function is_scalar;
 use function is_string;
 use function ksort;
-use function preg_replace;
 use function serialize;
 use function sort;
 use function unserialize;
@@ -27,6 +26,11 @@ use const PHP_EOL;
  */
 final class ModuleString
 {
+    public function __construct(
+        private BindingTargetVisitor $targetVisitor = new BindingTargetVisitor()
+    ) {
+    }
+
     /**
      * @param PointcutList $pointcuts
      */
@@ -134,23 +138,15 @@ final class ModuleString
     private function renderTarget(DependencyInterface $dependency): string
     {
         if ($dependency instanceof Dependency) {
-            $str = (string) $dependency;
-            /** @var string $class preg_replace won't return null with valid pattern */
-            $class = preg_replace('/^\(dependency\) ([^\s]+).*$/', '$1', $str);
-
-            return 'to:' . $class;
+            return 'to:' . $this->targetVisitor->targetClass($dependency);
         }
 
         if ($dependency instanceof DependencyProvider) {
-            $str = (string) $dependency;
-            /** @var string $class preg_replace won't return null with valid pattern */
-            $class = preg_replace('/^\(provider\) \(dependency\) ([^\s]+).*$/', '$1', $str);
-
-            return 'toProvider:' . $class;
+            return 'toProvider:' . $this->targetVisitor->targetClass($dependency);
         }
 
         if ($dependency instanceof Instance) {
-            return 'toInstance:' . $this->renderValue($dependency->value);
+            return 'toInstance:' . $this->renderValue($dependency->accept($this->targetVisitor));
         }
 
         if ($dependency instanceof NullObjectDependency) {

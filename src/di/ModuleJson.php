@@ -8,7 +8,6 @@ use function gettype;
 use function is_object;
 use function is_scalar;
 use function json_encode;
-use function preg_replace;
 use function serialize;
 use function unserialize;
 
@@ -25,6 +24,11 @@ use const JSON_UNESCAPED_UNICODE;
  */
 final class ModuleJson
 {
+    public function __construct(
+        private BindingTargetVisitor $targetVisitor = new BindingTargetVisitor()
+    ) {
+    }
+
     /**
      * @param PointcutList $pointcuts
      */
@@ -108,16 +112,11 @@ final class ModuleJson
      */
     private function createDependencyEntry(string $interface, string $name, Dependency $dependency, array $aopBindings): array
     {
-        $dependencyString = (string) $dependency;
-        // Extract class name from "(dependency) ClassName" or "(dependency) ClassName (aop) ..."
-        /** @var string $className preg_replace won't return null with valid pattern */
-        $className = preg_replace('/^\(dependency\) ([^\s]+).*$/', '$1', $dependencyString);
-
         $entry = [
             'interface' => $interface,
             'name' => $name,
             'type' => 'class',
-            'to' => $className,
+            'to' => $this->targetVisitor->targetClass($dependency),
         ];
 
         if ($aopBindings !== []) {
@@ -132,16 +131,11 @@ final class ModuleJson
      */
     private function createProviderEntry(string $interface, string $name, DependencyProvider $dependency): array
     {
-        $providerString = (string) $dependency;
-        // Extract provider class name from "(provider) (dependency) ProviderClassName"
-        /** @var string $providerClass preg_replace won't return null with valid pattern */
-        $providerClass = preg_replace('/^\(provider\) \(dependency\) ([^\s]+).*$/', '$1', $providerString);
-
         return [
             'interface' => $interface,
             'name' => $name,
             'type' => 'provider',
-            'to' => $providerClass,
+            'to' => $this->targetVisitor->targetClass($dependency),
         ];
     }
 
@@ -150,14 +144,11 @@ final class ModuleJson
      */
     private function createInstanceEntry(string $interface, string $name, Instance $dependency): array
     {
-        /** @psalm-suppress MixedAssignment */
-        $value = $dependency->value;
-
         return [
             'interface' => $interface,
             'name' => $name,
             'type' => 'instance',
-            'to' => $this->formatValue($value),
+            'to' => $this->formatValue($dependency->accept($this->targetVisitor)),
         ];
     }
 

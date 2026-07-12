@@ -52,6 +52,16 @@ class DependencyTest extends TestCase
     }
 
     /**
+     * __toString() is the human-readable diagnostic form of a binding.
+     * ModuleString/ModuleJson extract targets structurally via
+     * BindingTargetVisitor, so this contract is pinned here directly.
+     */
+    public function testToStringShowsDependencyClass(): void
+    {
+        $this->assertSame('(dependency) ' . FakeCar::class, (string) $this->dependency);
+    }
+
+    /**
      * @dataProvider containerProvider
      */
     public function testInject(Container $container): void

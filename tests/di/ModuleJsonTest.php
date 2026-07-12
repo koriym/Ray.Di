@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
+use Ray\Aop\Bind as AopBind;
+use ReflectionMethod;
+use ReflectionParameter;
 
 use function array_column;
+use function assert;
 use function json_decode;
 
 class ModuleJsonTest extends TestCase
@@ -122,6 +126,50 @@ class ModuleJsonTest extends TestCase
         $this->assertNotNull($binding);
         $this->assertSame('null', $binding['type']);
         $this->assertNull($binding['to']);
+    }
+
+    public function testVisitDependencyReturnsBoundClass(): void
+    {
+        $container = (new FakeLogStringModule())->getContainer()->getContainer();
+        $dependency = $container[FakeAopInterface::class . '-' . Name::ANY];
+        assert($dependency instanceof Dependency);
+
+        $this->assertSame(FakeAop::class, $dependency->accept(new BindingTargetVisitor()));
+    }
+
+    public function testVisitProviderReturnsProviderClassAndContext(): void
+    {
+        $container = (new FakeLogStringModule())->getContainer()->getContainer();
+        $provider = $container[FakeRobotInterface::class . '-' . Name::ANY];
+        assert($provider instanceof DependencyProvider);
+
+        $this->assertSame(
+            ['class' => FakeRobotProvider::class, 'context' => ''],
+            $provider->accept(new BindingTargetVisitor())
+        );
+    }
+
+    /**
+     * Nodes below the binding target (aspects, setters, arguments) carry no
+     * target information; the visitor must answer null for all of them.
+     */
+    public function testVisitorReturnsNullForNonTargetNodes(): void
+    {
+        $visitor = new BindingTargetVisitor();
+        $arguments = new Arguments(new ReflectionMethod(self::class, 'setUp'), new Name(Name::ANY));
+
+        $this->assertNull($visitor->visitAspectBind(new AopBind()));
+        $this->assertNull($visitor->visitSetterMethods([]));
+        $this->assertNull($visitor->visitSetterMethod('setUp', $arguments));
+        $this->assertNull($visitor->visitArguments([]));
+        $this->assertNull($visitor->visitArgument(
+            '0',
+            false,
+            null,
+            new ReflectionParameter(static function (int $arg): int {
+                return $arg;
+            }, 0)
+        ));
     }
 
     /**

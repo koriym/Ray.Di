@@ -34,6 +34,7 @@ abstract class AbstractModule implements Stringable
     public function __construct(
         ?self $module = null
     ) {
+        /** @psalm-suppress DeprecatedProperty kept for BC */
         $this->lastModule = $module;
         $this->container = new Container();
         $this->matcher = new Matcher();

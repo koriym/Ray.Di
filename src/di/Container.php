@@ -88,13 +88,12 @@ final class Container implements InjectorInterface
         $previous = $this->container[$index] ?? null;
         $dependency = $bind->getBound();
         $dependency->register($this->container, $bind);
-        $source = $bind->getSource();
         /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyContainer alias unexpanded */
         $this->log->register(
             $index,
             (string) $this->container[$index],
             $previous === null ? null : (string) $previous,
-            $source !== '' ? $source : 'unknown'
+            $bind->source !== '' ? $bind->source : 'unknown'
         );
     }
 

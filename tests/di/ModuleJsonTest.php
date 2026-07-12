@@ -12,6 +12,8 @@ use ReflectionParameter;
 use function array_column;
 use function assert;
 use function json_decode;
+use function serialize;
+use function unserialize;
 
 class ModuleJsonTest extends TestCase
 {
@@ -149,6 +151,50 @@ class ModuleJsonTest extends TestCase
         $this->assertSame('type-bool', $decoded['bindings'][0]['name']);
     }
 
+    /**
+     * Each binding carries the FQCN of the module owning the *current*
+     * binding — the composition winner as recorded by the BindingLog: the
+     * installed module for the robot (its binding beat the constructor-chained
+     * module's), the composing module for the engine (its replace was the
+     * last write). The provenance is read from the live container before
+     * ModuleJson's serialize/unserialize deep copy drops the log.
+     */
+    public function testSourceRecordsOwningModulePerBinding(): void
+    {
+        $module = new FakeBindingLogModule(new FakeBindingLogInnerModule());
+        /** @var array{bindings: list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}>} $decoded */
+        $decoded = json_decode($module->toJson(), true);
+
+        $engine = $this->findBinding($decoded['bindings'], FakeEngineInterface::class);
+        $robot = $this->findBinding($decoded['bindings'], FakeRobotInterface::class);
+
+        $this->assertNotNull($engine);
+        $this->assertNotNull($robot);
+        $this->assertSame(FakeBindingLogModule::class, $engine['source'] ?? null);
+        $this->assertSame(FakeBindingLogInstalledModule::class, $robot['source'] ?? null);
+    }
+
+    /**
+     * 'source' is omitted when provenance is unknown rather than guessed:
+     * the BindingLog does not survive serialization, so a revived container
+     * has no sources for its existing bindings, and a write performed after
+     * revival is attributed the literal 'unknown' — both cases must leave
+     * the key out of the JSON.
+     */
+    public function testSourceOmittedWhenProvenanceUnknown(): void
+    {
+        $revived = unserialize(serialize((new FakeToBindModule())->getContainer()));
+        assert($revived instanceof Container);
+        (new Bind($revived, FakeEngineInterface::class))->to(FakeEngine::class);
+        /** @var array{bindings: list<array<string, mixed>>} $decoded */
+        $decoded = json_decode((new ModuleJson())($revived, $revived->getPointcuts()), true);
+
+        $this->assertCount(2, $decoded['bindings']);
+        foreach ($decoded['bindings'] as $binding) {
+            $this->assertArrayNotHasKey('source', $binding);
+        }
+    }
+
     public function testVisitDependencyReturnsBoundClass(): void
     {
         $container = (new FakeLogStringModule())->getContainer()->getContainer();
@@ -217,22 +263,22 @@ class ModuleJsonTest extends TestCase
     }
 
     /**
-     * @return list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}>
+     * @return list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}>
      */
     private function decodeBindings(): array
     {
         $module = new FakeLogStringModule();
         $json = $module->toJson();
-        /** @var array{bindings: list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}>} $decoded */
+        /** @var array{bindings: list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}>} $decoded */
         $decoded = json_decode($json, true);
 
         return $decoded['bindings'];
     }
 
     /**
-     * @param list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}> $bindings
+     * @param list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}> $bindings
      *
-     * @return array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}|null
+     * @return array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}|null
      */
     private function findBinding(array $bindings, string $interface): ?array
     {
@@ -246,9 +292,9 @@ class ModuleJsonTest extends TestCase
     }
 
     /**
-     * @param list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}> $bindings
+     * @param list<array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}> $bindings
      *
-     * @return array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>}|null
+     * @return array{interface: string, name: string, type: string, to: mixed, aop?: array<string, list<string>>, source?: string}|null
      */
     private function findBindingByName(array $bindings, string $name): ?array
     {

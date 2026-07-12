@@ -20,7 +20,7 @@ use const JSON_UNESCAPED_UNICODE;
  * @psalm-import-type PointcutList from Types
  * @psalm-type BindingType = 'class'|'provider'|'instance'|'null'
  * @psalm-type AopBindings = array<string, list<string>>
- * @psalm-type BindingEntry = array{interface: string, name: string, type: BindingType, to: mixed, aop?: AopBindings}
+ * @psalm-type BindingEntry = array{interface: string, name: string, type: BindingType, to: mixed, aop?: AopBindings, source?: string}
  * @psalm-type ModuleBindings = array{bindings: list<BindingEntry>}
  */
 final class ModuleJson
@@ -54,6 +54,10 @@ final class ModuleJson
      */
     public function getBindings(Container $container, array $pointcuts): array
     {
+        // Provenance must be read before the deep copy below: BindingLog is
+        // composition-time state excluded from Container::__sleep(), so the
+        // revived copy always carries an empty log.
+        $sources = $container->getBindingLog()->getSources();
         /** @psalm-suppress MixedAssignment */
         $container = unserialize(serialize($container), ['allowed_classes' => true]);
         /** @var Container $container */
@@ -68,6 +72,12 @@ final class ModuleJson
 
             $entry = $this->createEntry($dependencyIndex, $dependency, $aopBindings);
             if ($entry !== null) {
+                $source = $sources[$dependencyIndex] ?? 'unknown';
+                if ($source !== 'unknown') {
+                    // omitted when provenance is unknown (e.g. writes after unserialize())
+                    $entry['source'] = $source;
+                }
+
                 $entries[] = $entry;
             }
         }

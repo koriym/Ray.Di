@@ -119,7 +119,7 @@ LOG;
                 $this->rename(FakeRobotInterface::class, 'renamed');
             }
         };
-        $log = $module->getContainer()->getBindingLog();
+        $log = $module->getContainer()->log;
 
         $events = $log->getEvents();
         $this->assertCount(2, $events);
@@ -146,11 +146,11 @@ LOG;
     public function testUnserializedContainerStartsWithEmptyUsableLog(): void
     {
         $container = (new FakeBindingLogInnerModule())->getContainer();
-        $this->assertNotSame('', (string) $container->getBindingLog());
+        $this->assertNotSame('', (string) $container->log);
 
         $revived = unserialize(serialize($container));
         assert($revived instanceof Container);
-        $log = $revived->getBindingLog();
+        $log = $revived->log;
         $this->assertSame('', (string) $log);
         $this->assertSame([], $log->getEvents());
         $this->assertSame([], $log->getSources());
@@ -158,8 +158,8 @@ LOG;
 
         (new Bind($revived, FakeRobotInterface::class))->to(FakeRobot2::class);
         // the lazily created log is a live instance, not a per-call copy
-        $this->assertSame($log, $revived->getBindingLog());
-        $events = $revived->getBindingLog()->getEvents();
+        $this->assertSame($log, $revived->log);
+        $events = $revived->log->getEvents();
         $this->assertCount(1, $events);
         $replace = $events[0];
         $this->assertSame(BindingEvent::REPLACE, $replace->type);
@@ -179,7 +179,7 @@ LOG;
         $module = new FakeBindingLogInnerModule();
         new Injector($module, __DIR__ . '/tmp');
 
-        $log = $module->getContainer()->getBindingLog();
+        $log = $module->getContainer()->log;
         $this->assertSame(Injector::class, $log->getSource(InjectorInterface::class . '-'));
     }
 
@@ -197,11 +197,11 @@ LOG;
         $container = (new ReflectionProperty(Injector::class, 'container'))->getValue($injector);
         assert($container instanceof Container);
 
-        $this->assertSame(Injector::class, $container->getBindingLog()->getSource(FakeEngine::class . '-'));
+        $this->assertSame(Injector::class, $container->log->getSource(FakeEngine::class . '-'));
     }
 
     private function composeGoldenLog(): BindingLog
     {
-        return (new FakeBindingLogModule(new FakeBindingLogInnerModule()))->getContainer()->getBindingLog();
+        return (new FakeBindingLogModule(new FakeBindingLogInnerModule()))->getContainer()->log;
     }
 }

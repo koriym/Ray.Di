@@ -58,7 +58,7 @@ final class Container implements InjectorInterface
      * Not serialized (excluded from __sleep()); re-created empty on __wakeup()
      * so a revived container never carries build-time history into runtime.
      */
-    private BindingLog $log;
+    public BindingLog $log;
 
     public function __construct()
     {
@@ -77,14 +77,6 @@ final class Container implements InjectorInterface
     public function __wakeup(): void
     {
         $this->log = new BindingLog();
-    }
-
-    /**
-     * Return the composition-time binding log
-     */
-    public function getBindingLog(): BindingLog
-    {
-        return $this->log;
     }
 
     /**
@@ -218,7 +210,7 @@ final class Container implements InjectorInterface
 
             $this->container[$targetIndex] = $this->container[$sourceIndex];
             unset($this->container[$sourceIndex]);
-            $this->getBindingLog()->move($sourceIndex, $targetIndex);
+            $this->log->move($sourceIndex, $targetIndex);
         }
     }
 
@@ -283,7 +275,7 @@ final class Container implements InjectorInterface
             $discardedDependencies[$index] = (string) $otherContainer[$index];
         }
 
-        $this->getBindingLog()->merge($container->getBindingLog(), $collidingIndexes, $keptDependencies, $discardedDependencies);
+        $this->log->merge($container->log, $collidingIndexes, $keptDependencies, $discardedDependencies);
 
         $this->multiBindings->merge($container->multiBindings);
         $this->container += $otherContainer;

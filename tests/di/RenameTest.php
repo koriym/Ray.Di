@@ -38,9 +38,9 @@ class RenameTest extends TestCase
 
     /**
      * override() replaces $this->container with the target module's (merged)
-     * container. rename() reads getContainer() lazily at call time, so
-     * calling it after override() must act on that merged container, not on
-     * a stale reference captured before the swap.
+     * container. rename() inside configure() is deferred and applied against
+     * getContainer() after composition completes, so it must act on that
+     * merged container, not on a stale reference captured before the swap.
      *
      * @covers \Ray\Di\AbstractModule::rename
      * @covers \Ray\Di\AbstractModule::override

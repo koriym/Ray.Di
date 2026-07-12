@@ -33,7 +33,9 @@ class ModuleTest extends TestCase
     {
         $module = new FakeRenameModule(new FakeToBindModule());
         $instance = $module->getContainer()->getInstance(FakeRobotInterface::class, 'original');
-        $this->assertInstanceOf(FakeRobotInterface::class, $instance);
+        // assert the concrete class: the renamed binding must be the one the
+        // chained module registered, not merely something type-compatible
+        $this->assertInstanceOf(FakeRobot::class, $instance);
     }
 
     public function testConstructorCallModule(): void

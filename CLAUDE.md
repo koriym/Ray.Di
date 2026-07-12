@@ -59,6 +59,25 @@ composer baseline          # Update static analysis baselines
 - Cache files are automatically cleaned between test runs
 - AOP proxy generation is tested with temporary directories
 
+### Behavioral Contract Tests
+
+Coverage measures execution, not meaning: PR #319 inverted module composition
+priority while 100% branch coverage stayed green. The semantics are pinned by
+contract tests; `tests/di/README.md` maps every contract to its test.
+
+When changing binding registration, merge order, scopes, or AOP weaving:
+
+1. Read `tests/di/ModuleCompositionTest.php` first — it is the composition
+   spec ("which binding wins"). If your change flips any outcome there, it is
+   a backward-compatibility break: stop and discuss, do not adjust the test.
+2. Assert winners, not types: concrete class, `assertSame` identity, or
+   invocation order. Asserting only an interface passes regardless of which
+   binding won.
+3. A new route by which bindings enter the container requires collision tests
+   against every existing route (bind / install / constructor chain / override).
+4. Behavior changes start with a red contract test in its own commit, then the
+   fix that turns it green.
+
 ## Framework Patterns
 
 ### Module Definition

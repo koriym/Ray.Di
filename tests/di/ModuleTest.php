@@ -76,12 +76,7 @@ Ray\Di\FakeRobotInterface- => (provider) (dependency) Ray\Di\FakeRobotProvider')
      */
     public function testToStringWithClosureInstanceDoesNotThrow(): void
     {
-        $module = new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->bind('')->annotatedWith('callback')->toInstance(static fn (): int => 1);
-            }
-        };
+        $module = new FakeClosureBindModule();
 
         $this->assertStringContainsString('-callback => (object) Closure', (string) $module);
     }

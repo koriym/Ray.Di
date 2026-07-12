@@ -131,12 +131,12 @@ final class Dependency implements DependencyInterface, AcceptInterface
      */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {
-        $bind = $this->aopBind($pointcuts);
+        $className = (string) $this->newInstance;
+        $bind = $this->aopBind($className, $pointcuts);
         if (! $bind instanceof AopBind) {
             return;
         }
 
-        $className = (string) $this->newInstance;
         $class = $compiler->compile($className, $bind);
         $this->newInstance->weaveAspects($class, $bind);
     }
@@ -154,7 +154,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     public function describe(array $pointcuts): string
     {
         $className = (string) $this->newInstance;
-        $bind = $this->aopBind($pointcuts);
+        $bind = $this->aopBind($className, $pointcuts);
         if ($bind instanceof AopBind) {
             $className = (new SpyCompiler())->compile($className, $bind);
         }
@@ -163,15 +163,15 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * Match pointcuts against this dependency's class, read-only
+     * Match pointcuts against the given class, read-only
      *
+     * @param class-string $className
      * @param PointcutList $pointcuts
      *
      * @return ?AopBind the matched bindings, or null when nothing is intercepted
      */
-    private function aopBind(array $pointcuts): ?AopBind
+    private function aopBind(string $className, array $pointcuts): ?AopBind
     {
-        $className = (string) $this->newInstance;
         $reflection = new ReflectionClass($className);
         if ($reflection->isFinal()) {
             return null;

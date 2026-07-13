@@ -1,0 +1,246 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * bindings-html — render a Ray.Di bindings.md as a self-contained HTML view.
+ *
+ * Usage:
+ *   bin/bindings-html <path/to/bindings.md> [message] > bindings.html
+ *   bin/bindings-html - [message] < bindings.md    > bindings.html   # read stdin
+ *
+ * The markdown is embedded verbatim in a <pre> data island; JavaScript
+ * decorates it on load — colour-coded events, a type filter, and the
+ * discarded side of every collision shown in red. Because the data stays
+ * plain text, a committed bindings.html diffs exactly like the plain
+ * markdown: only the data lines change, never the constant stylesheet or
+ * script. Without JavaScript the <pre> still shows the plain log.
+ *
+ * The optional [message] is rendered as a subtitle — e.g. the context a
+ * caller composed the bindings in ("prod-app"). It is metadata the tool does
+ * not invent: pass it if you know it, omit it and let the linking page label
+ * the view instead.
+ */
+
+$path = $argv[1] ?? null;
+if ($path === null || $path === '-h' || $path === '--help') {
+    fwrite(STDERR, "usage: bindings-html <bindings.md|-> [message] > out.html\n");
+    exit($path === null ? 1 : 0);
+}
+
+$md = $path === '-' ? file_get_contents('php://stdin') : @file_get_contents($path);
+if ($md === false) {
+    fwrite(STDERR, "bindings-html: cannot read {$path}\n");
+    exit(1);
+}
+
+echo renderBindingsHtml($md, $argv[2] ?? '');
+
+/**
+ * Wrap raw bindings markdown in the self-rendering HTML shell.
+ */
+function renderBindingsHtml(string $md, string $message): string
+{
+    $rawMd = htmlspecialchars($md, ENT_QUOTES, 'UTF-8');
+    $sub = $message === ''
+        ? ''
+        : "\n<div class=\"sub\">" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</div>';
+    $css = bindingsHtmlCss();
+    $js = bindingsHtmlJs();
+
+    return <<<HTML
+        <!doctype html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>Ray.Di bindings</title>
+        <script>document.documentElement.className = 'js';</script>
+        <style>
+        {$css}
+        </style>
+        </head>
+        <body>
+        <div class="wrap">
+        <header>
+        <h1>Ray.Di bindings</h1>{$sub}
+        </header>
+        <div id="view"></div>
+        <pre id="src">{$rawMd}</pre>
+        </div>
+        <script>
+        {$js}
+        </script>
+        </body>
+        </html>
+
+        HTML;
+}
+
+function bindingsHtmlCss(): string
+{
+    return <<<'CSS'
+        :root{
+          --bg:#faf9f7; --panel:#fff; --ink:#1c2027; --muted:#6b7280; --line:#e7e5e1;
+          --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+          --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+          --bind:#8a919c; --replace:#c07c1e; --keep:#a8850e; --move:#2f80b8;
+          --lost:#c0392b; --at:#8a919c; --accent:#0ea5b7; --keyink:#2a3140;
+        }
+        @media (prefers-color-scheme:dark){
+          :root{ --bg:#0e1116; --panel:#151a21; --ink:#d5dae2; --muted:#8b93a0; --line:#242b34;
+            --bind:#7d8590; --replace:#e0a13a; --keep:#d4b024; --move:#58a6d8; --lost:#e5615a;
+            --at:#6b7280; --accent:#3ad0e0; --keyink:#c6ccd6; }
+        }
+        :root[data-theme="light"]{ --bg:#faf9f7;--panel:#fff;--ink:#1c2027;--muted:#6b7280;--line:#e7e5e1;
+          --bind:#8a919c;--replace:#c07c1e;--keep:#a8850e;--move:#2f80b8;--lost:#c0392b;--at:#8a919c;--accent:#0ea5b7;--keyink:#2a3140;}
+        :root[data-theme="dark"]{ --bg:#0e1116;--panel:#151a21;--ink:#d5dae2;--muted:#8b93a0;--line:#242b34;
+          --bind:#7d8590;--replace:#e0a13a;--keep:#d4b024;--move:#58a6d8;--lost:#e5615a;--at:#6b7280;--accent:#3ad0e0;--keyink:#c6ccd6;}
+        *{box-sizing:border-box}
+        body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5}
+        .wrap{max-width:1100px;margin:0 auto;padding:32px 24px 80px}
+        h1{font-size:15px;font-weight:600;letter-spacing:.02em;margin:0;color:var(--muted);text-transform:uppercase}
+        header .sub{font-family:var(--mono);font-size:12px;color:var(--accent);margin-top:4px}
+        .lead{font-family:var(--mono);font-size:12px;color:var(--muted);margin:2px 0 18px}
+        .stats{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}
+        .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:104px}
+        .stat .n{font-size:26px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1}
+        .stat .l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:5px}
+        .stat.replace .n{color:var(--replace)} .stat.keep .n{color:var(--keep)}
+        .bar{position:sticky;top:0;background:linear-gradient(var(--bg),var(--bg) 70%,transparent);padding:10px 0;
+          display:flex;gap:8px;flex-wrap:wrap;align-items:center;z-index:5;border-bottom:1px solid var(--line);margin-bottom:14px}
+        .bar .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:2px}
+        .chip{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
+          padding:4px 10px;border-radius:999px;cursor:pointer;user-select:none;display:inline-flex;gap:6px;align-items:center}
+        .chip::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--c)}
+        .chip[data-off="1"]{opacity:.34;text-decoration:line-through}
+        .chip.bind{--c:var(--bind)} .chip.replace{--c:var(--replace)} .chip.keep{--c:var(--keep)} .chip.move{--c:var(--move)}
+        section{margin:26px 0}
+        h2{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+          margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+        h2 .hint{text-transform:none;font-weight:400;color:var(--muted)}
+        .log{font-family:var(--mono);font-size:12.5px}
+        .ev{padding:3px 10px 3px 12px;border-left:3px solid var(--bind);border-radius:0 4px 4px 0;
+          white-space:pre-wrap;word-break:break-word}
+        .ev+.ev{border-top:1px solid color-mix(in srgb,var(--line) 55%,transparent)}
+        .ev.bind{border-color:var(--bind)}
+        .ev.replace{border-color:var(--replace);background:color-mix(in srgb,var(--replace) 7%,transparent)}
+        .ev.keep{border-color:var(--keep);background:color-mix(in srgb,var(--keep) 7%,transparent)}
+        .ev.move{border-color:var(--move)}
+        .ev .t{display:inline-block;min-width:58px;color:var(--muted);text-transform:lowercase}
+        .ev.replace .t{color:var(--replace)} .ev.keep .t{color:var(--keep)} .ev.move .t{color:var(--move)}
+        .key{color:var(--keyink);font-weight:600} .arrow{color:var(--muted)} .tgt{color:var(--ink)}
+        .at{color:var(--at)} .mod{color:var(--accent)}
+        .lost{display:block;padding:1px 0 1px 58px;color:var(--lost)}
+        .lost .tag{opacity:.8;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;margin-right:4px}
+        .lost .mod{color:color-mix(in srgb,var(--lost) 70%,var(--accent))}
+        .b{font-family:var(--mono);font-size:12px;padding:2px 10px;white-space:pre-wrap;word-break:break-word}
+        .b+.b{border-top:1px solid color-mix(in srgb,var(--line) 45%,transparent)}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 22px}
+        .ml{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:12px;
+          padding:3px 4px;border-bottom:1px solid color-mix(in srgb,var(--line) 45%,transparent)}
+        .ml .mod{color:var(--accent)} .ml .cnt{color:var(--muted);font-variant-numeric:tabular-nums}
+        .hide-bind .ev.bind,.hide-replace .ev.replace,.hide-keep .ev.keep,.hide-move .ev.move{display:none}
+        pre#src{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;color:var(--ink);margin:0}
+        #view{display:none} html.js #view{display:block} html.js pre#src{display:none}
+        CSS;
+}
+
+function bindingsHtmlJs(): string
+{
+    return <<<'JS'
+        (function () {
+          var src = document.getElementById('src');
+          var view = document.getElementById('view');
+          if (!src || !view) { return; }
+          var text = src.textContent;
+
+          function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+          function section(name) {
+            var m = text.match(new RegExp('\\n## ' + name + '\\n([\\s\\S]*?)(?:\\n## |$)'));
+            if (!m) { return []; }
+            return m[1].split('\n').filter(function (l) { return l.trim() !== ''; });
+          }
+
+          var summary = '';
+          text.split('\n').slice(0, 8).forEach(function (l) {
+            if (l.indexOf('bindings ·') !== -1 && summary === '') { summary = l.trim(); }
+          });
+          var cm = summary.match(/(\d+) bindings . (\d+) modules . (\d+) replaced . (\d+) discarded/);
+          var counts = cm ? [cm[1], cm[2], cm[3], cm[4]] : ['?', '?', '?', '?'];
+
+          function renderEvent(line) {
+            var m = line.match(/^(bind|replace|keep|move)\s+(.*)$/);
+            if (!m) { return '<div class="ev other"><code>' + esc(line) + '</code></div>'; }
+            var typ = m[1], body = m[2], extra = '';
+            var dm = body.match(/\s\((discarded|replaced) (.*)\)\s*$/);
+            if (dm) {
+              var kind = dm[1], inner = dm[2];
+              body = body.slice(0, dm.index);
+              var im = inner.match(/^(.*) @([^ ]+)$/);
+              extra = im
+                ? '<span class="lost"><span class="tag">' + kind + '</span> ' + esc(im[1])
+                    + ' <span class="at">@</span><span class="mod">' + esc(im[2]) + '</span></span>'
+                : '<span class="lost">' + esc(inner) + '</span>';
+            }
+            var bm = body.match(/^(.*?) => (.*) @([^ ]+)$/);
+            var core = bm
+              ? '<span class="key">' + esc(bm[1]) + '</span><span class="arrow"> =&gt; </span>'
+                  + '<span class="tgt">' + esc(bm[2]) + '</span> <span class="at">@</span>'
+                  + '<span class="mod">' + esc(bm[3]) + '</span>'
+              : '<code>' + esc(body) + '</code>';
+            return '<div class="ev ' + typ + '" data-type="' + typ + '"><span class="t">' + typ + '</span>'
+              + core + extra + '</div>';
+          }
+
+          function renderBinding(line) {
+            var m = line.match(/^(.*?) => (.*)$/);
+            return m
+              ? '<div class="b"><span class="key">' + esc(m[1]) + '</span>'
+                  + '<span class="arrow"> =&gt; </span><span class="tgt">' + esc(m[2]) + '</span></div>'
+              : '<div class="b"><code>' + esc(line) + '</code></div>';
+          }
+
+          function renderModule(line) {
+            var m = line.match(/^- (.*) \((\d+)\)$/);
+            return m
+              ? '<div class="ml"><span class="mod">' + esc(m[1]) + '</span><span class="cnt">' + m[2] + '</span></div>'
+              : '<div class="ml">' + esc(line) + '</div>';
+          }
+
+          var prov = section('Provenance').map(renderEvent).join('');
+          var mods = section('Modules').map(renderModule).join('');
+          var binds = section('Bindings').map(renderBinding).join('');
+
+          view.innerHTML =
+            '<div class="stats">'
+            + '<div class="stat"><div class="n">' + counts[0] + '</div><div class="l">bindings</div></div>'
+            + '<div class="stat"><div class="n">' + counts[1] + '</div><div class="l">modules</div></div>'
+            + '<div class="stat replace"><div class="n">' + counts[2] + '</div><div class="l">replaced</div></div>'
+            + '<div class="stat keep"><div class="n">' + counts[3] + '</div><div class="l">discarded</div></div>'
+            + '</div>'
+            + '<section><h2>Provenance <span class="hint">— who bound what, who was discarded</span></h2>'
+            + '<div class="bar"><span class="lbl">filter</span>'
+            + '<span class="chip bind" data-t="bind" data-off="0">bind</span>'
+            + '<span class="chip replace" data-t="replace" data-off="0">replace</span>'
+            + '<span class="chip keep" data-t="keep" data-off="0">keep</span>'
+            + '<span class="chip move" data-t="move" data-off="0">move</span></div>'
+            + '<div class="log" id="prov">' + prov + '</div></section>'
+            + '<section><h2>Modules <span class="hint">— composing modules, by binding count</span></h2>'
+            + '<div class="grid">' + mods + '</div></section>'
+            + '<section><h2>Bindings <span class="hint">— resolved state</span></h2>'
+            + '<div class="log">' + binds + '</div></section>';
+
+          var provEl = document.getElementById('prov');
+          view.querySelectorAll('.chip').forEach(function (c) {
+            c.addEventListener('click', function () {
+              var off = c.getAttribute('data-off') === '1';
+              c.setAttribute('data-off', off ? '0' : '1');
+              provEl.classList.toggle('hide-' + c.getAttribute('data-t'), !off);
+            });
+          });
+        })();
+        JS;
+}

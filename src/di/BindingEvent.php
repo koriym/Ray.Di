@@ -7,6 +7,9 @@ namespace Ray\Di;
 use Stringable;
 
 use function sprintf;
+use function str_starts_with;
+use function strlen;
+use function substr;
 
 /**
  * A single composition-time write to the dependency container
@@ -49,13 +52,32 @@ final class BindingEvent implements Stringable
 
     public function __toString(): string
     {
+        $dependency = $this->label($this->dependency);
+        $discarded = $this->label($this->discarded ?? '');
         $body = match ($this->type) {
-            self::BIND => sprintf('%s => %s @%s', $this->index, $this->dependency, $this->source),
-            self::REPLACE => sprintf('%s => %s @%s (replaced %s @%s)', $this->index, $this->dependency, $this->source, $this->discarded ?? '', $this->discardedSource ?? ''),
-            self::KEEP => sprintf('%s => %s @%s (discarded %s @%s)', $this->index, $this->dependency, $this->source, $this->discarded ?? '', $this->discardedSource ?? ''),
+            self::BIND => sprintf('%s => %s @%s', $this->index, $dependency, $this->source),
+            self::REPLACE => sprintf('%s => %s @%s (replaced %s @%s)', $this->index, $dependency, $this->source, $discarded, $this->discardedSource ?? ''),
+            self::KEEP => sprintf('%s => %s @%s (discarded %s @%s)', $this->index, $dependency, $this->source, $discarded, $this->discardedSource ?? ''),
             self::MOVE => sprintf('%s => %s @%s', $this->movedFrom ?? '', $this->index, $this->source),
         };
 
         return sprintf('%-7s', $this->type) . ' ' . $body;
+    }
+
+    /**
+     * Collapse an untargeted binding's repeated class to a single marker
+     *
+     * An untargeted (or self-bound) concrete class lands at index '{class}-'
+     * with dependency '(dependency) {class}' — the same name twice. Show
+     * '(untargeted)' so the reader need not compare the two.
+     */
+    private function label(string $dependency): string
+    {
+        $prefix = '(dependency) ';
+        if (str_starts_with($dependency, $prefix) && $this->index === substr($dependency, strlen($prefix)) . '-') {
+            return '(untargeted)';
+        }
+
+        return $dependency;
     }
 }

@@ -106,6 +106,21 @@ LOG;
     }
 
     /**
+     * An untargeted (or self-bound) class lands at index '{class}-' with the
+     * same class as its dependency; the string form collapses the repeat to
+     * '(untargeted)'. A targeted binding, whose interface differs from the
+     * bound class, is shown in full.
+     */
+    public function testUntargetedBindingCollapsesTheRepeatedClassInString(): void
+    {
+        $untargeted = new BindingEvent(BindingEvent::BIND, FakeRobot::class . '-', '(dependency) ' . FakeRobot::class, 'M');
+        $this->assertSame('bind    ' . FakeRobot::class . '- => (untargeted) @M', (string) $untargeted);
+
+        $targeted = new BindingEvent(BindingEvent::BIND, FakeRobotInterface::class . '-', '(dependency) ' . FakeRobot::class, 'M');
+        $this->assertSame('bind    ' . FakeRobotInterface::class . '- => (dependency) ' . FakeRobot::class . ' @M', (string) $targeted);
+    }
+
+    /**
      * rename() is a move: the binding leaves its old index for the new one,
      * and the log both records the move and transfers provenance — the moved
      * binding still belongs to the module that bound it, not to the renamer.

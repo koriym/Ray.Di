@@ -105,13 +105,13 @@ abstract class AbstractModule implements Stringable
         $this->getContainer()->addPointcut($pointcut);
         foreach ($interceptors as $interceptor) {
             if (class_exists($interceptor)) {
-                (new Bind($this->getContainer(), $interceptor))->to($interceptor)->in(Scope::SINGLETON);
+                (new Bind($this->getContainer(), $interceptor, static::class))->to($interceptor)->in(Scope::SINGLETON);
 
                 continue;
             }
 
             assert(interface_exists($interceptor));
-            (new Bind($this->getContainer(), $interceptor))->in(Scope::SINGLETON);
+            (new Bind($this->getContainer(), $interceptor, static::class))->in(Scope::SINGLETON);
         }
     }
 
@@ -125,7 +125,7 @@ abstract class AbstractModule implements Stringable
         $pointcut = new PriorityPointcut($classMatcher, $methodMatcher, $interceptors);
         $this->getContainer()->addPointcut($pointcut);
         foreach ($interceptors as $interceptor) {
-            (new Bind($this->getContainer(), $interceptor))->to($interceptor)->in(Scope::SINGLETON);
+            (new Bind($this->getContainer(), $interceptor, static::class))->to($interceptor)->in(Scope::SINGLETON);
         }
     }
 
@@ -175,7 +175,7 @@ abstract class AbstractModule implements Stringable
      */
     protected function bind(string $interface = ''): Bind
     {
-        return new Bind($this->getContainer(), $interface);
+        return new Bind($this->getContainer(), $interface, static::class);
     }
 
     /**

@@ -16,6 +16,7 @@ use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionClass;
 
+use function array_intersect_key;
 use function array_keys;
 use function array_merge;
 use function class_exists;
@@ -51,9 +52,18 @@ final class Container implements InjectorInterface
      */
     private array $resolving = [];
 
+    /**
+     * Composition-time binding history
+     *
+     * Not serialized (excluded from __sleep()); re-created empty on __wakeup()
+     * so a revived container never carries build-time history into runtime.
+     */
+    public BindingLog $log;
+
     public function __construct()
     {
         $this->multiBindings = new MultiBindings();
+        $this->log = new BindingLog();
     }
 
     /**
@@ -64,13 +74,27 @@ final class Container implements InjectorInterface
         return ['container', 'pointcuts', 'multiBindings'];
     }
 
+    public function __wakeup(): void
+    {
+        $this->log = new BindingLog();
+    }
+
     /**
      * Add binding to a container
      */
     public function add(Bind $bind): void
     {
+        $index = (string) $bind;
+        $previous = $this->container[$index] ?? null;
         $dependency = $bind->getBound();
         $dependency->register($this->container, $bind);
+        /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyContainer alias unexpanded */
+        $this->log->register(
+            $index,
+            (string) $this->container[$index],
+            $previous === null ? null : (string) $previous,
+            $bind->source !== '' ? $bind->source : 'unknown'
+        );
     }
 
     /**
@@ -211,6 +235,7 @@ final class Container implements InjectorInterface
 
             $this->container[$targetIndex] = $this->container[$sourceIndex];
             unset($this->container[$sourceIndex]);
+            $this->log->move($sourceIndex, $targetIndex);
         }
     }
 
@@ -258,11 +283,27 @@ final class Container implements InjectorInterface
 
     /**
      * Merge container
+     *
+     * The collision history is recorded first: `+=` lets existing entries win
+     * and silently discards the incoming side, so each colliding index is
+     * logged as a keep event before the merge makes the discard invisible.
      */
     public function merge(self $container): void
     {
+        $otherContainer = $container->getContainer();
+        // iterate the incoming (usually smaller) side: O(incoming), not O(accumulated)
+        $collidingIndexes = array_keys(array_intersect_key($otherContainer, $this->container));
+        $keptDependencies = [];
+        $discardedDependencies = [];
+        foreach ($collidingIndexes as $index) {
+            $keptDependencies[$index] = (string) $this->container[$index];
+            $discardedDependencies[$index] = (string) $otherContainer[$index];
+        }
+
+        $this->log->merge($container->log, $collidingIndexes, $keptDependencies, $discardedDependencies);
+
         $this->multiBindings->merge($container->multiBindings);
-        $this->container += $container->getContainer();
+        $this->container += $otherContainer;
         $this->pointcuts = array_merge($this->pointcuts, $container->getPointcuts());
     }
 

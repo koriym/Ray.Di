@@ -50,6 +50,9 @@ h2 .hint{text-transform:none;font-weight:400;color:var(--muted)}
 .ev.replace .t{color:var(--replace)} .ev.keep .t{color:var(--keep)} .ev.move .t{color:var(--move)}
 .key{color:var(--keyink);font-weight:600} .arrow{color:var(--muted)} .tgt{color:var(--ink)}
 .at{color:var(--at)} .mod{color:var(--accent)}
+/* source links keep their token colour; only an underline marks them clickable */
+#view a{color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 45%,transparent);text-underline-offset:2px}
+#view a:hover{text-decoration-color:currentColor}
 .lost{display:block;padding:1px 0 1px 58px;color:var(--lost)}
 .lost .tag{opacity:.8;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;margin-right:4px}
 .lost .mod{color:color-mix(in srgb,var(--lost) 70%,var(--accent))}

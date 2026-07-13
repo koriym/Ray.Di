@@ -15,7 +15,38 @@
     if (!src || !view) { return; }
     var text = src.textContent;
 
+    var srcmap = [];
+    var mapEl = document.getElementById('srcmap');
+    if (mapEl) { try { srcmap = JSON.parse(mapEl.textContent) || []; } catch (e) { srcmap = []; } }
+
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function resolve(fqcn) {
+      var best = null;
+      for (var i = 0; i < srcmap.length; i++) {
+        var e = srcmap[i];
+        if (fqcn.indexOf(e.p) === 0 && (!best || e.p.length > best.p.length)) { best = e; }
+      }
+      if (!best) { return null; }
+      var file = (best.d ? best.d + '/' : '') + fqcn.slice(best.p.length).replace(/\\/g, '/') + '.php';
+      var gh = best.u.indexOf('github.com') !== -1 ? best.u + '/blob/' + best.r + '/' + file : best.u;
+      return { gh: gh, local: 'vendor/' + best.n + '/' + file };
+    }
+
+    // esc, but wrap any resolvable class name in a source link: href to the
+    // repository (for humans), data-src to the local vendor/ path (for agents)
+    function escLink(s) {
+      var out = '', last = 0, re = /[A-Za-z_][A-Za-z0-9_]*(?:\\[A-Za-z0-9_]+)+/g, m;
+      while ((m = re.exec(s)) !== null) {
+        out += esc(s.slice(last, m.index));
+        var r = resolve(m[0]);
+        out += r
+          ? '<a href="' + r.gh + '" data-src="' + r.local + '" target="_blank" rel="noopener">' + esc(m[0]) + '</a>'
+          : esc(m[0]);
+        last = m.index + m[0].length;
+      }
+      return out + esc(s.slice(last));
+    }
 
     function section(name) {
       var m = text.match(new RegExp('(?:^|\\n)## ' + name + '\\n([\\s\\S]*?)(?:\\n## |$)'));
@@ -40,15 +71,15 @@
         body = body.slice(0, dm.index);
         var im = inner.match(/^(.*) @([^ ]+)$/);
         extra = im
-          ? '<span class="lost"><span class="tag">' + kind + '</span> ' + esc(im[1])
-              + ' <span class="at">@</span><span class="mod">' + esc(im[2]) + '</span></span>'
-          : '<span class="lost">' + esc(inner) + '</span>';
+          ? '<span class="lost"><span class="tag">' + kind + '</span> ' + escLink(im[1])
+              + ' <span class="at">@</span><span class="mod">' + escLink(im[2]) + '</span></span>'
+          : '<span class="lost">' + escLink(inner) + '</span>';
       }
       var bm = body.match(/^(.*?) => (.*) @([^ ]+)$/);
       var core = bm
-        ? '<span class="key">' + esc(bm[1]) + '</span><span class="arrow"> =&gt; </span>'
-            + '<span class="tgt">' + esc(bm[2]) + '</span> <span class="at">@</span>'
-            + '<span class="mod">' + esc(bm[3]) + '</span>'
+        ? '<span class="key">' + escLink(bm[1]) + '</span><span class="arrow"> =&gt; </span>'
+            + '<span class="tgt">' + escLink(bm[2]) + '</span> <span class="at">@</span>'
+            + '<span class="mod">' + escLink(bm[3]) + '</span>'
         : '<code>' + esc(body) + '</code>';
       return '<div class="ev ' + typ + '" data-type="' + typ + '"><span class="t">' + typ + '</span>'
         + core + extra + '</div>';
@@ -57,15 +88,15 @@
     function renderBinding(line) {
       var m = line.match(/^(.*?) => (.*)$/);
       return m
-        ? '<div class="b"><span class="key">' + esc(m[1]) + '</span>'
-            + '<span class="arrow"> =&gt; </span><span class="tgt">' + esc(m[2]) + '</span></div>'
+        ? '<div class="b"><span class="key">' + escLink(m[1]) + '</span>'
+            + '<span class="arrow"> =&gt; </span><span class="tgt">' + escLink(m[2]) + '</span></div>'
         : '<div class="b"><code>' + esc(line) + '</code></div>';
     }
 
     function renderModule(line) {
       var m = line.match(/^- (.*) \((\d+)\)$/);
       return m
-        ? '<div class="ml"><span class="mod">' + esc(m[1]) + '</span><span class="cnt">' + m[2] + '</span></div>'
+        ? '<div class="ml"><span class="mod">' + escLink(m[1]) + '</span><span class="cnt">' + m[2] + '</span></div>'
         : '<div class="ml">' + esc(line) + '</div>';
     }
 

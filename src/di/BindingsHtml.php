@@ -4,9 +4,21 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use function array_merge;
 use function htmlspecialchars;
+use function is_array;
+use function json_decode;
+use function json_encode;
+use function preg_replace;
+use function rtrim;
+use function str_contains;
+use function str_replace;
+use function str_starts_with;
+use function substr;
 
 use const ENT_QUOTES;
+use const JSON_HEX_TAG;
+use const JSON_UNESCAPED_SLASHES;
 
 /**
  * Renders a Ray.Di bindings.md as an HTML view
@@ -18,10 +30,23 @@ use const ENT_QUOTES;
  * CLI, a documentation generator, a hand-written page — reuses the same viewer
  * instead of embedding its own copy.
  *
- * {@see fragment()} is the reusable core (the data island plus the mount point)
- * for embedding in a page that owns its own <head>; {@see page()} wraps it in a
- * standalone document that links the CDN assets. Without JavaScript the <pre>
- * shows the plain log.
+ * Given a composer.lock the viewer also links each class to its source: the
+ * lock's per-package source URL + reference resolve to a GitHub blob URL (for
+ * humans), and the package name resolves to the local vendor/ path (carried in
+ * data-src, so an agent working in the project reads the file directly instead
+ * of fetching over the network). Resolution is pure string work — no reflection,
+ * no vendor/ access needed at render time.
+ *
+ * {@see fragment()} is the reusable core (the data island, the mount point, and
+ * the optional source map) for embedding in a page that owns its own <head>;
+ * {@see page()} wraps it in a standalone document that links the CDN assets.
+ * Without JavaScript the <pre> shows the plain log.
+ *
+ * @psalm-type ComposerPackage = array{
+ *     name?: string,
+ *     source?: array{url?: string, reference?: string},
+ *     autoload?: array{psr-4?: array<string, string|list<string>>}
+ * }
  */
 final class BindingsHtml
 {
@@ -30,15 +55,17 @@ final class BindingsHtml
     public const JS_URL = 'https://cdn.jsdelivr.net/gh/ray-di/Ray.Di@' . self::VERSION . '/docs/bindings/bindings.js';
 
     /**
-     * The reusable core: the markdown as a <pre> data island and the mount
-     * point the viewer decorates. Embed this in a page that references
+     * The reusable core: the markdown as a <pre> data island, the mount point
+     * the viewer decorates, and — when a composer.lock is given — the source
+     * map it links classes with. Embed this in a page that references
      * {@see CSS_URL} and {@see JS_URL}.
      */
-    public function fragment(string $bindingsMarkdown): string
+    public function fragment(string $bindingsMarkdown, string $composerLock = ''): string
     {
         $md = htmlspecialchars($bindingsMarkdown, ENT_QUOTES, 'UTF-8');
 
-        return "<pre id=\"src\">{$md}</pre>\n<div id=\"view\"></div>";
+        return '<pre id="src">' . $md . '</pre>' . "\n" . '<div id="view"></div>'
+            . $this->sourceMap($bindingsMarkdown, $composerLock);
     }
 
     /**
@@ -48,9 +75,9 @@ final class BindingsHtml
      * The optional $message renders as a subtitle, e.g. the context the
      * bindings were composed in ("prod-app").
      */
-    public function page(string $bindingsMarkdown, string $message = ''): string
+    public function page(string $bindingsMarkdown, string $composerLock = '', string $message = ''): string
     {
-        $fragment = $this->fragment($bindingsMarkdown);
+        $fragment = $this->fragment($bindingsMarkdown, $composerLock);
         $sub = $message === ''
             ? ''
             : "\n<div class=\"sub\">" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . '</div>';
@@ -64,19 +91,89 @@ final class BindingsHtml
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width,initial-scale=1">
             <title>Ray.Di bindings</title>
-            <link rel="stylesheet" href="{$css}">
+            <link rel="stylesheet" href="$css">
             </head>
             <body>
             <div class="wrap">
             <header>
-            <h1>Ray.Di bindings</h1>{$sub}
+            <h1>Ray.Di bindings</h1>$sub
             </header>
-            {$fragment}
+            $fragment
             </div>
-            <script src="{$js}"></script>
+            <script src="$js"></script>
             </body>
             </html>
 
             HTML;
+    }
+
+    /**
+     * A <script id="srcmap"> table the viewer uses to link classes to source.
+     *
+     * Each entry maps a PSR-4 prefix to its package's repository URL, commit
+     * reference, package name, and source directory — everything the viewer
+     * needs to build both a GitHub blob URL and a local vendor/ path. Derived
+     * entirely from composer.lock and pruned to the packages actually named in
+     * the markdown, so the payload stays small.
+     */
+    private function sourceMap(string $markdown, string $composerLock): string
+    {
+        if ($composerLock === '') {
+            return '';
+        }
+
+        $decoded = json_decode($composerLock, true);
+        if (! is_array($decoded)) {
+            return '';
+        }
+
+        /** @var array{packages?: list<ComposerPackage>, packages-dev?: list<ComposerPackage>} $decoded */
+        $packages = array_merge($decoded['packages'] ?? [], $decoded['packages-dev'] ?? []);
+
+        $map = [];
+        foreach ($packages as $package) {
+            $name = $package['name'] ?? null;
+            $source = $package['source'] ?? [];
+            $autoload = $package['autoload'] ?? [];
+            $psr4 = $autoload['psr-4'] ?? null;
+            $url = $source['url'] ?? null;
+            $reference = $source['reference'] ?? null;
+            if ($name === null || $url === null || $reference === null || $psr4 === null) {
+                continue;
+            }
+
+            $repository = $this->repositoryUrl($url);
+            foreach ($psr4 as $prefix => $dir) {
+                // prune: keep only packages whose namespace appears in the bindings
+                if ($prefix === '' || ! str_contains($markdown, $prefix)) {
+                    continue;
+                }
+
+                $sourceDir = is_array($dir) ? ($dir[0] ?? null) : $dir;
+                if ($sourceDir === null) {
+                    continue;
+                }
+
+                $map[] = ['p' => $prefix, 'u' => $repository, 'r' => $reference, 'n' => $name, 'd' => rtrim($sourceDir, '/')];
+            }
+        }
+
+        if ($map === []) {
+            return '';
+        }
+
+        return "\n" . '<script type="application/json" id="srcmap">'
+            . (string) json_encode($map, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES) . '</script>';
+    }
+
+    /** Normalise a composer source URL to its web repository URL. */
+    private function repositoryUrl(string $url): string
+    {
+        // git@github.com:owner/repo.git -> https://github.com/owner/repo
+        if (str_starts_with($url, 'git@')) {
+            $url = 'https://' . str_replace(':', '/', substr($url, 4));
+        }
+
+        return (string) preg_replace('#\.git$#', '', $url);
     }
 }

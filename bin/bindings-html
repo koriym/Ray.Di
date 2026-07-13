@@ -7,14 +7,18 @@ declare(strict_types=1);
  * bindings-html — render a Ray.Di bindings.md as an HTML view.
  *
  * Usage:
- *   bin/bindings-html <path/to/bindings.md> [message] > bindings.html
- *   bin/bindings-html - [message] < bindings.md    > bindings.html   # read stdin
+ *   bin/bindings-html <path/to/bindings.md> [composer.lock] [message] > bindings.html
+ *   bin/bindings-html - [composer.lock] [message] < bindings.md       > bindings.html
  *
  * The markdown is embedded verbatim in a <pre> data island; a shared viewer
  * (stylesheet + script served from jsDelivr) decorates it on load: colour-coded
  * events, a type filter, and the discarded side of every collision in red.
- * Without JavaScript the <pre> shows the plain log. The optional [message]
- * renders as a subtitle, e.g. the context the bindings were composed in.
+ * Without JavaScript the <pre> shows the plain log.
+ *
+ * Pass a composer.lock to link each class to its source — a GitHub URL for
+ * humans and the local vendor/ path (data-src) for agents. The optional
+ * [message] renders as a subtitle, e.g. the context the bindings were composed
+ * in.
  *
  * The rendering lives in Ray\Di\BindingsHtml so every consumer — this CLI, a
  * documentation generator — reuses the same viewer.
@@ -39,7 +43,7 @@ require $autoload;
 
 $path = $argv[1] ?? null;
 if ($path === null || $path === '-h' || $path === '--help') {
-    fwrite(STDERR, "usage: bindings-html <bindings.md|-> [message] > out.html\n");
+    fwrite(STDERR, "usage: bindings-html <bindings.md|-> [composer.lock] [message] > out.html\n");
     exit($path === null ? 1 : 0);
 }
 
@@ -49,4 +53,14 @@ if ($md === false) {
     exit(1);
 }
 
-echo (new BindingsHtml())->page($md, $argv[2] ?? '');
+$lock = '';
+$lockPath = $argv[2] ?? '';
+if ($lockPath !== '') {
+    $lock = @file_get_contents($lockPath);
+    if ($lock === false) {
+        fwrite(STDERR, "bindings-html: cannot read {$lockPath}\n");
+        exit(1);
+    }
+}
+
+echo (new BindingsHtml())->page($md, $lock, $argv[3] ?? '');

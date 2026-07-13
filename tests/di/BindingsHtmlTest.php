@@ -12,12 +12,14 @@ use function assert;
 use function dirname;
 use function fclose;
 use function file_get_contents;
+use function file_put_contents;
 use function fwrite;
 use function glob;
 use function html_entity_decode;
 use function is_dir;
 use function is_resource;
 use function is_string;
+use function json_encode;
 use function mkdir;
 use function preg_match;
 use function proc_close;
@@ -95,8 +97,38 @@ class BindingsHtmlTest extends TestCase
     {
         $html = new BindingsHtml();
 
-        $this->assertStringContainsString('<div class="sub">prod-app</div>', $html->page($this->markdown(), 'prod-app'));
+        $this->assertStringContainsString('<div class="sub">prod-app</div>', $html->page($this->markdown(), '', 'prod-app'));
         $this->assertStringNotContainsString('class="sub"', $html->page($this->markdown()));
+    }
+
+    public function testEmbedsASourceMapDerivedFromComposerLock(): void
+    {
+        $page = (new BindingsHtml())->page($this->markdown(), $this->composerLock());
+
+        $this->assertStringContainsString('<script type="application/json" id="srcmap">', $page);
+        // ray/di's namespace appears in the bindings, so it is mapped: the .git
+        // suffix is stripped, the reference and source dir are kept
+        $this->assertStringContainsString('"u":"https://github.com/ray-di/Ray.Di"', $page);
+        $this->assertStringContainsString('"n":"ray/di"', $page);
+        $this->assertStringContainsString('"r":"abcdef1234"', $page);
+        $this->assertStringContainsString('"d":"src/di"', $page);
+    }
+
+    public function testOmitsTheSourceMapWithoutAComposerLock(): void
+    {
+        $this->assertStringNotContainsString('id="srcmap"', (new BindingsHtml())->page($this->markdown()));
+    }
+
+    public function testCliEmbedsTheSourceMapWhenGivenAComposerLock(): void
+    {
+        $lockFile = $this->classDir . '/composer.lock';
+        file_put_contents($lockFile, $this->composerLock());
+
+        [$stdout, , $exit] = $this->runTool([$this->md, $lockFile]);
+
+        $this->assertSame(0, $exit);
+        $this->assertStringContainsString('id="srcmap"', $stdout);
+        $this->assertStringContainsString('"n":"ray/di"', $stdout);
     }
 
     public function testCliRendersThePageFromAFile(): void
@@ -132,6 +164,24 @@ class BindingsHtmlTest extends TestCase
         assert(is_string($markdown));
 
         return $markdown;
+    }
+
+    /** A minimal composer.lock whose one package's namespace appears in the bindings. */
+    private function composerLock(): string
+    {
+        return (string) json_encode([
+            'packages' => [
+                [
+                    'name' => 'ray/di',
+                    'source' => [
+                        'type' => 'git',
+                        'url' => 'https://github.com/ray-di/Ray.Di.git',
+                        'reference' => 'abcdef1234',
+                    ],
+                    'autoload' => ['psr-4' => ['Ray\\Di\\' => 'src/di']],
+                ],
+            ],
+        ]);
     }
 
     /**

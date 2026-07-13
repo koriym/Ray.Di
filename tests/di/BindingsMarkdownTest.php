@@ -6,12 +6,15 @@ namespace Ray\Di;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 use function assert;
-use function file_exists;
 use function file_get_contents;
+use function glob;
+use function is_dir;
 use function is_string;
 use function mkdir;
+use function rmdir;
 use function sys_get_temp_dir;
 use function uniqid;
 use function unlink;
@@ -22,15 +25,21 @@ class BindingsMarkdownTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->classDir = sys_get_temp_dir() . '/ray-bindings-md-' . uniqid();
-        mkdir($this->classDir);
+        $this->classDir = sys_get_temp_dir() . '/ray-bindings-md-' . uniqid('', true);
+        if (! mkdir($this->classDir) && ! is_dir($this->classDir)) {
+            throw new RuntimeException('Cannot create ' . $this->classDir);
+        }
     }
 
     protected function tearDown(): void
     {
-        $file = $this->classDir . '/bindings.md';
-        if (file_exists($file)) {
-            unlink($file);
+        // remove the whole test-owned dir: bindings.md and any generated proxies
+        foreach (glob($this->classDir . '/*') ?: [] as $artifact) {
+            unlink($artifact);
+        }
+
+        if (is_dir($this->classDir)) {
+            rmdir($this->classDir);
         }
     }
 

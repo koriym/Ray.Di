@@ -159,7 +159,7 @@ function bindingsHtmlJs(): string
           function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
           function section(name) {
-            var m = text.match(new RegExp('\\n## ' + name + '\\n([\\s\\S]*?)(?:\\n## |$)'));
+            var m = text.match(new RegExp('(?:^|\\n)## ' + name + '\\n([\\s\\S]*?)(?:\\n## |$)'));
             if (!m) { return []; }
             return m[1].split('\n').filter(function (l) { return l.trim() !== ''; });
           }
@@ -223,10 +223,10 @@ function bindingsHtmlJs(): string
             + '</div>'
             + '<section><h2>Provenance <span class="hint">— who bound what, who was discarded</span></h2>'
             + '<div class="bar"><span class="lbl">filter</span>'
-            + '<span class="chip bind" data-t="bind" data-off="0">bind</span>'
-            + '<span class="chip replace" data-t="replace" data-off="0">replace</span>'
-            + '<span class="chip keep" data-t="keep" data-off="0">keep</span>'
-            + '<span class="chip move" data-t="move" data-off="0">move</span></div>'
+            + '<span class="chip bind" data-t="bind" data-off="0" role="button" tabindex="0">bind</span>'
+            + '<span class="chip replace" data-t="replace" data-off="0" role="button" tabindex="0">replace</span>'
+            + '<span class="chip keep" data-t="keep" data-off="0" role="button" tabindex="0">keep</span>'
+            + '<span class="chip move" data-t="move" data-off="0" role="button" tabindex="0">move</span></div>'
             + '<div class="log" id="prov">' + prov + '</div></section>'
             + '<section><h2>Modules <span class="hint">— composing modules, by binding count</span></h2>'
             + '<div class="grid">' + mods + '</div></section>'
@@ -235,10 +235,15 @@ function bindingsHtmlJs(): string
 
           var provEl = document.getElementById('prov');
           view.querySelectorAll('.chip').forEach(function (c) {
-            c.addEventListener('click', function () {
+            function toggle() {
               var off = c.getAttribute('data-off') === '1';
               c.setAttribute('data-off', off ? '0' : '1');
               provEl.classList.toggle('hide-' + c.getAttribute('data-t'), !off);
+            }
+
+            c.addEventListener('click', toggle);
+            c.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
             });
           });
         })();

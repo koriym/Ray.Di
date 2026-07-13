@@ -76,7 +76,7 @@ class BindingsHtmlTest extends TestCase
 
         $this->assertSame(0, $exit);
         // the <pre> data island unescapes back to the exact markdown
-        preg_match('#<pre id="src">(.*)</pre>#s', $stdout, $matches);
+        $this->assertSame(1, preg_match('#<pre id="src">(.*)</pre>#s', $stdout, $matches));
         $recovered = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
         $original = file_get_contents($this->md);
         assert(is_string($original));
@@ -101,7 +101,7 @@ class BindingsHtmlTest extends TestCase
         [$stdout, , $exit] = $this->runTool(['-'], $md);
 
         $this->assertSame(0, $exit);
-        preg_match('#<pre id="src">(.*)</pre>#s', $stdout, $matches);
+        $this->assertSame(1, preg_match('#<pre id="src">(.*)</pre>#s', $stdout, $matches));
         $this->assertSame($md, html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8'));
     }
 

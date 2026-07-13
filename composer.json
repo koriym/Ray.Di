@@ -9,6 +9,7 @@
             "email": "akihito.koriyama@gmail.com"
         }
     ],
+    "bin": ["bin/bindings-html"],
     "require": {
         "php": "^8.2",
         "koriym/null-object": "^1.0",

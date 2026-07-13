@@ -32,13 +32,13 @@ use const ENT_QUOTES;
 use const PHP_BINARY;
 
 /**
- * Smoke-tests the bin/bindings-html CLI against a real bindings.md
+ * Covers Ray\Di\BindingsHtml and its bin/bindings-html CLI
  *
- * The tool is a projection, not a source of truth: it must embed the markdown
- * verbatim — so a committed bindings.html diffs exactly like the plain
- * markdown — and ship its decoration inline. These tests invoke the script the
- * way a user does, as a subprocess, so argument handling, stdin, and exit
- * codes are covered as well.
+ * The renderer is a projection, not a source of truth: it embeds the markdown
+ * verbatim in a <pre> data island and references a shared viewer (stylesheet +
+ * script) from the CDN, so every consumer reuses one implementation. The class
+ * is unit-tested directly; the CLI is exercised as a subprocess so argument
+ * handling, stdin, and exit codes are covered too.
  */
 class BindingsHtmlTest extends TestCase
 {
@@ -70,47 +70,68 @@ class BindingsHtmlTest extends TestCase
         }
     }
 
-    public function testEmbedsTheMarkdownVerbatimAndShipsTheDecoration(): void
+    public function testFragmentEmbedsTheMarkdownVerbatim(): void
+    {
+        $markdown = $this->markdown();
+
+        $fragment = (new BindingsHtml())->fragment($markdown);
+
+        // the <pre> data island unescapes back to the exact markdown
+        $this->assertSame(1, preg_match('#<pre id="src">(.*)</pre>#s', $fragment, $matches));
+        $this->assertSame($markdown, html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8'));
+        $this->assertStringContainsString('<div id="view"></div>', $fragment);
+    }
+
+    public function testPageLinksTheSharedCdnAssets(): void
+    {
+        $page = (new BindingsHtml())->page($this->markdown());
+
+        $this->assertStringContainsString('<link rel="stylesheet" href="' . BindingsHtml::CSS_URL . '">', $page);
+        $this->assertStringContainsString('<script src="' . BindingsHtml::JS_URL . '">', $page);
+        $this->assertStringContainsString('<pre id="src">', $page);
+    }
+
+    public function testPageRendersTheOptionalMessageAsSubtitle(): void
+    {
+        $html = new BindingsHtml();
+
+        $this->assertStringContainsString('<div class="sub">prod-app</div>', $html->page($this->markdown(), 'prod-app'));
+        $this->assertStringNotContainsString('class="sub"', $html->page($this->markdown()));
+    }
+
+    public function testCliRendersThePageFromAFile(): void
     {
         [$stdout, , $exit] = $this->runTool([$this->md]);
 
         $this->assertSame(0, $exit);
-        // the <pre> data island unescapes back to the exact markdown
+        $this->assertStringContainsString(BindingsHtml::JS_URL, $stdout);
         $this->assertSame(1, preg_match('#<pre id="src">(.*)</pre>#s', $stdout, $matches));
-        $recovered = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
-        $original = file_get_contents($this->md);
-        assert(is_string($original));
-        $this->assertSame($original, $recovered);
-        // the decoration travels in the same file
-        $this->assertStringContainsString('function renderEvent', $stdout);
-        $this->assertStringContainsString('<div id="view"></div>', $stdout);
+        $this->assertSame($this->markdown(), html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8'));
     }
 
-    public function testOptionalMessageBecomesASubtitle(): void
+    public function testCliReadsMarkdownFromStdin(): void
     {
-        [$stdout] = $this->runTool([$this->md, 'prod-app']);
-
-        $this->assertStringContainsString('<div class="sub">prod-app</div>', $stdout);
-    }
-
-    public function testReadsMarkdownFromStdin(): void
-    {
-        $md = file_get_contents($this->md);
-        assert(is_string($md));
-
-        [$stdout, , $exit] = $this->runTool(['-'], $md);
+        [$stdout, , $exit] = $this->runTool(['-'], $this->markdown());
 
         $this->assertSame(0, $exit);
         $this->assertSame(1, preg_match('#<pre id="src">(.*)</pre>#s', $stdout, $matches));
-        $this->assertSame($md, html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8'));
+        $this->assertSame($this->markdown(), html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8'));
     }
 
-    public function testExitsNonZeroWhenTheMarkdownCannotBeRead(): void
+    public function testCliExitsNonZeroWhenTheMarkdownCannotBeRead(): void
     {
         [, $stderr, $exit] = $this->runTool([$this->classDir . '/missing.md']);
 
         $this->assertSame(1, $exit);
         $this->assertStringContainsString('cannot read', $stderr);
+    }
+
+    private function markdown(): string
+    {
+        $markdown = file_get_contents($this->md);
+        assert(is_string($markdown));
+
+        return $markdown;
     }
 
     /**

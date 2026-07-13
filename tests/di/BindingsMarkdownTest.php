@@ -45,14 +45,40 @@ class BindingsMarkdownTest extends TestCase
         $markdown = file_get_contents($this->classDir . '/bindings.md');
         assert(is_string($markdown));
 
-        // exact section structure, so a dropped separator or section is caught
-        $this->assertStringStartsWith("# Ray.Di bindings\n\n## Provenance\n\n", $markdown);
-        $this->assertStringContainsString("\n\n## Bindings\n\n", $markdown);
-        $this->assertStringEndsWith("\n", $markdown);
-        // provenance names the module that bound it
-        $this->assertStringContainsString('@' . FakeLogStringModule::class, $markdown);
+        // title + summary counts, then Bindings first
+        $this->assertStringStartsWith(
+            "# Ray.Di bindings\n\n15 bindings · 5 modules · 0 replaced · 0 discarded\n\n## Bindings\n\n",
+            $markdown,
+        );
         // bindings list the resolved target
         $this->assertStringContainsString(FakeAopInterface::class . '- => (dependency) ' . FakeAop::class, $markdown);
+        // modules, sorted, with each module's binding count, then provenance
+        $this->assertStringContainsString(
+            "## Modules\n\n"
+            . "- Ray\\Di\\AssistedInjectModule (1)\n"
+            . "- Ray\\Di\\AssistedModule (2)\n"
+            . '- ' . FakeLogStringModule::class . " (9)\n"
+            . "- Ray\\Di\\MultiBinding\\MultiBindingModule (2)\n"
+            . "- Ray\\Di\\ProviderSetModule (1)\n\n## Provenance",
+            $markdown,
+        );
+        // provenance names the module that bound it
+        $this->assertStringContainsString('@' . FakeLogStringModule::class, $markdown);
+        $this->assertStringEndsWith("\n", $markdown);
+    }
+
+    /**
+     * The summary counts replaced (last-write-wins rebind) and discarded
+     * (merge collision, incoming dropped) bindings.
+     */
+    public function testSummaryCountsReplacedAndDiscarded(): void
+    {
+        new Injector(new FakeBindingLogModule(new FakeBindingLogInnerModule()), $this->classDir);
+
+        $markdown = file_get_contents($this->classDir . '/bindings.md');
+        assert(is_string($markdown));
+
+        $this->assertStringContainsString('8 bindings · 6 modules · 1 replaced · 1 discarded', $markdown);
     }
 
     /**

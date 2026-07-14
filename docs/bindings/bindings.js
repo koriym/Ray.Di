@@ -21,13 +21,17 @@
 
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
+    // esc for a double-quoted attribute value (esc leaves quotes untouched)
+    function attr(s) { return esc(s).replace(/"/g, '&quot;'); }
+
     function resolve(fqcn) {
       var best = null;
       for (var i = 0; i < srcmap.length; i++) {
         var e = srcmap[i];
         if (fqcn.indexOf(e.p) === 0 && (!best || e.p.length > best.p.length)) { best = e; }
       }
-      if (!best) { return null; }
+      // only link http(s) repositories, so a hostile source URL can't become a javascript: href
+      if (!best || !/^https?:\/\//.test(best.u)) { return null; }
       var file = (best.d ? best.d + '/' : '') + fqcn.slice(best.p.length).replace(/\\/g, '/') + '.php';
       var gh = best.u.indexOf('github.com') !== -1 ? best.u + '/blob/' + best.r + '/' + file : best.u;
       return { gh: gh, local: 'vendor/' + best.n + '/' + file };
@@ -41,7 +45,7 @@
         out += esc(s.slice(last, m.index));
         var r = resolve(m[0]);
         out += r
-          ? '<a href="' + r.gh + '" data-src="' + r.local + '" target="_blank" rel="noopener">' + esc(m[0]) + '</a>'
+          ? '<a href="' + attr(r.gh) + '" data-src="' + attr(r.local) + '" target="_blank" rel="noopener">' + esc(m[0]) + '</a>'
           : esc(m[0]);
         last = m.index + m[0].length;
       }

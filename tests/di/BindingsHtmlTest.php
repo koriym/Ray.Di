@@ -119,6 +119,15 @@ class BindingsHtmlTest extends TestCase
         $this->assertStringNotContainsString('id="srcmap"', (new BindingsHtml())->page($this->markdown()));
     }
 
+    public function testMalformedComposerLockOmitsTheSourceMapWithoutCrashing(): void
+    {
+        $html = new BindingsHtml();
+
+        // invalid JSON and an unexpected shape both degrade to no source map
+        $this->assertStringNotContainsString('id="srcmap"', $html->page($this->markdown(), 'not json'));
+        $this->assertStringNotContainsString('id="srcmap"', $html->page($this->markdown(), '{"packages":"not-an-array"}'));
+    }
+
     public function testCliEmbedsTheSourceMapWhenGivenAComposerLock(): void
     {
         $lockFile = $this->classDir . '/composer.lock';

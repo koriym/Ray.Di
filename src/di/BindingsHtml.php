@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use JsonException;
+use Throwable;
+
 use function array_merge;
 use function htmlspecialchars;
 use function is_array;
@@ -18,6 +21,7 @@ use function substr;
 
 use const ENT_QUOTES;
 use const JSON_HEX_TAG;
+use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_SLASHES;
 
 /**
@@ -122,7 +126,21 @@ final class BindingsHtml
             return '';
         }
 
-        $decoded = json_decode($composerLock, true);
+        try {
+            return $this->buildSourceMap($markdown, $composerLock);
+        } catch (Throwable) {
+            // a malformed lock (bad JSON or unexpected shapes) omits the source
+            // map rather than crashing the render — the page still works
+            return '';
+        }
+    }
+
+    /**
+     * @throws JsonException on invalid JSON in the composer.lock.
+     */
+    private function buildSourceMap(string $markdown, string $composerLock): string
+    {
+        $decoded = json_decode($composerLock, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($decoded)) {
             return '';
         }

@@ -108,8 +108,10 @@
           return '<span class="mod">' + link(i, esc(i.split('\\').pop())) + '</span> <span class="methods">' + esc(by[i].join(', ')) + '</span>';
         }).join(' · ') + '</div>';
       }
+      // a compiled null object ({Interface}{hash}Null) is noise; show it as (null object)
+      var tgt = /[0-9a-f]{8}Null$/.test(target) ? '<span class="nil">(null object)</span>' : escLink(target);
       return '<div class="b"><div class="brow"><span class="key">' + escLink(m[1]) + '</span>'
-        + '<span class="arrow"> =&gt; </span><span class="tgt">' + escLink(target) + '</span></div>' + aop + '</div>';
+        + '<span class="arrow"> =&gt; </span><span class="tgt">' + tgt + '</span></div>' + aop + '</div>';
     }
 
     function renderModule(line) {

@@ -48,7 +48,7 @@ h2 .hint{text-transform:none;font-weight:400;color:var(--muted)}
 .ev.move{border-color:var(--move)}
 .ev .t{display:inline-block;min-width:58px;color:var(--muted);text-transform:lowercase}
 .ev.replace .t{color:var(--replace)} .ev.keep .t{color:var(--keep)} .ev.move .t{color:var(--move)}
-.key{color:var(--keyink);font-weight:600} .arrow{color:var(--muted)} .tgt{color:var(--ink)}
+.key{color:var(--keyink);font-weight:600} .arrow{color:var(--muted)} .tgt{color:var(--ink)} .nil{color:var(--muted)}
 .at{color:var(--at)} .mod{color:var(--accent)}
 /* source links keep their token colour; only an underline marks them clickable */
 #view a{color:inherit;text-decoration:underline;text-decoration-color:color-mix(in srgb,currentColor 45%,transparent);text-underline-offset:2px}

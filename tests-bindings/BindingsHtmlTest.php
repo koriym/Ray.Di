@@ -145,6 +145,89 @@ class BindingsHtmlTest extends TestCase
         $this->assertStringNotContainsString('id="srcmap"', $html->page(self::MARKDOWN, '{"packages":"not-an-array"}'));
     }
 
+    public function testNonArrayJsonOmitsTheSourceMap(): void
+    {
+        // valid JSON that decodes to null (not an array) → early return
+        $this->assertStringNotContainsString(
+            'id="srcmap"',
+            (new BindingsHtml())->page(self::MARKDOWN, 'null')
+        );
+    }
+
+    public function testPackageMissingRequiredFieldsIsSkipped(): void
+    {
+        $lock = (string) json_encode([
+            'packages' => [
+                [
+                    'name' => 'ray/di',
+                    // missing 'source' key → url and reference are null
+                    'autoload' => ['psr-4' => ['Ray\\Di\\' => 'src/di']],
+                ],
+            ],
+        ]);
+
+        $this->assertStringNotContainsString('id="srcmap"', (new BindingsHtml())->page(self::MARKDOWN, $lock));
+    }
+
+    public function testPackageWithUnknownPrefixIsPruned(): void
+    {
+        $lock = (string) json_encode([
+            'packages' => [
+                [
+                    'name' => 'some/package',
+                    'source' => [
+                        'url' => 'https://github.com/some/package.git',
+                        'reference' => 'ref123',
+                    ],
+                    'autoload' => ['psr-4' => ['Some\\Package\\' => 'src/']],
+                ],
+            ],
+        ]);
+
+        // the prefix doesn't appear in the bindings → no source map
+        $this->assertStringNotContainsString('id="srcmap"', (new BindingsHtml())->page(self::MARKDOWN, $lock));
+    }
+
+    public function testPackageWithEmptySourceDirArrayIsSkipped(): void
+    {
+        $lock = (string) json_encode([
+            'packages' => [
+                [
+                    'name' => 'ray/di',
+                    'source' => [
+                        'url' => 'https://github.com/ray-di/Ray.Di.git',
+                        'reference' => 'abcdef1234',
+                    ],
+                    'autoload' => ['psr-4' => ['Ray\\Di\\' => []]],
+                ],
+            ],
+        ]);
+
+        $this->assertStringNotContainsString('id="srcmap"', (new BindingsHtml())->page(self::MARKDOWN, $lock));
+    }
+
+    public function testGitAtUrlIsNormalisedToHttps(): void
+    {
+        $lock = (string) json_encode([
+            'packages' => [
+                [
+                    'name' => 'ray/di',
+                    'source' => [
+                        'type' => 'git',
+                        'url' => 'git@github.com:ray-di/Ray.Di.git',
+                        'reference' => 'abcdef1234',
+                    ],
+                    'autoload' => ['psr-4' => ['Ray\\Di\\' => 'src/di']],
+                ],
+            ],
+        ]);
+
+        $page = (new BindingsHtml())->page(self::MARKDOWN, $lock);
+
+        $this->assertStringContainsString('id="srcmap"', $page);
+        $this->assertStringContainsString('"u":"https://github.com/ray-di/Ray.Di"', $page);
+    }
+
     public function testCliRendersThePageFromAFile(): void
     {
         [$stdout, , $exit] = $this->runTool([$this->md]);

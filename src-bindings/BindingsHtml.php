@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Di;
+namespace Ray\Bindings;
 
 use JsonException;
 use Throwable;

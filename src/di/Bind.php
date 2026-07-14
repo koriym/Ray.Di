@@ -61,9 +61,7 @@ final class Bind implements Stringable
         }
     }
 
-    /**
-     * @return non-empty-string
-     */
+    /** @return non-empty-string */
     public function __toString(): string
     {
         return $this->interface . '-' . $this->name;

@@ -7,9 +7,7 @@ namespace Ray\Di\MultiBinding;
 use Ray\Di\AbstractModule;
 use Ray\Di\Types;
 
-/**
- * @psalm-import-type BindableInterface from Types
- */
+/** @psalm-import-type BindableInterface from Types */
 final class MultiBindingModule extends AbstractModule
 {
     protected function configure(): void

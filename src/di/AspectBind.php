@@ -9,9 +9,7 @@ use Ray\Aop\MethodInterceptor;
 
 use function assert;
 
-/**
- * @psalm-import-type MethodInterceptorBindings from Types
- */
+/** @psalm-import-type MethodInterceptorBindings from Types */
 final class AspectBind implements AcceptInterface
 {
     public function __construct(private AopBind $bind)

@@ -35,9 +35,7 @@ final class AssistedInjectInterceptor implements MethodInterceptor
     {
     }
 
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     public function invoke(MethodInvocation $invocation)
     {
         $this->methodInvocationProvider->set($invocation);
@@ -81,9 +79,7 @@ final class AssistedInjectInterceptor implements MethodInterceptor
         return $namedParams;
     }
 
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     private function getDependency(ReflectionParameter $param)
     {
         $named = (string) $this->getName($param);
@@ -114,9 +110,7 @@ final class AssistedInjectInterceptor implements MethodInterceptor
         return $this->getCustomInject($param);
     }
 
-    /**
-     * @return ?class-string
-     */
+    /** @return ?class-string */
     private function getCustomInject(ReflectionParameter $param): ?string
     {
         /** @var list<ReflectionAttribute> $injects */

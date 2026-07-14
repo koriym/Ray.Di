@@ -13,9 +13,6 @@ use Ray\Di\FakeRobotInterface;
 use Ray\Di\MultiBinder;
 use Ray\Di\NullModule;
 
-/**
- * @requires PHP 8.0
- */
 class MultiBinderTest extends TestCase
 {
     public function testAdd(): void
@@ -48,8 +45,6 @@ class MultiBinderTest extends TestCase
      * interface registered in the shared MultiBindings. Binding interface A,
      * then calling setBinding() on a different interface B, must leave A's
      * bindings intact.
-     *
-     * @covers \Ray\Di\MultiBinder::setBinding
      */
     public function testSetBindingDoesNotClearOtherInterfaces(): void
     {

@@ -41,9 +41,6 @@ class ModuleCompositionTest extends TestCase
     /**
      * A binding declared directly with bind() must override the same binding
      * coming from the constructor-chained module.
-     *
-     * @covers \Ray\Di\AbstractModule::__construct
-     * @covers \Ray\Di\AbstractModule::bind
      */
     public function testOwnBindOverridesConstructorChainedBinding(): void
     {
@@ -64,9 +61,6 @@ class ModuleCompositionTest extends TestCase
      * same binding coming from the constructor-chained module. ProdModule-style
      * context modules bind exclusively through install(), so if the chained
      * module won here, a prod context would silently run with dev bindings.
-     *
-     * @covers \Ray\Di\AbstractModule::__construct
-     * @covers \Ray\Di\AbstractModule::install
      */
     public function testInstallOverridesConstructorChainedBinding(): void
     {
@@ -90,9 +84,6 @@ class ModuleCompositionTest extends TestCase
     /**
      * bind() overrides a binding installed earlier in the same configure().
      * bind() is assertive: it always registers, no matter what is already there.
-     *
-     * @covers \Ray\Di\AbstractModule::bind
-     * @covers \Ray\Di\AbstractModule::install
      */
     public function testBindOverridesEarlierInstalledBinding(): void
     {
@@ -112,9 +103,6 @@ class ModuleCompositionTest extends TestCase
     /**
      * install() does not override a binding declared earlier with bind().
      * install() is polite: it only fills keys that are not yet bound.
-     *
-     * @covers \Ray\Di\AbstractModule::bind
-     * @covers \Ray\Di\AbstractModule::install
      */
     public function testEarlierBindSurvivesLaterInstall(): void
     {
@@ -134,8 +122,6 @@ class ModuleCompositionTest extends TestCase
     /**
      * When two install()ed modules bind the same key, the first install wins,
      * for the same reason install() never overrides: existing entries are kept.
-     *
-     * @covers \Ray\Di\AbstractModule::install
      */
     public function testFirstInstallWinsWhenTwoInstallsCollide(): void
     {
@@ -166,8 +152,6 @@ class ModuleCompositionTest extends TestCase
      * In a chain `new A(new B(new C()))` the outermost module wins, and for
      * keys the outermost does not bind, the next-outer module wins. This is
      * the "left context overrides right" rule of BEAR.Sunday contexts.
-     *
-     * @covers \Ray\Di\AbstractModule::__construct
      */
     public function testOuterModuleWinsAcrossConstructorChain(): void
     {
@@ -203,8 +187,6 @@ class ModuleCompositionTest extends TestCase
      * override() is the one route that replaces an existing binding: on a
      * colliding key the override module's binding wins over what configure()
      * declared before it.
-     *
-     * @covers \Ray\Di\AbstractModule::override
      */
     public function testOverrideModuleWinsOnCollision(): void
     {
@@ -231,9 +213,6 @@ class ModuleCompositionTest extends TestCase
      * constructor-chained module's binding. `bind(Concrete::class)->in(SINGLETON)`
      * is the documented idiom to singletonize a concrete class; it must not be
      * silently ignored just because the chained module already bound the class.
-     *
-     * @covers \Ray\Di\AbstractModule::__construct
-     * @covers \Ray\Di\AbstractModule::bind
      */
     public function testRebindScopeOverridesConstructorChainedBinding(): void
     {
@@ -263,9 +242,6 @@ class ModuleCompositionTest extends TestCase
      * FakeDoubleInterceptor outermost, returnSame(2) is (2 + 1) * 2 = 6;
      * if the chained FakeIncrementInterceptor wrapped it instead, the result
      * would be (2 * 2) + 1 = 5.
-     *
-     * @covers \Ray\Di\AbstractModule::__construct
-     * @covers \Ray\Di\AbstractModule::bindInterceptor
      */
     public function testOwnInterceptorWrapsConstructorChainedInterceptor(): void
     {
@@ -300,9 +276,6 @@ class ModuleCompositionTest extends TestCase
      * Within one configure(), an interceptor declared before install() wraps
      * the installed module's interceptor: pointcuts append in declaration
      * order and earlier means outermost. (2 + 1) * 2 = 6, as above.
-     *
-     * @covers \Ray\Di\AbstractModule::bindInterceptor
-     * @covers \Ray\Di\AbstractModule::install
      */
     public function testInterceptorDeclaredBeforeInstallWrapsInstalledInterceptor(): void
     {
@@ -337,9 +310,6 @@ class ModuleCompositionTest extends TestCase
      * Multibinding collections keep the same precedence direction: the module's
      * own entries come first in the Map, the constructor-chained module's
      * entries follow.
-     *
-     * @covers \Ray\Di\AbstractModule::__construct
-     * @covers \Ray\Di\MultiBinding\MultiBindings::merge
      */
     public function testOwnMultiBindingEntriesPrecedeConstructorChainedEntries(): void
     {

@@ -9,7 +9,7 @@
 /tests/tmp/
 /tests/compiler/tmp/
 /*.cache.php
-/.phpunit.result.cache
+/.phpunit.cache/
 /composer.lock
 /.phpcs-cache
 /coverage.xml

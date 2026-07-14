@@ -17,9 +17,7 @@ use function class_exists;
 use function is_string;
 use function preg_match;
 
-/**
- * @psalm-import-type ParameterNameMapping from Types
- */
+/** @psalm-import-type ParameterNameMapping from Types */
 final class Name
 {
     /**
@@ -38,9 +36,7 @@ final class Name
      */
     private array $names = [];
 
-    /**
-     * @param string|ParameterNameMapping $name
-     */
+    /** @param string|ParameterNameMapping $name */
     public function __construct(string|array $name)
     {
         if (is_string($name)) {

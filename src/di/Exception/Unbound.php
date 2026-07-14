@@ -39,9 +39,7 @@ class Unbound extends LogicException implements ExceptionInterface
         return parent::__toString();
     }
 
-    /**
-     * @param array<int, string> $msg
-     */
+    /** @param array<int, string> $msg */
     private function buildMessage(self $e, array $msg): string
     {
         $lastE = $e;
@@ -57,9 +55,7 @@ class Unbound extends LogicException implements ExceptionInterface
         return $this->getMainMessage($lastE) . implode('', $msg);
     }
 
-    /**
-     * @psalm-pure
-     */
+    /** @psalm-pure */
     private function getMainMessage(self $e): string
     {
         return sprintf(

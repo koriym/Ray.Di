@@ -11,9 +11,7 @@ use Stringable;
 
 use function assert;
 
-/**
- * @psalm-import-type MethodArguments from Types
- */
+/** @psalm-import-type MethodArguments from Types */
 final class NewInstance implements Stringable
 {
     /** @var class-string */
@@ -24,9 +22,7 @@ final class NewInstance implements Stringable
     private ?Arguments $arguments = null;
     private ?AspectBind $bind = null;
 
-    /**
-     * @phpstan-param ReflectionClass<object> $class
-     */
+    /** @phpstan-param ReflectionClass<object> $class */
     public function __construct(
         ReflectionClass $class,
         SetterMethods $setterMethods,
@@ -52,17 +48,13 @@ final class NewInstance implements Stringable
         return $this->postNewInstance($container, $instance);
     }
 
-    /**
-     * @return class-string
-     */
+    /** @return class-string */
     public function __toString(): string
     {
         return $this->class;
     }
 
-    /**
-     * @param MethodArguments $params
-     */
+    /** @param MethodArguments $params */
     public function newInstanceArgs(Container $container, array $params): object
     {
         /** @var class-string $class */
@@ -73,9 +65,7 @@ final class NewInstance implements Stringable
         return $this->postNewInstance($container, $instance);
     }
 
-    /**
-     * @param class-string $class
-     */
+    /** @param class-string $class */
     public function weaveAspects(string $class, AopBind $bind): void
     {
         $this->class = $class;

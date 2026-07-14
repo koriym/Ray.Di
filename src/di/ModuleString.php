@@ -16,14 +16,10 @@ use function unserialize;
 
 use const PHP_EOL;
 
-/**
- * @psalm-import-type PointcutList from Types
- */
+/** @psalm-import-type PointcutList from Types */
 final class ModuleString
 {
-    /**
-     * @param PointcutList $pointcuts
-     */
+    /** @param PointcutList $pointcuts */
     public function __invoke(Container $container, array $pointcuts): string
     {
         $log = [];

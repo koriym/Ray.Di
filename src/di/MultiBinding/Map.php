@@ -25,16 +25,12 @@ use function sprintf;
  */
 final class Map implements IteratorAggregate, ArrayAccess, Countable
 {
-    /**
-     * @param array<array-key, LazyInterface> $lazies
-     */
+    /** @param array<array-key, LazyInterface> $lazies */
     public function __construct(private array $lazies, private readonly InjectorInterface $injector)
     {
     }
 
-    /**
-     * @param array-key $offset
-     */
+    /** @param array-key $offset */
     #[ReturnTypeWillChange]
     public function offsetExists($offset): bool
     {
@@ -96,9 +92,7 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
         return count($this->lazies);
     }
 
-    /**
-     * @param mixed $offset array-key at the type level, but ArrayAccess allows null (e.g. `$map[] = $value`)
-     */
+    /** @param mixed $offset array-key at the type level, but ArrayAccess allows null (e.g. `$map[] = $value`) */
     private function offsetToString($offset): string
     {
         if ($offset === null) {

@@ -114,17 +114,13 @@ final class BindingLog implements Stringable
         $this->events[] = new BindingEvent(BindingEvent::MOVE, $to, '', $this->sources[$to] ?? 'unknown', null, null, $from);
     }
 
-    /**
-     * @return list<BindingEvent>
-     */
+    /** @return list<BindingEvent> */
     public function getEvents(): array
     {
         return $this->events;
     }
 
-    /**
-     * @return array<string, string> Index => module FQCN owning the current binding
-     */
+    /** @return array<string, string> Index => module FQCN owning the current binding */
     public function getSources(): array
     {
         return $this->sources;

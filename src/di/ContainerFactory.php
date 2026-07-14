@@ -35,9 +35,7 @@ final class ContainerFactory
         return $container;
     }
 
-    /**
-     * @param AbstractModule|ModuleList|null $module Module(s)
-     */
+    /** @param AbstractModule|ModuleList|null $module Module(s) */
     private function getModule($module): AbstractModule
     {
         if ($module instanceof AbstractModule) {

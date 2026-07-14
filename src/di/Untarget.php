@@ -15,9 +15,7 @@ final class Untarget
     private readonly ReflectionClass $class;
     private string $scope = Scope::PROTOTYPE;
 
-    /**
-     * @param class-string $class
-     */
+    /** @param class-string $class */
     public function __construct(string $class)
     {
         $this->class = new ReflectionClass($class);

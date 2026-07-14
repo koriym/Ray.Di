@@ -17,3 +17,5 @@ parameters:
   ignoreErrors:
     - '#contains generic class ReflectionAttribute but does not specify its types:#'
     - '#generic class ReflectionAttribute but does not specify its types:#'
+    - '#Offset 1 might not exist on array\{\}\|array\{non-falsy-string, string\}#'
+    - '#will always evaluate to true#'

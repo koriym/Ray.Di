@@ -32,7 +32,7 @@ final class InjectionPoint implements InjectionPointInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getParameter(): ReflectionParameter
     {
@@ -40,31 +40,31 @@ final class InjectionPoint implements InjectionPointInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getMethod(): ReflectionMethod
     {
         $class = $this->parameter->getDeclaringClass();
         $method = $this->parameter->getDeclaringFunction()->getShortName();
-        assert($class instanceof \ReflectionClass);
+        assert($class instanceof CoreReflectionClass);
         assert(class_exists($class->getName()));
 
         return new ReflectionMethod($class->getName(), $method);
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getClass(): ReflectionClass
     {
         $class = $this->parameter->getDeclaringClass();
-        assert($class instanceof \ReflectionClass);
+        assert($class instanceof CoreReflectionClass);
 
         return new ReflectionClass($class->getName());
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function getQualifiers(): array
     {
@@ -80,9 +80,7 @@ final class InjectionPoint implements InjectionPointInterface
         return $qualifiers;
     }
 
-    /**
-     * @return array<string>
-     */
+    /** @return array<string> */
     public function __serialize(): array
     {
         return [$this->pClass, $this->pFunction, $this->pName];

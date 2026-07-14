@@ -10,20 +10,16 @@ use ReflectionClass;
 use function assert;
 use function is_dir;
 
-/**
- * @codeCoverageIgnore
- */
+/** @codeCoverageIgnore */
 final class NullObjectDependency implements DependencyInterface
 {
-    /**
-     * @param class-string $interface
-     */
+    /** @param class-string $interface */
     public function __construct(private string $interface)
     {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function __toString(): string
     {
@@ -31,7 +27,7 @@ final class NullObjectDependency implements DependencyInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function inject(Container $container): null
     {
@@ -39,7 +35,7 @@ final class NullObjectDependency implements DependencyInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function register(array &$container, Bind $bind): void
     {
@@ -47,7 +43,7 @@ final class NullObjectDependency implements DependencyInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function setScope($scope): void
     {

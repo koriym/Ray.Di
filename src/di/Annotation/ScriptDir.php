@@ -12,7 +12,8 @@ use Ray\Di\Di\Qualifier;
  *
  * This qualifier should not use in an application code.
  */
-#[Attribute, Qualifier]
+#[Attribute]
+#[Qualifier]
 final class ScriptDir
 {
 }

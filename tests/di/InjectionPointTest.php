@@ -54,9 +54,6 @@ class InjectionPointTest extends TestCase
      * unserialize() the ReflectionParameter must be reconstructed; otherwise
      * the typed $parameter property stays uninitialized and getParameter()/
      * getMethod()/getClass() raise an Error on first access.
-     *
-     * @covers \Ray\Di\InjectionPoint::__unserialize
-     * @covers \Ray\Di\InjectionPoint::__serialize
      */
     public function testSerializeRoundTripRestoresParameter(): void
     {

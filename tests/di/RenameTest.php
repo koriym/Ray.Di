@@ -15,8 +15,6 @@ class RenameTest extends TestCase
      * introduced via install() -- not just constructor chaining -- can be
      * renamed. After the move, the new name resolves and the old (unnamed)
      * index is gone.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testRenamesBindingIntroducedByInstall(): void
     {
@@ -41,9 +39,6 @@ class RenameTest extends TestCase
      * container. rename() inside configure() is deferred and applied against
      * getContainer() after composition completes, so it must act on that
      * merged container, not on a stale reference captured before the swap.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
-     * @covers \Ray\Di\AbstractModule::override
      */
     public function testRenamesBindingAfterOverride(): void
     {
@@ -73,8 +68,6 @@ class RenameTest extends TestCase
     /**
      * When no binding exists at the source index, rename() must
      * surface Container::move()'s Unbound rather than silently no-op.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testThrowsUnboundWhenSourceMissing(): void
     {
@@ -94,8 +87,6 @@ class RenameTest extends TestCase
      * instead of silently overwriting it. The pre-existing binding at the
      * target index must remain resolvable afterward, proving move() aborted
      * before mutating the container.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testThrowsWhenTargetAlreadyBoundAndPreservesExistingBinding(): void
     {
@@ -129,8 +120,6 @@ class RenameTest extends TestCase
     /**
      * With $targetInterface omitted, the rename must stay within the same
      * interface -- only the binding name changes.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testRenameWithinSameInterfaceWhenTargetInterfaceOmitted(): void
     {
@@ -152,8 +141,6 @@ class RenameTest extends TestCase
      * With $targetInterface specified, the binding must move to a different
      * interface index entirely, not just get a new name under the source
      * interface.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testMovesToDifferentInterfaceWhenTargetInterfaceSpecified(): void
     {
@@ -177,8 +164,6 @@ class RenameTest extends TestCase
     /**
      * Renaming a binding to its own current name must be a no-op, not an
      * error. The existing binding must remain resolvable under the same name.
-     *
-     * @covers \Ray\Di\AbstractModule::rename
      */
     public function testSelfRenameIsNoOp(): void
     {

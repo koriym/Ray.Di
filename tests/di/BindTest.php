@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Exception\InvalidProvider;
 use Ray\Di\Exception\InvalidType;
@@ -21,6 +22,7 @@ class BindTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->bind = new Bind(new Container(), FakeTyreInterface::class);
     }
 
@@ -68,8 +70,6 @@ class BindTest extends TestCase
      * untargeted binding. The constructor checks isRegistered("{interface}-ANY")
      * to detect this. If the registry key is computed wrongly, the existing
      * explicit binding would be silently overwritten by an auto-constructed one.
-     *
-     * @covers \Ray\Di\Bind::__construct
      */
     public function testAlreadyRegisteredConcreteClassIsNotOverwritten(): void
     {
@@ -95,21 +95,16 @@ class BindTest extends TestCase
         $this->assertSame(spl_object_hash($dependency1), spl_object_hash($dependency2));
     }
 
-    /**
-     * @return array<int, array<int, array<string, string>>>
-     */
-    public function nameProvider(): array
+    /** @return array<int, array<int, array<string, string>>> */
+    public static function nameProvider(): array
     {
         return [
             [['tmpDir' => 'tmp_dir', 'leg' => 'left']],
         ];
     }
 
-    /**
-     * @param array<string, string>|string $name
-     *
-     * @dataProvider nameProvider
-     */
+    /** @param array<string, string>|string $name */
+    #[DataProvider('nameProvider')]
     public function testToConstructor($name): void
     {
         $container = new Container();

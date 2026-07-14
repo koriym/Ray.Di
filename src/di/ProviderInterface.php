@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-/**
- * @template T of mixed
- */
+/** @template T of mixed */
 interface ProviderInterface
 {
-    /**
-     * @return T
-     */
+    /** @return T */
     public function get();
 }

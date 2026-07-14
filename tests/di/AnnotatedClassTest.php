@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use LogicException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\ReflectionClass;
 
@@ -16,6 +17,7 @@ class AnnotatedClassTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->annotatedClass = new AnnotatedClass();
     }
 
@@ -42,11 +44,8 @@ class AnnotatedClassTest extends TestCase
         $this->assertNull($car->hardtop);
     }
 
-    /**
-     * @phpstan-param class-string $class
-     *
-     * @dataProvider classProvider
-     */
+    /** @phpstan-param class-string $class */
+    #[DataProvider('classProvider')]
     public function testAnnotatedByAnnotation(string $class): void
     {
         $newInstance = $this->annotatedClass->getNewInstance(new ReflectionClass($class));
@@ -62,10 +61,8 @@ class AnnotatedClassTest extends TestCase
         $this->assertInstanceOf(FakeMirrorRight::class, $handleBar->rightMirror);
     }
 
-    /**
-     * @return array<array<class-string>>
-     */
-    public function classProvider(): array
+    /** @return array<array<class-string>> */
+    public static function classProvider(): array
     {
         return [
             [FakeHandleBar::class],

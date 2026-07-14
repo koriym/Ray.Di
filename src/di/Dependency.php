@@ -38,9 +38,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
         $this->postConstruct = $postConstruct->name ?? null;
     }
 
-    /**
-     * @return array<string>
-     */
+    /** @return array<string> */
     public function __sleep()
     {
         return ['newInstance', 'postConstruct', 'isSingleton'];
@@ -55,7 +53,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function register(array &$container, Bind $bind): void
     {
@@ -63,7 +61,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function inject(Container $container)
     {
@@ -117,7 +115,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function setScope($scope): void
     {
@@ -126,9 +124,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
         }
     }
 
-    /**
-     * @param PointcutList $pointcuts
-     */
+    /** @param PointcutList $pointcuts */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {
         $class = (string) $this->newInstance;

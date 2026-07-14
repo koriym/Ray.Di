@@ -7,25 +7,19 @@ namespace Ray\Di;
 use Ray\Aop\MethodInvocation;
 use Ray\Di\Exception\MethodInvocationNotAvailable;
 
-/**
- * @implements ProviderInterface<MethodInvocation>
- */
+/** @implements ProviderInterface<MethodInvocation> */
 final class MethodInvocationProvider implements ProviderInterface
 {
     /** @var ?MethodInvocation<object> */
     private ?MethodInvocation $invocation = null;
 
-    /**
-     * @param MethodInvocation<object> $invocation
-     */
+    /** @param MethodInvocation<object> $invocation */
     public function set(MethodInvocation $invocation): void
     {
         $this->invocation = $invocation;
     }
 
-    /**
-     * @return MethodInvocation<object>
-     */
+    /** @return MethodInvocation<object> */
     public function get(): MethodInvocation
     {
         if ($this->invocation === null) {

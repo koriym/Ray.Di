@@ -6,6 +6,8 @@ namespace Ray\Di;
 
 use LogicException;
 use PDO;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\RequiresOperatingSystem;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\NullInterceptor;
 use Ray\Di\Exception\Unbound;
@@ -46,8 +48,6 @@ class InjectorTest extends TestCase
      * An unbound concrete class is auto-registered as an untargeted binding:
      * getInstance() catches Untargeted, binds the class on the fly, then
      * resolves it. Removing that self-bind makes the retry recurse endlessly.
-     *
-     * @covers \Ray\Di\Injector::getInstance
      */
     public function testGetUnboundConcreteClassIsAutoBound(): void
     {
@@ -56,9 +56,6 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(FakeEngine::class, $instance);
     }
 
-    /**
-     * @covers \Ray\Di\Injector::getInstance
-     */
     public function testUnboundConcreteClassIsConstructedOnlyOnce(): void
     {
         FakeConstructCounter::$constructCount = 0;
@@ -72,8 +69,6 @@ class InjectorTest extends TestCase
     /**
      * A named request cannot be satisfied by just-in-time binding (which
      * registers under Name::ANY only), so it fails fast as Unbound.
-     *
-     * @covers \Ray\Di\Injector::getInstance
      */
     public function testUnboundConcreteClassWithNameThrowsUnbound(): void
     {
@@ -229,9 +224,7 @@ class InjectorTest extends TestCase
         return $injector;
     }
 
-    /**
-     * @depends testAnnotationBasedInjection
-     */
+    #[Depends('testAnnotationBasedInjection')]
     public function testSerialize(Injector $injector): void
     {
         $extractedInjector = unserialize(serialize($injector));
@@ -346,8 +339,6 @@ class InjectorTest extends TestCase
      * loop returned after the first class interceptor, leaving the rest unbound;
      * building the proxy then threw an uncaught Untargeted during weaving. Here
      * the woven instance must build AND both interceptors must run.
-     *
-     * @covers \Ray\Di\AbstractModule::bindInterceptor
      */
     public function testBindInterceptorWeavesAllInterceptors(): void
     {
@@ -402,7 +393,7 @@ class InjectorTest extends TestCase
         (new Injector())->getInstance(FakeConcreteClass::class);
     }
 
-    /** @requires OS ^Linux|^Darwin */
+    #[RequiresOperatingSystem('^Linux|^Darwin')]
     public function testIsOptionalValue(): void
     {
         if (! defined('HHVM_VERSION')) {
@@ -418,7 +409,7 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(FakeInternalTypes::class, $types);
     }
 
-    /** @requires OS ^Linux|^Darwin */
+    #[RequiresOperatingSystem('^Linux|^Darwin')]
     public function testToConstructor(): void
     {
         $module = new class extends AbstractModule {
@@ -438,13 +429,13 @@ class InjectorTest extends TestCase
 
     public function testNullObject(): void
     {
-        $injector = (new Injector(new class extends AbstractModule {
+        $injector = new Injector(new class extends AbstractModule {
             protected function configure()
             {
                 $this->bind(FakeTyreInterface::class)->toNull();
                 $this->bind(FakeAopInterface::class)->toNull();
             }
-        }));
+        });
         $nullObject = $injector->getInstance(FakeTyreInterface::class);
         $this->assertInstanceOf(FakeTyreInterface::class, $nullObject);
         // a null object stubs every interface method to a no-op returning null
@@ -454,7 +445,7 @@ class InjectorTest extends TestCase
 
     public function testBindInterfeceInterceptor(): void
     {
-        $injector = (new Injector(new class extends AbstractModule {
+        $injector = new Injector(new class extends AbstractModule {
             protected function configure()
             {
                 $this->bind(FakeAop::class);
@@ -465,7 +456,7 @@ class InjectorTest extends TestCase
                     [FakeDoubleInterceptorInterface::class]
                 );
             }
-        }));
+        });
         $instance = $injector->getInstance(FakeAop::class);
         $result = $instance->returnSame(2);
         $this->assertSame(4, $result);
@@ -473,7 +464,7 @@ class InjectorTest extends TestCase
 
     public function testBindInterfeceNullInterceptor(): void
     {
-        $injector = (new Injector(new class extends AbstractModule {
+        $injector = new Injector(new class extends AbstractModule {
             protected function configure()
             {
                 $this->bind(FakeAop::class);
@@ -484,7 +475,7 @@ class InjectorTest extends TestCase
                     [FakeDoubleInterceptorInterface::class]
                 );
             }
-        }));
+        });
         $instance = $injector->getInstance(FakeAop::class);
         $result = $instance->returnSame(2);
         $this->assertSame(2, $result);
@@ -533,9 +524,6 @@ class InjectorTest extends TestCase
         $this->assertSame('a', $injector->getInstance('', 'var'));
     }
 
-    /**
-     * @requires PHP 8.0
-     */
     public function testProviderInjectWithSet(): void
     {
         $injector = new Injector(new class extends AbstractModule{

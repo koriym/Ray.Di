@@ -15,8 +15,6 @@ class DependencyProviderTest extends TestCase
      * exactly once. Tracking instantiation through `$instance !== null` instead
      * of an explicit flag re-runs the provider on every call when it returns
      * null, breaking the singleton contract.
-     *
-     * @covers \Ray\Di\DependencyProvider::inject
      */
     public function testSingletonProviderReturningNullIsInstantiatedOnce(): void
     {

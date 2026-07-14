@@ -14,8 +14,6 @@ class AbstractModuleTest extends TestCase
      * adopts that merged container. Both modules' bindings must resolve, and in
      * particular this module's own binding must survive the merge. If the merge
      * step is skipped, this module's binding is lost.
-     *
-     * @covers \Ray\Di\AbstractModule::override
      */
     public function testOverrideMergesThisModuleIntoTarget(): void
     {
@@ -44,8 +42,6 @@ class AbstractModuleTest extends TestCase
     /**
      * bindInterceptor() registers each interceptor in the container as a
      * singleton so the woven proxy can resolve it.
-     *
-     * @covers \Ray\Di\AbstractModule::bindInterceptor
      */
     public function testBindInterceptorRegistersInterceptor(): void
     {
@@ -65,8 +61,6 @@ class AbstractModuleTest extends TestCase
      * the first one. If the loop short-circuits (returns) after binding the
      * first class interceptor, the second one is never registered and resolving
      * it throws Unbound.
-     *
-     * @covers \Ray\Di\AbstractModule::bindInterceptor
      */
     public function testBindInterceptorRegistersAllInterceptors(): void
     {
@@ -85,8 +79,6 @@ class AbstractModuleTest extends TestCase
     /**
      * bindPriorityInterceptor() likewise registers each interceptor as a
      * singleton in the container.
-     *
-     * @covers \Ray\Di\AbstractModule::bindPriorityInterceptor
      */
     public function testBindPriorityInterceptorRegistersInterceptor(): void
     {

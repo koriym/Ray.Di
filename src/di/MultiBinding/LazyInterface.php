@@ -8,8 +8,6 @@ use Ray\Di\InjectorInterface;
 
 interface LazyInterface
 {
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     public function __invoke(InjectorInterface $injector);
 }

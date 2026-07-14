@@ -8,9 +8,7 @@ use Ray\Aop\ReflectionClass;
 use Ray\Aop\ReflectionMethod;
 use ReflectionParameter;
 
-/**
- * @psalm-import-type QualifierList from Types
- */
+/** @psalm-import-type QualifierList from Types */
 interface InjectionPointInterface
 {
     /**

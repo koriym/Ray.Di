@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 
 use function get_class;
@@ -16,6 +17,7 @@ class InjectionPointsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->injectionPoints = (new InjectionPoints())->addMethod('setTires')->addOptionalMethod('setHardtop');
     }
 
@@ -33,9 +35,7 @@ class InjectionPointsTest extends TestCase
         return $setterMethods;
     }
 
-    /**
-     * @depends testInvoke
-     */
+    #[Depends('testInvoke')]
     public function testSetterMethod(SetterMethods $setterMethod): void
     {
         $car = new FakeCar(new FakeEngine());
@@ -46,9 +46,7 @@ class InjectionPointsTest extends TestCase
         $this->assertInstanceOf(FakeHardtop::class, $car->hardtop);
     }
 
-    /**
-     * @depends testInvoke
-     */
+    #[Depends('testInvoke')]
     public function testSetterMethodOptional(SetterMethods $setterMethod): void
     {
         $car = new FakeCar(new FakeEngine());

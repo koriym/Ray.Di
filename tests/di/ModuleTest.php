@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
-use Ray\Aop\AbstractMatcher;
 use Ray\Aop\Matcher;
 use Ray\Di\Exception\NotFound;
-use ReflectionClass;
-use ReflectionMethod;
 
 use function str_replace;
 
@@ -92,26 +89,7 @@ Ray\Di\FakeRobotInterface- => (provider) (dependency) Ray\Di\FakeRobotProvider')
                 $this->bind(FakeAopInterface::class)->annotatedWith('two')->to(FakeAop::class);
             }
         };
-        $classMatcher = new class extends AbstractMatcher {
-            public int $matches = 0;
-
-            /** @param array<array-key, mixed> $arguments */
-            public function matchesClass(ReflectionClass $class, array $arguments): bool
-            {
-                unset($class, $arguments);
-                $this->matches++;
-
-                return true;
-            }
-
-            /** @param array<array-key, mixed> $arguments */
-            public function matchesMethod(ReflectionMethod $method, array $arguments): bool
-            {
-                unset($method, $arguments);
-
-                return true;
-            }
-        };
+        $classMatcher = new FakeCountingMatcher();
         $module->bindInterceptor($classMatcher, (new Matcher())->any(), [FakeDoubleInterceptor::class]);
         $container = $module->getContainer()->getContainer();
         $first = $container[FakeAopInterface::class . '-one'];

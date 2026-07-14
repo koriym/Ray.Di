@@ -6,11 +6,8 @@ namespace Ray\Di;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
-use Ray\Aop\AbstractMatcher;
 use Ray\Aop\Matcher;
 use Ray\Aop\Pointcut;
-use ReflectionClass;
-use ReflectionMethod;
 use RuntimeException;
 
 use function assert;
@@ -181,26 +178,7 @@ class BindingsMarkdownTest extends TestCase
     {
         $container = new Container();
         (new Bind($container, FakeAopInterface::class, self::class))->to(FakeAop::class);
-        $classMatcher = new class extends AbstractMatcher {
-            public int $matches = 0;
-
-            /** @param array<array-key, mixed> $arguments */
-            public function matchesClass(ReflectionClass $class, array $arguments): bool
-            {
-                unset($class, $arguments);
-                $this->matches++;
-
-                return true;
-            }
-
-            /** @param array<array-key, mixed> $arguments */
-            public function matchesMethod(ReflectionMethod $method, array $arguments): bool
-            {
-                unset($method, $arguments);
-
-                return true;
-            }
-        };
+        $classMatcher = new FakeCountingMatcher();
         $container->addPointcut(new Pointcut($classMatcher, (new Matcher())->any(), [FakeDoubleInterceptor::class]));
         $writer = new BindingsMarkdown();
         $writer($container, $this->classDir);

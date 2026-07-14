@@ -59,7 +59,7 @@ final class Dependency implements DependencyInterface, AcceptInterface
      *
      * @internal
      */
-    public function toStringWithAspects(CompilerInterface $compiler, array $pointcuts): string
+    public function toStringWithAspects(SpyCompiler $compiler, array $pointcuts): string
     {
         $aspect = $this->compileAspects($compiler, $pointcuts);
         if ($aspect === null) {

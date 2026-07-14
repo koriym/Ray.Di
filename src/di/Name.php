@@ -127,7 +127,7 @@ final class Name
     private function setName(string $name): void
     {
         // annotation
-        if (class_exists($name, false)) {
+        if (class_exists($name)) {
             $this->name = $name;
 
             return;

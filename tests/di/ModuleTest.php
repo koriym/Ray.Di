@@ -70,6 +70,18 @@ Ray\Di\FakeDoubleInterceptor- => (untargeted)
 Ray\Di\FakeRobotInterface- => (provider) (dependency) Ray\Di\FakeRobotProvider'), $normalize($string));
     }
 
+    public function testToStringWithoutPointcuts(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeEngine::class);
+            }
+        };
+
+        $this->assertSame(FakeEngine::class . '- => (untargeted)', (string) $module);
+    }
+
     /** Identical target classes share one AOP preview without mutating either dependency. */
     public function testToStringCachesAspectPreview(): void
     {

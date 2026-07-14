@@ -48,11 +48,9 @@ final class BindingsMarkdown
             }
 
             $written = file_put_contents($markdownFile, $this->render($container));
-            if ($written === false || $signature === null) {
-                return;
+            if ($written !== false && $signature !== null) {
+                file_put_contents($signatureFile, $signature);
             }
-
-            file_put_contents($signatureFile, $signature);
         } catch (Throwable) { // @codeCoverageIgnoreStart
             // best-effort: never break construction for a diagnostics file
         } // @codeCoverageIgnoreEnd

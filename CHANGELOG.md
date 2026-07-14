@@ -1,0 +1,34 @@
+# Changelog
+
+## 2.21.0 - 2026-07-15
+
+### Added
+
+- Add a binding provenance log and emit `bindings.md` during module composition ([#323](https://github.com/ray-di/Ray.Di/pull/323)).
+- Add a reusable `Ray\Bindings\BindingsHtml` viewer and the `bin/bindings-html` command ([#325](https://github.com/ray-di/Ray.Di/pull/325)).
+- Detect circular dependencies and report them with a dedicated exception, and add the official `AbstractModule::renameBinding()` API ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
+
+### Changed
+
+- Improve module composition compatibility and DI hot-path performance ([#316](https://github.com/ray-di/Ray.Di/pull/316), [#319](https://github.com/ray-di/Ray.Di/pull/319)).
+- Update the CI and development toolchain for PHP 8.5, PHPUnit 11, PHP_CodeSniffer 4, and mutation testing ([#315](https://github.com/ray-di/Ray.Di/pull/315), [#317](https://github.com/ray-di/Ray.Di/pull/317), [#326](https://github.com/ray-di/Ray.Di/pull/326)).
+
+### Fixed
+
+- Preserve provider constructor injection points during dependency resolution ([#320](https://github.com/ray-di/Ray.Di/pull/320)).
+- Correct JIT binding recursion, singleton handling, multi-binding scope clearing, and multi-interceptor registration ([#318](https://github.com/ray-di/Ray.Di/pull/318)).
+- Cache `bindings.md` generation when the binding signature is unchanged ([#327](https://github.com/ray-di/Ray.Di/pull/327)).
+
+### Included pull requests
+
+- [#311 Update license copyright year(s)](https://github.com/ray-di/Ray.Di/pull/311)
+- [#315 Add mutation testing with Infection framework](https://github.com/ray-di/Ray.Di/pull/315)
+- [#316 Improve DI hot path performance](https://github.com/ray-di/Ray.Di/pull/316)
+- [#317 Raise mutation MSI to 90%](https://github.com/ray-di/Ray.Di/pull/317)
+- [#318 Fix DI bugs and cleanups](https://github.com/ray-di/Ray.Di/pull/318)
+- [#319 Fix core resolution and module composition](https://github.com/ray-di/Ray.Di/pull/319)
+- [#320 Preserve provider injection points](https://github.com/ray-di/Ray.Di/pull/320)
+- [#323 Add binding provenance logging](https://github.com/ray-di/Ray.Di/pull/323)
+- [#325 Add the bindings HTML viewer](https://github.com/ray-di/Ray.Di/pull/325)
+- [#326 Bump CI tooling to PHP 8.5/8.4](https://github.com/ray-di/Ray.Di/pull/326)
+- [#327 Optimize bindings markdown generation](https://github.com/ray-di/Ray.Di/pull/327)

@@ -121,6 +121,17 @@ LOG;
     }
 
     /**
+     * A null-object binding (toNull) has an empty dependency string form; the
+     * event labels it '(null object)' so the reader sees a bound null object
+     * rather than a blank target.
+     */
+    public function testNullObjectBindingShowsANullObjectMarkerInString(): void
+    {
+        $nullObject = new BindingEvent(BindingEvent::BIND, FakeRobotInterface::class . '-', '', 'M');
+        $this->assertSame('bind    ' . FakeRobotInterface::class . '- => (null object) @M', (string) $nullObject);
+    }
+
+    /**
      * rename() is a move: the binding leaves its old index for the new one,
      * and the log both records the move and transfers provenance — the moved
      * binding still belongs to the module that bound it, not to the renamer.

@@ -3,7 +3,9 @@ parameters:
   level: max
   paths:
     - src/di
+    - src-bindings
     - tests/di
+    - tests-bindings
     - tests/type
   excludePaths:
     - tests/tmp/*

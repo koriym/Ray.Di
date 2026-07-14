@@ -20,11 +20,11 @@ declare(strict_types=1);
  * [message] renders as a subtitle, e.g. the context the bindings were composed
  * in.
  *
- * The rendering lives in Ray\Di\BindingsHtml so every consumer — this CLI, a
- * documentation generator — reuses the same viewer.
+ * The rendering lives in Ray\Bindings\BindingsHtml so every consumer — this
+ * CLI, a documentation generator — reuses the same viewer.
  */
 
-use Ray\Di\BindingsHtml;
+use Ray\Bindings\BindingsHtml;
 
 $autoload = null;
 foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $file) {

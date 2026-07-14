@@ -37,16 +37,18 @@
       return { gh: gh, local: 'vendor/' + best.n + '/' + file };
     }
 
-    // esc, but wrap any resolvable class name in a source link: href to the
-    // repository (for humans), data-src to the local vendor/ path (for agents)
+    // link a class to its source (href for humans, data-src for agents) showing
+    // the given already-escaped text; returns the text unchanged if unresolved
+    function link(fqcn, text) {
+      var r = resolve(fqcn);
+      return r ? '<a href="' + attr(r.gh) + '" data-src="' + attr(r.local) + '" target="_blank" rel="noopener">' + text + '</a>' : text;
+    }
+
+    // esc, but wrap any resolvable class name in a source link
     function escLink(s) {
       var out = '', last = 0, re = /[A-Za-z_][A-Za-z0-9_]*(?:\\[A-Za-z0-9_]+)+/g, m;
       while ((m = re.exec(s)) !== null) {
-        out += esc(s.slice(last, m.index));
-        var r = resolve(m[0]);
-        out += r
-          ? '<a href="' + attr(r.gh) + '" data-src="' + attr(r.local) + '" target="_blank" rel="noopener">' + esc(m[0]) + '</a>'
-          : esc(m[0]);
+        out += esc(s.slice(last, m.index)) + link(m[0], esc(m[0]));
         last = m.index + m[0].length;
       }
       return out + esc(s.slice(last));
@@ -91,10 +93,23 @@
 
     function renderBinding(line) {
       var m = line.match(/^(.*?) => (.*)$/);
-      return m
-        ? '<div class="b"><span class="key">' + escLink(m[1]) + '</span>'
-            + '<span class="arrow"> =&gt; </span><span class="tgt">' + escLink(m[2]) + '</span></div>'
-        : '<div class="b"><code>' + esc(line) + '</code></div>';
+      if (!m) { return '<div class="b"><code>' + esc(line) + '</code></div>'; }
+      var target = m[2], aop = '';
+      // peel off a trailing " (aop) +method(Interceptor) ..." and group methods by interceptor
+      var am = target.match(/ \(aop\)((?: \+\w+\([^)]*\))+)\s*$/);
+      if (am) {
+        target = target.slice(0, am.index);
+        var by = {}, order = [], pair, re = /\+(\w+)\(([^)]*)\)/g;
+        while ((pair = re.exec(am[1])) !== null) {
+          if (!by[pair[2]]) { by[pair[2]] = []; order.push(pair[2]); }
+          by[pair[2]].push(pair[1]);
+        }
+        aop = '<div class="aop"><span class="tag">aop</span> ' + order.map(function (i) {
+          return '<span class="mod">' + link(i, esc(i.split('\\').pop())) + '</span> <span class="methods">' + esc(by[i].join(', ')) + '</span>';
+        }).join(' · ') + '</div>';
+      }
+      return '<div class="b"><div class="brow"><span class="key">' + escLink(m[1]) + '</span>'
+        + '<span class="arrow"> =&gt; </span><span class="tgt">' + escLink(target) + '</span></div>' + aop + '</div>';
     }
 
     function renderModule(line) {

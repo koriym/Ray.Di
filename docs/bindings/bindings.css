@@ -56,8 +56,12 @@ h2 .hint{text-transform:none;font-weight:400;color:var(--muted)}
 .lost{display:block;padding:1px 0 1px 58px;color:var(--lost)}
 .lost .tag{opacity:.8;text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;margin-right:4px}
 .lost .mod{color:color-mix(in srgb,var(--lost) 70%,var(--accent))}
-.b{font-family:var(--mono);font-size:12px;padding:2px 10px;white-space:pre-wrap;word-break:break-word}
-.b+.b{border-top:1px solid color-mix(in srgb,var(--line) 45%,transparent)}
+.b{font-family:var(--mono);font-size:12px;padding:5px 10px;white-space:pre-wrap;word-break:break-word}
+.b+.b{border-top:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.b .aop{margin-top:3px;padding-left:22px;font-size:11.5px;position:relative}
+.b .aop::before{content:"↳";position:absolute;left:6px;color:var(--muted)}
+.b .aop .tag{text-transform:uppercase;font-size:10px;letter-spacing:.06em;color:var(--move);margin-right:5px}
+.b .aop .methods{color:var(--muted)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:2px 22px}
 .ml{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--mono);font-size:12px;
   padding:3px 4px;border-bottom:1px solid color-mix(in srgb,var(--line) 45%,transparent)}

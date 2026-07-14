@@ -17,6 +17,7 @@ class InjectionPointsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->injectionPoints = (new InjectionPoints())->addMethod('setTires')->addOptionalMethod('setHardtop');
     }
 

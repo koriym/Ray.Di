@@ -11,9 +11,7 @@ namespace Ray\Di;
  */
 interface DependencyInterface
 {
-    /**
-     * @return string
-     */
+    /** @return string */
     public function __toString();
 
     /**

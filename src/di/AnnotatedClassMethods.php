@@ -11,9 +11,7 @@ use ReflectionAttribute;
 
 final class AnnotatedClassMethods
 {
-    /**
-     * @phpstan-param ReflectionClass<object> $class
-     */
+    /** @phpstan-param ReflectionClass<object> $class */
     public function getConstructorName(ReflectionClass $class): Name
     {
         $constructor = $class->getConstructor();

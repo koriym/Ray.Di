@@ -66,9 +66,7 @@ final class Container implements InjectorInterface
         $this->log = new BindingLog();
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public function __sleep()
     {
         return ['container', 'pointcuts', 'multiBindings'];
@@ -333,9 +331,7 @@ final class Container implements InjectorInterface
         return $this;
     }
 
-    /**
-     * @param callable(DependencyInterface, string): DependencyInterface $f
-     */
+    /** @param callable(DependencyInterface, string): DependencyInterface $f */
     public function map(callable $f): void
     {
         foreach ($this->container as $key => &$index) {

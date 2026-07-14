@@ -10,18 +10,14 @@ use Ray\Di\InjectionPointInterface;
 use Ray\Di\InjectorInterface;
 use Ray\Di\ProviderInterface;
 
-/**
- * @implements ProviderInterface<Map>
- */
+/** @implements ProviderInterface<Map> */
 final class MapProvider implements ProviderInterface
 {
     public function __construct(private readonly InjectionPointInterface $ip, private MultiBindings $multiBindings, private readonly InjectorInterface $injector)
     {
     }
 
-    /**
-     * @return Map<mixed>
-     */
+    /** @return Map<mixed> */
     public function get(): Map
     {
         $param = $this->ip->getParameter();

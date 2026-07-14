@@ -51,9 +51,7 @@ final class MultiBinder
         return $this;
     }
 
-    /**
-     * @param class-string $class
-     */
+    /** @param class-string $class */
     public function to(string $class): void
     {
         $this->bind(new LazyTo($class), $this->key);
@@ -69,9 +67,7 @@ final class MultiBinder
         $this->bind(new LazyProvider($provider), $this->key);
     }
 
-    /**
-     * @param mixed $instance
-     */
+    /** @param mixed $instance */
     public function toInstance($instance): void
     {
         $this->bind(new LazyInstance($instance), $this->key);

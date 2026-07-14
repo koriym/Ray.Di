@@ -14,9 +14,7 @@ use function assert;
 use function in_array;
 use function sprintf;
 
-/**
- * @psalm-import-type DependencyIndex from Types
- */
+/** @psalm-import-type DependencyIndex from Types */
 final class Argument implements AcceptInterface, Stringable
 {
     public const UNBOUND_TYPE = ['bool', 'int', 'float', 'string', 'array', 'resource', 'callable', 'iterable'];
@@ -75,9 +73,7 @@ final class Argument implements AcceptInterface, Stringable
         return $this->isDefaultAvailable;
     }
 
-    /**
-     * @return mixed
-     */
+    /** @return mixed */
     public function getDefaultValue()
     {
         return $this->default;
@@ -88,9 +84,7 @@ final class Argument implements AcceptInterface, Stringable
         return $this->meta;
     }
 
-    /**
-     * @return array<mixed>
-     */
+    /** @return array<mixed> */
     public function __serialize(): array
     {
         $method = $this->reflection->getDeclaringFunction();
@@ -110,9 +104,7 @@ final class Argument implements AcceptInterface, Stringable
         ];
     }
 
-    /**
-     * @param array{0: DependencyIndex, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $unserialized
-     */
+    /** @param array{0: DependencyIndex, 1: bool, 2: string, 3: string, 4: string, 5: array{0: string, 1: string, 2:string}} $unserialized */
     public function __unserialize(array $unserialized): void
     {
         [
@@ -151,9 +143,7 @@ final class Argument implements AcceptInterface, Stringable
         }
     }
 
-    /**
-     * @psalm-pure
-     */
+    /** @psalm-pure */
     private function getType(ReflectionParameter $parameter): string
     {
         $type = $parameter->getType();

@@ -14,9 +14,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PARAMETER)]
 final class Inject implements InjectInterface
 {
-    /**
-     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
-     */
+    /** @SuppressWarnings("PHPMD.BooleanArgumentFlag") */
     public function __construct(
         /**
          * If true, and the appropriate binding is not found, the Injector will skip injection of this method or field rather than produce an error.
@@ -26,7 +24,7 @@ final class Inject implements InjectInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function isOptional(): bool
     {

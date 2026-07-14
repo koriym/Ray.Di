@@ -6,21 +6,15 @@ namespace Ray\Di;
 
 use Exception;
 
-/**
- * @psalm-import-type SetterMethodsList from Types
- */
+/** @psalm-import-type SetterMethodsList from Types */
 final class SetterMethods implements AcceptInterface
 {
-    /**
-     * @param SetterMethodsList $setterMethods
-     */
+    /** @param SetterMethodsList $setterMethods */
     public function __construct(private array $setterMethods)
     {
     }
 
-    /**
-     * @throws Exception
-     */
+    /** @throws Exception */
     public function __invoke(object $instance, Container $container): void
     {
         foreach ($this->setterMethods as $setterMethod) {

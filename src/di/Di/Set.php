@@ -13,9 +13,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PARAMETER | Attribute::TARGET_PROPERTY)]
 final class Set
 {
-    /**
-     * @param ''|class-string<T> $interface
-     */
+    /** @param ''|class-string<T> $interface */
     public function __construct(public string $interface, public string $name = '')
     {
     }

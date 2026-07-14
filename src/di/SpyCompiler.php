@@ -13,9 +13,7 @@ use function implode;
 use function method_exists;
 use function sprintf;
 
-/**
- * @codeCoverageIgnore
- */
+/** @codeCoverageIgnore */
 final class SpyCompiler implements CompilerInterface
 {
     /**
@@ -51,9 +49,7 @@ final class SpyCompiler implements CompilerInterface
         return $class . $this->getInterceptors($bind); // @phpstan-ignore-line
     }
 
-    /**
-     * @param class-string $class
-     */
+    /** @param class-string $class */
     private function hasNoBinding(string $class, BindInterface $bind): bool
     {
         $hasMethod = $this->hasBoundMethod($class, $bind);
@@ -61,9 +57,7 @@ final class SpyCompiler implements CompilerInterface
         return ! $bind->getBindings() && ! $hasMethod;
     }
 
-    /**
-     * @param class-string $class
-     */
+    /** @param class-string $class */
     private function hasBoundMethod(string $class, BindInterface $bind): bool
     {
         $bindingMethods = array_keys($bind->getBindings());

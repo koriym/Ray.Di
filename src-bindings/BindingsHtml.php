@@ -135,9 +135,7 @@ final class BindingsHtml
         }
     }
 
-    /**
-     * @throws JsonException on invalid JSON in the composer.lock.
-     */
+    /** @throws JsonException on invalid JSON in the composer.lock. */
     private function buildSourceMap(string $markdown, string $composerLock): string
     {
         $decoded = json_decode($composerLock, true, 512, JSON_THROW_ON_ERROR);

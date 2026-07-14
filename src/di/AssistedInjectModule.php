@@ -15,7 +15,7 @@ final class AssistedInjectModule extends AbstractModule
     {
         $this->bindInterceptor(
             $this->matcher->any(),
-            (new AssistedInjectMatcher()),
+            new AssistedInjectMatcher(),
             [AssistedInjectInterceptor::class]
         );
     }

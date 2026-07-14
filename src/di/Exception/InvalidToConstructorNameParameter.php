@@ -6,9 +6,7 @@ namespace Ray\Di\Exception;
 
 use InvalidArgumentException;
 
-/**
- * @see https://github.com/ray-di/Ray.Di#constructor-bindings
- */
+/** @see https://github.com/ray-di/Ray.Di#constructor-bindings */
 final class InvalidToConstructorNameParameter extends InvalidArgumentException implements ExceptionInterface
 {
 }

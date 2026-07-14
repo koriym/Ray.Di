@@ -17,6 +17,7 @@ class AnnotatedClassTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->annotatedClass = new AnnotatedClass();
     }
 
@@ -43,9 +44,7 @@ class AnnotatedClassTest extends TestCase
         $this->assertNull($car->hardtop);
     }
 
-    /**
-     * @phpstan-param class-string $class
-     */
+    /** @phpstan-param class-string $class */
     #[DataProvider('classProvider')]
     public function testAnnotatedByAnnotation(string $class): void
     {
@@ -62,9 +61,7 @@ class AnnotatedClassTest extends TestCase
         $this->assertInstanceOf(FakeMirrorRight::class, $handleBar->rightMirror);
     }
 
-    /**
-     * @return array<array<class-string>>
-     */
+    /** @return array<array<class-string>> */
     public static function classProvider(): array
     {
         return [

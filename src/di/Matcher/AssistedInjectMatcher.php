@@ -15,7 +15,7 @@ use ReflectionMethod;
 final class AssistedInjectMatcher extends AbstractMatcher
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @codeCoverageIgnore
      */
@@ -25,7 +25,7 @@ final class AssistedInjectMatcher extends AbstractMatcher
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function matchesMethod(ReflectionMethod $method, array $arguments): bool
     {

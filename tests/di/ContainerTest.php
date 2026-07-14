@@ -30,6 +30,7 @@ class ContainerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->container = new Container();
         $this->engine = new FakeEngine();
         (new Bind($this->container, FakeEngineInterface::class))->toInstance($this->engine);
@@ -210,7 +211,7 @@ class ContainerTest extends TestCase
         $container = new Container();
         //FakeConstantInterface
         (new Bind($container, ''))->annotatedWith(FakeConstant::class)->toInstance('kuma');
-        (new Bind($container, FakeConstantConsumer::class));
+        new Bind($container, FakeConstantConsumer::class);
         $instance = $container->getInstance(FakeConstantConsumer::class, Name::ANY);
         $this->assertSame('kuma', $instance->constantByConstruct);
         $this->assertSame('kuma', $instance->constantBySetter);
@@ -250,7 +251,7 @@ class ContainerTest extends TestCase
     public function testWeaveAspectsWithEmptyPointcuts(): void
     {
         $container = new Container();
-        (new Bind($container, FakeEngine::class));
+        new Bind($container, FakeEngine::class);
 
         // Should work fine even when no pointcuts are defined
         $tmpDir = sys_get_temp_dir();

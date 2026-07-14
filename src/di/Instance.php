@@ -11,9 +11,7 @@ use function sprintf;
 
 final class Instance implements DependencyInterface, AcceptInterface
 {
-    /**
-     * @param mixed $value
-     */
+    /** @param mixed $value */
     public function __construct(public $value)
     {
     }
@@ -36,7 +34,7 @@ final class Instance implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function register(array &$container, Bind $bind): void
     {
@@ -45,7 +43,7 @@ final class Instance implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function inject(Container $container)
     {
@@ -53,7 +51,7 @@ final class Instance implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @codeCoverageIgnore
      */

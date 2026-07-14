@@ -22,6 +22,7 @@ class BindTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->bind = new Bind(new Container(), FakeTyreInterface::class);
     }
 
@@ -94,9 +95,7 @@ class BindTest extends TestCase
         $this->assertSame(spl_object_hash($dependency1), spl_object_hash($dependency2));
     }
 
-    /**
-     * @return array<int, array<int, array<string, string>>>
-     */
+    /** @return array<int, array<int, array<string, string>>> */
     public static function nameProvider(): array
     {
         return [
@@ -104,9 +103,7 @@ class BindTest extends TestCase
         ];
     }
 
-    /**
-     * @param array<string, string>|string $name
-     */
+    /** @param array<string, string>|string $name */
     #[DataProvider('nameProvider')]
     public function testToConstructor($name): void
     {

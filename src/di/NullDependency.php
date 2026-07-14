@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-/**
- * @codeCoverageIgnore
- */
+/** @codeCoverageIgnore */
 final class NullDependency implements DependencyInterface
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function __toString(): string
     {
@@ -18,14 +16,14 @@ final class NullDependency implements DependencyInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function inject(Container $container): void
     {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function register(array &$container, Bind $bind): void
     {
@@ -33,7 +31,7 @@ final class NullDependency implements DependencyInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function setScope($scope): void
     {

@@ -429,13 +429,13 @@ class InjectorTest extends TestCase
 
     public function testNullObject(): void
     {
-        $injector = (new Injector(new class extends AbstractModule {
+        $injector = new Injector(new class extends AbstractModule {
             protected function configure()
             {
                 $this->bind(FakeTyreInterface::class)->toNull();
                 $this->bind(FakeAopInterface::class)->toNull();
             }
-        }));
+        });
         $nullObject = $injector->getInstance(FakeTyreInterface::class);
         $this->assertInstanceOf(FakeTyreInterface::class, $nullObject);
         // a null object stubs every interface method to a no-op returning null
@@ -445,7 +445,7 @@ class InjectorTest extends TestCase
 
     public function testBindInterfeceInterceptor(): void
     {
-        $injector = (new Injector(new class extends AbstractModule {
+        $injector = new Injector(new class extends AbstractModule {
             protected function configure()
             {
                 $this->bind(FakeAop::class);
@@ -456,7 +456,7 @@ class InjectorTest extends TestCase
                     [FakeDoubleInterceptorInterface::class]
                 );
             }
-        }));
+        });
         $instance = $injector->getInstance(FakeAop::class);
         $result = $instance->returnSame(2);
         $this->assertSame(4, $result);
@@ -464,7 +464,7 @@ class InjectorTest extends TestCase
 
     public function testBindInterfeceNullInterceptor(): void
     {
-        $injector = (new Injector(new class extends AbstractModule {
+        $injector = new Injector(new class extends AbstractModule {
             protected function configure()
             {
                 $this->bind(FakeAop::class);
@@ -475,7 +475,7 @@ class InjectorTest extends TestCase
                     [FakeDoubleInterceptorInterface::class]
                 );
             }
-        }));
+        });
         $instance = $injector->getInstance(FakeAop::class);
         $result = $instance->returnSame(2);
         $this->assertSame(2, $result);

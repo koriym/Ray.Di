@@ -51,9 +51,7 @@ class MultiBindingModuleTest extends TestCase
         };
     }
 
-    /**
-     * @return Map<FakeEngineInterface>
-     */
+    /** @return Map<FakeEngineInterface> */
     public function testInjectMap(): Map
     {
         $injector = new Injector($this->module);
@@ -63,9 +61,7 @@ class MultiBindingModuleTest extends TestCase
         return $consumer->engines;
     }
 
-    /**
-     * @param Map<object> $map
-     */
+    /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testMapInstance(Map $map): void
     {
@@ -73,9 +69,7 @@ class MultiBindingModuleTest extends TestCase
         $this->assertInstanceOf(FakeEngine2::class, $map['two']);
     }
 
-    /**
-     * @param Map<object> $map
-     */
+    /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testMapIteration(Map $map): void
     {
@@ -91,9 +85,7 @@ class MultiBindingModuleTest extends TestCase
         $this->assertInstanceOf(FakeEngine3::class, $items[0]);
     }
 
-    /**
-     * @param Map<object> $map
-     */
+    /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testIsSet(Map $map): void
     {
@@ -101,9 +93,7 @@ class MultiBindingModuleTest extends TestCase
         $this->assertTrue(isset($map['two']));
     }
 
-    /**
-     * @param Map<object> $map
-     */
+    /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testOffsetSet(Map $map): void
     {
@@ -112,9 +102,7 @@ class MultiBindingModuleTest extends TestCase
         $map['one'] = 1;
     }
 
-    /**
-     * @param Map<object> $map
-     */
+    /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testOffsetUnset(Map $map): void
     {
@@ -136,9 +124,7 @@ class MultiBindingModuleTest extends TestCase
         $map[] = new FakeEngine();
     }
 
-    /**
-     * @param Map<object> $map
-     */
+    /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testOffsetUnsetWithNullOffset(Map $map): void
     {

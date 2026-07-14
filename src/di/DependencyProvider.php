@@ -24,9 +24,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
     ) {
     }
 
-    /**
-     * @return list<string>
-     */
+    /** @return list<string> */
     public function __sleep()
     {
         return ['context', 'dependency', 'isSingleton'];
@@ -41,7 +39,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function register(array &$container, Bind $bind): void
     {
@@ -49,7 +47,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function inject(Container $container)
     {
@@ -74,7 +72,7 @@ final class DependencyProvider implements DependencyInterface, AcceptInterface
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public function setScope($scope): void
     {

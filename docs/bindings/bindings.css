@@ -58,10 +58,10 @@ h2 .hint{text-transform:none;font-weight:400;color:var(--muted)}
 .lost .mod{color:color-mix(in srgb,var(--lost) 70%,var(--accent))}
 .b{font-family:var(--mono);font-size:12px;padding:2px 10px;white-space:pre-wrap;word-break:break-word}
 .b+.b{border-top:1px solid color-mix(in srgb,var(--line) 45%,transparent)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px 22px}
-.ml{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:12px;
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:2px 22px}
+.ml{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--mono);font-size:12px;
   padding:3px 4px;border-bottom:1px solid color-mix(in srgb,var(--line) 45%,transparent)}
-.ml .mod{color:var(--accent)} .ml .cnt{color:var(--muted);font-variant-numeric:tabular-nums}
+.ml .mod{color:var(--accent);min-width:0;overflow-wrap:anywhere} .ml .cnt{color:var(--muted);font-variant-numeric:tabular-nums;flex-shrink:0}
 .hide-bind .ev.bind,.hide-replace .ev.replace,.hide-keep .ev.keep,.hide-move .ev.move{display:none}
 pre#src{font-family:var(--mono);font-size:12px;white-space:pre-wrap;word-break:break-word;color:var(--ink);margin:0}
 /* the viewer script shows #view and hides the raw <pre> once it has rendered;

@@ -67,9 +67,6 @@ class AssistedInjectTest extends TestCase
         $this->assertSame(1, $i);
     }
 
-    /**
-     * @requires PHP 8.1
-     */
     public function testConstructorPropertyPromotion(): void
     {
         $injector = new Injector(

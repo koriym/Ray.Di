@@ -143,8 +143,6 @@ class ContainerTest extends TestCase
      * move() must build the source index as "{interface}-{name}". With a
      * non-empty source name the order of interface, separator and name matters:
      * a wrong key format would fail to locate the existing named binding.
-     *
-     * @covers \Ray\Di\Container::move
      */
     public function testMoveNamedBinding(): void
     {
@@ -166,8 +164,6 @@ class ContainerTest extends TestCase
      * move() must refuse to overwrite an existing binding at the target
      * index. Silently overwriting it would destroy that binding with no way
      * to recover it, so the conflict is reported via an exception instead.
-     *
-     * @covers \Ray\Di\Container::move
      */
     public function testMoveThrowsWhenTargetAlreadyBound(): void
     {
@@ -181,8 +177,6 @@ class ContainerTest extends TestCase
     /**
      * sort() must order the container by key (ksort). Bindings added out of
      * lexicographic order must end up sorted afterwards.
-     *
-     * @covers \Ray\Di\Container::sort
      */
     public function testSort(): void
     {
@@ -234,9 +228,6 @@ class ContainerTest extends TestCase
         $container->getInstanceWithArgs(FakeEngineInterface::class, []);
     }
 
-    /**
-     * @covers \Ray\Di\Container::getInstanceWithArgs
-     */
     public function testUnbound(): void
     {
         $this->expectException(Unbound::class);
@@ -248,8 +239,6 @@ class ContainerTest extends TestCase
      * name that itself contains a hyphen (e.g. "type-bool") must be preserved
      * whole in the resulting Unbound message; splitting on every hyphen
      * truncates the name to its first segment.
-     *
-     * @covers \Ray\Di\Container::unbound
      */
     public function testUnboundPreservesHyphenatedBindName(): void
     {

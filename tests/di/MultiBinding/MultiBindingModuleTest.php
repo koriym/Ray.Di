@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ray\Di\MultiBinding;
 
 use ArrayAccess;
+use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Exception\ReadOnlyMapAccess;
@@ -28,9 +29,6 @@ use function array_keys;
 use function count;
 use function iterator_to_array;
 
-/**
- * @requires PHP 8.0
- */
 class MultiBindingModuleTest extends TestCase
 {
     /** @var AbstractModule */
@@ -67,9 +65,8 @@ class MultiBindingModuleTest extends TestCase
 
     /**
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testMapInstance(Map $map): void
     {
         $this->assertInstanceOf(FakeEngine::class, $map['one']);
@@ -78,9 +75,8 @@ class MultiBindingModuleTest extends TestCase
 
     /**
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testMapIteration(Map $map): void
     {
         $this->assertContainsOnlyInstancesOf(FakeEngineInterface::class, $map);
@@ -97,9 +93,8 @@ class MultiBindingModuleTest extends TestCase
 
     /**
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testIsSet(Map $map): void
     {
         $this->assertTrue(isset($map['one']));
@@ -108,9 +103,8 @@ class MultiBindingModuleTest extends TestCase
 
     /**
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testOffsetSet(Map $map): void
     {
         $this->expectException(ReadOnlyMapAccess::class);
@@ -120,9 +114,8 @@ class MultiBindingModuleTest extends TestCase
 
     /**
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testOffsetUnset(Map $map): void
     {
         $this->expectException(ReadOnlyMapAccess::class);
@@ -134,9 +127,8 @@ class MultiBindingModuleTest extends TestCase
      * `$map[] = $value` invokes offsetSet() with a null offset.
      *
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testOffsetSetWithNullOffset(Map $map): void
     {
         $this->expectException(ReadOnlyMapAccess::class);
@@ -146,9 +138,8 @@ class MultiBindingModuleTest extends TestCase
 
     /**
      * @param Map<object> $map
-     *
-     * @depends testInjectMap
      */
+    #[Depends('testInjectMap')]
     public function testOffsetUnsetWithNullOffset(Map $map): void
     {
         $this->expectException(ReadOnlyMapAccess::class);

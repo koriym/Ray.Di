@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\Compiler;
 use Ray\Aop\Matcher;
@@ -41,7 +42,7 @@ class DependencyTest extends TestCase
      * @return Container[][]
      * @psalm-return array{0: array{0: Container}}
      */
-    public function containerProvider(): array
+    public static function containerProvider(): array
     {
         $container = new Container();
         (new Bind($container, FakeTyreInterface::class))->to(FakeTyre::class);
@@ -51,9 +52,7 @@ class DependencyTest extends TestCase
         return [[$container]];
     }
 
-    /**
-     * @dataProvider containerProvider
-     */
+    #[DataProvider('containerProvider')]
     public function testInject(Container $container): void
     {
         $car = $this->dependency->inject($container);
@@ -61,9 +60,7 @@ class DependencyTest extends TestCase
         $this->assertInstanceOf(FakeCar::class, $car);
     }
 
-    /**
-     * @dataProvider containerProvider
-     */
+    #[DataProvider('containerProvider')]
     public function testSetterInjection(Container $container): void
     {
         $car = $this->dependency->inject($container);
@@ -72,9 +69,7 @@ class DependencyTest extends TestCase
         $this->assertInstanceOf(FakeTyre::class, $car->frontTyre);
     }
 
-    /**
-     * @dataProvider containerProvider
-     */
+    #[DataProvider('containerProvider')]
     public function testPostConstruct(Container $container): void
     {
         $car = $this->dependency->inject($container);
@@ -82,9 +77,7 @@ class DependencyTest extends TestCase
         $this->assertTrue($car->isConstructed);
     }
 
-    /**
-     * @dataProvider containerProvider
-     */
+    #[DataProvider('containerProvider')]
     public function testPrototype(Container $container): void
     {
         $this->dependency->setScope(Scope::PROTOTYPE);
@@ -94,9 +87,7 @@ class DependencyTest extends TestCase
         $this->assertNotSame(spl_object_hash($car1), spl_object_hash($car2));
     }
 
-    /**
-     * @dataProvider containerProvider
-     */
+    #[DataProvider('containerProvider')]
     public function testSingleton(Container $container): void
     {
         $this->dependency->setScope(Scope::SINGLETON);
@@ -115,8 +106,6 @@ class DependencyTest extends TestCase
      * instead of an explicit flag would behave the same way here (the
      * instance is also dropped by __sleep()), but this test pins the
      * DependencyProvider-aligned $isInstantiated behaviour explicitly.
-     *
-     * @covers \Ray\Di\Dependency::inject
      */
     public function testSingletonAfterUnserializeReinstantiatesOnceThenCaches(): void
     {
@@ -167,9 +156,8 @@ class DependencyTest extends TestCase
      * constructor-injected engine and the setter-injected front tyre are present.
      * If the postConstruct call in injectWithArgs() is removed, isConstructed
      * stays false.
-     * @dataProvider containerProvider
-     * @covers \Ray\Di\Dependency::injectWithArgs
      */
+    #[DataProvider('containerProvider')]
     public function testInjectWithArgsPostConstruct(Container $container): void
     {
         $car = $this->dependency->injectWithArgs($container, [new FakeEngine()]);
@@ -182,10 +170,8 @@ class DependencyTest extends TestCase
      * The singleton fast-path of injectWithArgs() must return the very same
      * instance on repeated calls. If the early `return $this->instance` is
      * removed, a fresh instance is built every time and the two differ.
-     *
-     * @dataProvider containerProvider
-     * @covers \Ray\Di\Dependency::injectWithArgs
      */
+    #[DataProvider('containerProvider')]
     public function testInjectWithArgsSingleton(Container $container): void
     {
         $this->dependency->setScope(Scope::SINGLETON);
@@ -201,7 +187,6 @@ class DependencyTest extends TestCase
      * even though injectWithArgs() is called repeatedly. The recorded
      * postConstruct invocation count proves the cached instance short-circuits
      * before postConstruct runs again.
-     * @covers \Ray\Di\Dependency::injectWithArgs
      */
     public function testInjectWithArgsSingletonPostConstructRunsOnce(): void
     {

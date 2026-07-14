@@ -65,14 +65,20 @@ final class BindingEvent implements Stringable
     }
 
     /**
-     * Collapse an untargeted binding's repeated class to a single marker
+     * Label a dependency string for display
      *
-     * An untargeted (or self-bound) concrete class lands at index '{class}-'
-     * with dependency '(dependency) {class}' — the same name twice. Show
-     * '(untargeted)' so the reader need not compare the two.
+     * A null-object binding (toNull) has an empty string form; show
+     * '(null object)' rather than a blank. An untargeted (or self-bound)
+     * concrete class lands at index '{class}-' with dependency
+     * '(dependency) {class}' — the same name twice; show '(untargeted)' so the
+     * reader need not compare the two.
      */
     private function label(string $dependency): string
     {
+        if ($dependency === '') {
+            return '(null object)';
+        }
+
         $prefix = '(dependency) ';
         if (str_starts_with($dependency, $prefix) && $this->index === substr($dependency, strlen($prefix)) . '-') {
             return '(untargeted)';

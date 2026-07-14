@@ -53,6 +53,23 @@ final class Dependency implements DependencyInterface, AcceptInterface
     }
 
     /**
+     * Return the AOP-aware description without mutating this dependency
+     *
+     * @param PointcutList $pointcuts
+     *
+     * @internal
+     */
+    public function toStringWithAspects(CompilerInterface $compiler, array $pointcuts): string
+    {
+        $aspect = $this->compileAspects($compiler, $pointcuts);
+        if ($aspect === null) {
+            return (string) $this;
+        }
+
+        return sprintf('(dependency) %s', $aspect[0]);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function register(array &$container, Bind $bind): void
@@ -127,27 +144,45 @@ final class Dependency implements DependencyInterface, AcceptInterface
     /** @param PointcutList $pointcuts */
     public function weaveAspects(CompilerInterface $compiler, array $pointcuts): void
     {
+        $aspect = $this->compileAspects($compiler, $pointcuts);
+        if ($aspect === null) {
+            return;
+        }
+
+        [$class, $bind] = $aspect;
+        $this->newInstance->weaveAspects($class, $bind);
+    }
+
+    /**
+     * @param PointcutList $pointcuts
+     *
+     * @return array{class-string, AopBind}|null
+     */
+    private function compileAspects(CompilerInterface $compiler, array $pointcuts): ?array
+    {
+        if ($pointcuts === []) {
+            return null;
+        }
+
         $class = (string) $this->newInstance;
         $reflection = new ReflectionClass($class);
         if ($reflection->isFinal()) {
-            return;
+            return null;
         }
 
         $isInterceptor = $reflection->implementsInterface(MethodInterceptor::class);
         $isWeaved = $reflection->implementsInterface(WeavedInterface::class);
         if ($isInterceptor || $isWeaved) {
-            return;
+            return null;
         }
 
         $bind = new AopBind();
-        $className = (string) $this->newInstance;
-        $bind->bind($className, $pointcuts);
+        $bind->bind($class, $pointcuts);
         if (! $bind->getBindings()) {
-            return;
+            return null;
         }
 
-        $class = $compiler->compile($className, $bind);
-        $this->newInstance->weaveAspects($class, $bind);
+        return [$compiler->compile($class, $bind), $bind];
     }
 
     /** @inheritDoc */

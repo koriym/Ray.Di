@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
+use Ray\Aop\AbstractMatcher;
+use Ray\Aop\BuiltinMatcher;
 use Throwable;
 
 use function count;
+use function file_get_contents;
 use function file_put_contents;
+use function hash;
+use function hash_equals;
 use function implode;
+use function is_file;
+use function is_object;
+use function is_string;
 use function ksort;
+use function serialize;
+use function sort;
 use function sprintf;
+use function trim;
 
 /**
  * Emit the composed container as bindings.md next to the generated classes
@@ -23,13 +34,97 @@ use function sprintf;
  */
 final class BindingsMarkdown
 {
+    /** Bump when the rendered format or signature inputs change. */
+    private const SIGNATURE_VERSION = 1;
+
     public function __invoke(Container $container, string $classDir): void
     {
         try {
-            file_put_contents($classDir . '/bindings.md', $this->render($container));
+            $markdownFile = $classDir . '/bindings.md';
+            $signatureFile = $classDir . '/bindings.md.signature';
+            $signature = $this->signature($container);
+            if ($signature !== null && $this->isCached($markdownFile, $signatureFile, $signature)) {
+                return;
+            }
+
+            $written = file_put_contents($markdownFile, $this->render($container));
+            if ($written === false || $signature === null) {
+                return;
+            }
+
+            file_put_contents($signatureFile, $signature);
         } catch (Throwable) { // @codeCoverageIgnoreStart
             // best-effort: never break construction for a diagnostics file
         } // @codeCoverageIgnoreEnd
+    }
+
+    /**
+     * Return a signature of inputs that affect resolved bindings
+     *
+     * Composition provenance is intentionally excluded: if the final bindings
+     * and pointcuts are unchanged, the existing diagnostics file is reused.
+     */
+    private function signature(Container $container): ?string
+    {
+        try {
+            $bindings = [];
+            foreach ($container->getContainer() as $index => $dependency) {
+                $bindings[] = $index . "\0" . (string) $dependency;
+            }
+
+            sort($bindings);
+
+            return hash(
+                'sha256',
+                serialize([self::SIGNATURE_VERSION, $bindings, $this->pointcutSignature($container)]),
+            );
+        } catch (Throwable) { // @codeCoverageIgnoreStart
+            return null;
+        } // @codeCoverageIgnoreEnd
+    }
+
+    /** @return list<array{string, string, string, list<string>}> */
+    private function pointcutSignature(Container $container): array
+    {
+        $signature = [];
+        foreach ($container->getPointcuts() as $pointcut) {
+            $interceptors = [];
+            foreach ($pointcut->interceptors as $interceptor) {
+                $interceptors[] = is_object($interceptor) ? $interceptor::class : $interceptor;
+            }
+
+            $signature[] = [
+                $pointcut::class,
+                $this->matcherSignature($pointcut->classMatcher),
+                $this->matcherSignature($pointcut->methodMatcher),
+                $interceptors,
+            ];
+        }
+
+        return $signature;
+    }
+
+    private function matcherSignature(AbstractMatcher $matcher): string
+    {
+        if ($matcher instanceof BuiltinMatcher) {
+            return serialize($matcher);
+        }
+
+        return serialize([$matcher::class, $matcher->getArguments()]);
+    }
+
+    private function isCached(string $markdownFile, string $signatureFile, string $signature): bool
+    {
+        if (! is_file($markdownFile) || ! is_file($signatureFile)) {
+            return false;
+        }
+
+        $cachedSignature = file_get_contents($signatureFile);
+        if (! is_string($cachedSignature)) {
+            return false; // @codeCoverageIgnore
+        }
+
+        return hash_equals($signature, trim($cachedSignature));
     }
 
     private function render(Container $container): string

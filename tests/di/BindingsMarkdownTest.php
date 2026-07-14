@@ -6,10 +6,16 @@ namespace Ray\Di;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
+use Ray\Aop\AbstractMatcher;
+use Ray\Aop\Matcher;
+use Ray\Aop\Pointcut;
+use ReflectionClass;
+use ReflectionMethod;
 use RuntimeException;
 
 use function assert;
 use function file_get_contents;
+use function file_put_contents;
 use function glob;
 use function is_dir;
 use function is_string;
@@ -90,17 +96,15 @@ class BindingsMarkdownTest extends TestCase
         $this->assertStringContainsString('8 bindings · 6 modules · 1 replaced · 1 discarded', $markdown);
     }
 
-    /**
-     * A binding ModuleString cannot serialize (a closure instance) makes the
-     * emission fail, but construction must still succeed — the diagnostics
-     * artifact is best-effort.
-     */
-    public function testConstructionSucceedsWhenMarkdownCannotBeWritten(): void
+    /** A closure binding is rendered without serializing the container. */
+    public function testClosureBindingIsWrittenToMarkdown(): void
     {
         $injector = new Injector(new FakeClosureBindModule(), $this->classDir);
 
         $this->assertInstanceOf(Closure::class, $injector->getInstance('', 'callback'));
-        $this->assertFileDoesNotExist($this->classDir . '/bindings.md');
+        $markdown = file_get_contents($this->classDir . '/bindings.md');
+        assert(is_string($markdown));
+        $this->assertStringContainsString('-callback => (object) Closure', $markdown);
     }
 
     /**
@@ -122,5 +126,90 @@ class BindingsMarkdownTest extends TestCase
         assert(is_string($markdown));
 
         $this->assertStringContainsString(FakeEngine::class . '- => (untargeted)', $markdown);
+    }
+
+    /** An unchanged binding surface reuses the existing markdown. */
+    public function testUnchangedBindingsUseSignatureCache(): void
+    {
+        $container = (new FakeLogStringModule())->getContainer();
+        $writer = new BindingsMarkdown();
+        $writer($container, $this->classDir);
+        $this->assertFileExists($this->classDir . '/bindings.md.signature');
+        file_put_contents($this->classDir . '/bindings.md', 'cached');
+
+        $writer($container, $this->classDir);
+
+        $this->assertSame('cached', file_get_contents($this->classDir . '/bindings.md'));
+    }
+
+    /** A changed resolved binding invalidates the cached markdown. */
+    public function testBindingChangeInvalidatesSignatureCache(): void
+    {
+        $container = new Container();
+        (new Bind($container, '', self::class))->annotatedWith('value')->toInstance(1);
+        $writer = new BindingsMarkdown();
+        $writer($container, $this->classDir);
+
+        (new Bind($container, '', self::class))->annotatedWith('value')->toInstance(2);
+        $writer($container, $this->classDir);
+
+        $markdown = file_get_contents($this->classDir . '/bindings.md');
+        assert(is_string($markdown));
+        $this->assertStringContainsString('-value => (integer) 2', $markdown);
+    }
+
+    /** Provenance-only changes intentionally retain the cached markdown. */
+    public function testProvenanceChangeDoesNotInvalidateSignatureCache(): void
+    {
+        $first = new Container();
+        (new Bind($first, '', 'FirstModule'))->annotatedWith('value')->toInstance(1);
+        $second = new Container();
+        (new Bind($second, '', 'SecondModule'))->annotatedWith('value')->toInstance(1);
+        $writer = new BindingsMarkdown();
+        $writer($first, $this->classDir);
+
+        $writer($second, $this->classDir);
+
+        $markdown = file_get_contents($this->classDir . '/bindings.md');
+        assert(is_string($markdown));
+        $this->assertStringContainsString('@FirstModule', $markdown);
+        $this->assertStringNotContainsString('@SecondModule', $markdown);
+    }
+
+    /** Matcher runtime state is not part of the declarative pointcut signature. */
+    public function testMatcherRuntimeStateDoesNotInvalidateSignatureCache(): void
+    {
+        $container = new Container();
+        (new Bind($container, FakeAopInterface::class, self::class))->to(FakeAop::class);
+        $classMatcher = new class extends AbstractMatcher {
+            public int $matches = 0;
+
+            /** @param array<array-key, mixed> $arguments */
+            public function matchesClass(ReflectionClass $class, array $arguments): bool
+            {
+                unset($class, $arguments);
+                $this->matches++;
+
+                return true;
+            }
+
+            /** @param array<array-key, mixed> $arguments */
+            public function matchesMethod(ReflectionMethod $method, array $arguments): bool
+            {
+                unset($method, $arguments);
+
+                return true;
+            }
+        };
+        $container->addPointcut(new Pointcut($classMatcher, (new Matcher())->any(), [FakeDoubleInterceptor::class]));
+        $writer = new BindingsMarkdown();
+        $writer($container, $this->classDir);
+        $matches = $classMatcher->matches;
+        file_put_contents($this->classDir . '/bindings.md', 'cached');
+
+        $writer($container, $this->classDir);
+
+        $this->assertSame($matches, $classMatcher->matches);
+        $this->assertSame('cached', file_get_contents($this->classDir . '/bindings.md'));
     }
 }

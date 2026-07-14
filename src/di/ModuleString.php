@@ -9,6 +9,9 @@ use function implode;
 use function serialize;
 use function sort;
 use function sprintf;
+use function str_starts_with;
+use function strlen;
+use function substr;
 use function unserialize;
 
 use const PHP_EOL;
@@ -33,15 +36,26 @@ final class ModuleString
                 $dependency->weaveAspects($spy, $pointcuts);
             }
 
-            $log[] = sprintf(
-                '%s => %s',
-                $dependencyIndex,
-                (string) $dependency
-            );
+            $log[] = sprintf('%s => %s', $dependencyIndex, $this->label($dependencyIndex, (string) $dependency));
         }
 
         sort($log);
 
         return implode(PHP_EOL, $log);
+    }
+
+    /**
+     * Collapse a class bound to itself to '(untargeted)', matching
+     * {@see BindingEvent::label()} so the resolved bindings agree with the
+     * provenance.
+     */
+    private function label(string $index, string $dependency): string
+    {
+        $prefix = '(dependency) ';
+        if (str_starts_with($dependency, $prefix) && $index === substr($dependency, strlen($prefix)) . '-') {
+            return '(untargeted)';
+        }
+
+        return $dependency;
     }
 }

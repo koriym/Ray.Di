@@ -102,4 +102,25 @@ class BindingsMarkdownTest extends TestCase
         $this->assertInstanceOf(Closure::class, $injector->getInstance('', 'callback'));
         $this->assertFileDoesNotExist($this->classDir . '/bindings.md');
     }
+
+    /**
+     * A concrete class bound to itself (untargeted) is collapsed to
+     * '(untargeted)' in the Bindings section, matching the provenance label so
+     * the resolved bindings and the provenance agree.
+     */
+    public function testUntargetedBindingIsCollapsedInTheBindingsSection(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeEngine::class);
+            }
+        };
+        new Injector($module, $this->classDir);
+
+        $markdown = file_get_contents($this->classDir . '/bindings.md');
+        assert(is_string($markdown));
+
+        $this->assertStringContainsString(FakeEngine::class . '- => (untargeted)', $markdown);
+    }
 }

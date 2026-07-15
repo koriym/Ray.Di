@@ -7,7 +7,7 @@ namespace Ray\Di\Exception;
 use LogicException;
 
 /**
- * Exception thrown when a resolved setter method cannot be called
+ * Message format: {setter method name}
  *
  * This is a defensive guard: the setter method is looked up on the
  * instance right before invocation, and reaching this branch would mean

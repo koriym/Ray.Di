@@ -98,6 +98,25 @@ $injector = new Injector(new MyModule());
 $instance = $injector->getInstance(Interface::class);
 ```
 
+### Exception Classes
+
+Name the class so it states what went wrong; let the phpdoc explain how
+execution reaches it. The name is the summary — never a generic exception
+(`LogicException`, `RuntimeException`); create a specific domain exception
+under `Ray\Di\Exception` implementing `ExceptionInterface`.
+
+The phpdoc adds only what the class name cannot carry:
+
+- **Summary line (`Thrown when ...`)**: write it only when it says more than
+  the name — the precise trigger condition, the call site, or an unfamiliar
+  term. Omit it when it would merely restate the name (e.g. `Unbound`,
+  `CircularDependency` open directly with `Message format:`).
+- **`Message format:` line**: add it when the exception message is just
+  variables, so a reader knows what those variables hold.
+- **Body**: reserve for context the name cannot express — how the code
+  reaches this branch, the design reason, recovery behavior, or a
+  "no longer thrown, kept for BC" note.
+
 ## Important Notes
 
 - Ray.Di generates proxy classes for AOP which are cached in temp directories

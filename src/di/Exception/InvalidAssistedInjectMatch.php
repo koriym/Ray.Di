@@ -7,7 +7,7 @@ namespace Ray\Di\Exception;
 use LogicException;
 
 /**
- * Exception thrown when AssistedInjectMatcher::matchesClass() is called
+ * Thrown when AssistedInjectMatcher::matchesClass() is called
  *
  * This matcher is intended for method matching only, so it must not be
  * used as a class matcher.

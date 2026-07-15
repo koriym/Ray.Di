@@ -7,7 +7,7 @@ namespace Ray\Di\Exception;
 use LogicException;
 
 /**
- * Exception thrown when SpyCompiler::newInstance() is called
+ * Thrown when SpyCompiler::newInstance() is called
  *
  * SpyCompiler only logs binding information and never produces real
  * instances, so this method is never expected to be invoked.

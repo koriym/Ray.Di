@@ -7,7 +7,7 @@ namespace Ray\Di\Exception;
 use LogicException;
 
 /**
- * Exception thrown when the rename target index is already bound
+ * Message format: '{interface}-{name}' of the existing target binding
  *
  * Renaming over an existing binding would silently destroy it,
  * so the conflict is reported instead.

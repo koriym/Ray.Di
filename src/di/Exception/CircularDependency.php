@@ -7,8 +7,6 @@ namespace Ray\Di\Exception;
 use LogicException;
 
 /**
- * Exception thrown when dependency resolution enters a cycle
- *
  * Message format: resolution path '{interface}-{name} -> {interface}-{name} -> ...'
  *
  * Deliberately not extending Unbound: default-value and optional-setter

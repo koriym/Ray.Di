@@ -13,8 +13,6 @@ use function implode;
 use function sprintf;
 
 /**
- * Exception thrown when a binding is not found
- *
  * Message format: '{type}-{name}' in file:line ($var)
  *
  * Examples:

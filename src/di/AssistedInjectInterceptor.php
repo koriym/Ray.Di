@@ -14,6 +14,7 @@ use ReflectionAttribute;
 use ReflectionNamedType;
 use ReflectionParameter;
 
+use function array_key_exists;
 use function assert;
 use function in_array;
 
@@ -62,12 +63,12 @@ final class AssistedInjectInterceptor implements MethodInterceptor
      */
     private function getNamedArguments(MethodInvocation $invocation): array
     {
-        $args = $invocation->getArguments();
+        $args = $invocation->getArguments()->getArrayCopy();
         $params = $invocation->getMethod()->getParameters();
         $namedParams = [];
         foreach ($params as $param) {
             $pos = $param->getPosition();
-            if (isset($args[$pos])) {
+            if (array_key_exists($pos, $args)) {
                 /** @psalm-suppress MixedAssignment */
                 $namedParams[$param->getName()] = $args[$pos];
             }

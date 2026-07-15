@@ -13,6 +13,8 @@ use InvalidArgumentException;
  *
  * No longer thrown: toProvider() now declares its $context parameter as
  * string, so PHP enforces this first. Kept for backward compatibility.
+ *
+ * @deprecated No longer thrown; kept for backward compatibility.
  */
 final class InvalidContext extends InvalidArgumentException implements ExceptionInterface
 {

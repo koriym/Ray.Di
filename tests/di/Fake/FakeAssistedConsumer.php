@@ -34,4 +34,10 @@ class FakeAssistedConsumer
     {
         return [$var2, $robot];
     }
+
+    /** @return array{string, FakeRobotInterface|null} */
+    public function assistAfterDefault(string $value = 'default', #[Assisted] ?FakeRobotInterface $robot = null): array
+    {
+        return [$value, $robot];
+    }
 }

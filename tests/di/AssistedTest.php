@@ -44,6 +44,15 @@ class AssistedTest extends TestCase
         $this->assertInstanceOf(FakeRobot::class, $assistedDependency2);
     }
 
+    public function testAssistedAfterOmittedDefaultArgument(): void
+    {
+        $consumer = $this->injector->getInstance(FakeAssistedConsumer::class);
+        [$value, $assistedDependency] = $consumer->assistAfterDefault();
+
+        $this->assertSame('default', $value);
+        $this->assertInstanceOf(FakeRobot::class, $assistedDependency);
+    }
+
     public function testAssistedMethodInvocation(): void
     {
         $assistedConsumer = (new Injector(new FakeAssistedDbModule()))->getInstance(FakeAssistedParamsConsumer::class);

@@ -14,10 +14,9 @@ use ReflectionAttribute;
 use ReflectionNamedType;
 use ReflectionParameter;
 
+use function array_key_exists;
 use function assert;
-use function call_user_func_array;
 use function in_array;
-use function is_callable;
 
 /**
  * @psalm-import-type NamedArguments from Types
@@ -52,10 +51,9 @@ final class AssistedInjectInterceptor implements MethodInterceptor
             }
         }
 
-        $callable = [$invocation->getThis(), $invocation->getMethod()->getName()];
-        assert(is_callable($callable));
+        $invocation->getArguments()->exchangeArray($namedArguments);
 
-        return call_user_func_array($callable, $namedArguments);
+        return $invocation->proceed();
     }
 
     /**
@@ -65,12 +63,12 @@ final class AssistedInjectInterceptor implements MethodInterceptor
      */
     private function getNamedArguments(MethodInvocation $invocation): array
     {
-        $args = $invocation->getArguments();
+        $args = $invocation->getArguments()->getArrayCopy();
         $params = $invocation->getMethod()->getParameters();
         $namedParams = [];
         foreach ($params as $param) {
             $pos = $param->getPosition();
-            if (isset($args[$pos])) {
+            if (array_key_exists($pos, $args)) {
                 /** @psalm-suppress MixedAssignment */
                 $namedParams[$param->getName()] = $args[$pos];
             }

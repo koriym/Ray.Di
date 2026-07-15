@@ -7,7 +7,7 @@ namespace Ray\Di\Exception;
 use LogicException;
 
 /**
- * Exception thrown when a multibinding Map is mutated through ArrayAccess
+ * Thrown when a multibinding Map is mutated through ArrayAccess
  *
  * Map is a read-only view over injected bindings, so writing or removing
  * an offset is not supported.

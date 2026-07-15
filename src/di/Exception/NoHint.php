@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ray\Di\Exception;
 
 /**
- * Exception thrown when a parameter has no type hint and no binding name
+ * Thrown when a parameter has no type hint and no binding name
  *
  * Message format: ${var} (file:line)
  *

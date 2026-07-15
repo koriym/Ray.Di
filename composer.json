@@ -18,7 +18,7 @@
     "require-dev": {
         "ext-pdo": "*",
         "bamarni/composer-bin-plugin": "^1.4",
-        "infection/infection": "*",
+        "infection/infection": "^0.34",
         "phpunit/phpunit": "^11.0"
     },
     "suggest": {

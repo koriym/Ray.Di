@@ -13,22 +13,24 @@ use function dirname;
 use function fclose;
 use function file_put_contents;
 use function fwrite;
-use function glob;
 use function html_entity_decode;
 use function is_dir;
 use function is_resource;
+use function json_decode;
 use function json_encode;
 use function mkdir;
 use function preg_match;
 use function proc_close;
 use function proc_open;
 use function rmdir;
+use function scandir;
 use function stream_get_contents;
 use function sys_get_temp_dir;
 use function uniqid;
 use function unlink;
 
 use const ENT_QUOTES;
+use const JSON_THROW_ON_ERROR;
 use const PHP_BINARY;
 
 /**
@@ -85,13 +87,7 @@ class BindingsHtmlTest extends TestCase
 
     protected function tearDown(): void
     {
-        foreach (glob($this->dir . '/*') ?: [] as $file) {
-            unlink($file);
-        }
-
-        if (is_dir($this->dir)) {
-            rmdir($this->dir);
-        }
+        $this->removeDirectory($this->dir);
     }
 
     public function testFragmentEmbedsTheMarkdownVerbatim(): void
@@ -122,13 +118,14 @@ class BindingsHtmlTest extends TestCase
 
     public function testEmbedsASourceMapDerivedFromComposerLock(): void
     {
-        $page = (new BindingsHtml())->page(self::MARKDOWN, $this->composerLock());
+        $page = (new BindingsHtml())->page(self::MARKDOWN, $this->composerLock(), '', $this->dir);
 
         $this->assertStringContainsString('<script type="application/json" id="srcmap">', $page);
         $this->assertStringContainsString('"u":"https://github.com/ray-di/Ray.Di"', $page);
         $this->assertStringContainsString('"n":"ray/di"', $page);
         $this->assertStringContainsString('"r":"abcdef1234"', $page);
         $this->assertStringContainsString('"d":"src/di"', $page);
+        $this->assertStringNotContainsString('"x":1', $page);
     }
 
     public function testOmitsTheSourceMapWithoutAComposerLock(): void
@@ -265,6 +262,114 @@ class BindingsHtmlTest extends TestCase
 
         $this->assertSame(1, $exit);
         $this->assertStringContainsString('cannot read', $stderr);
+    }
+
+    public function testSharedPrefixIsDisambiguatedWhenVendorDirIsGiven(): void
+    {
+        $vendor = $this->dir . '/vendor';
+        mkdir($vendor . '/bear/package/src/Provide/Router', 0777, true);
+        mkdir($vendor . '/bear/aura-router-module/src/Provide/Router', 0777, true);
+        file_put_contents($vendor . '/bear/package/src/Provide/Router/WebRouter.php', "<?php\n");
+        file_put_contents($vendor . '/bear/aura-router-module/src/Provide/Router/AuraRouter.php', "<?php\n");
+        file_put_contents(
+            $vendor . '/bear/aura-router-module/src/Provide/Router/AuraRouterModule.php',
+            "<?php\n",
+        );
+
+        $markdown = "# Ray.Di bindings\n\n## Bindings\n\n"
+            . "BEAR\\Package\\Provide\\Router\\WebRouter- => (dependency)\n"
+            . "BEAR\\Package\\Provide\\Router\\AuraRouter- => (dependency)\n"
+            . "BEAR\\Package\\Provide\\Router\\AuraRouterModule- => (dependency)\n"
+            . "Acme\\Package\\Service- => (dependency)\n";
+        $lock = (string) json_encode([
+            'packages' => [
+                [
+                    'name' => 'bear/package',
+                    'source' => [
+                        'url' => 'https://github.com/bearsunday/BEAR.Package.git',
+                        'reference' => 'pkgref',
+                    ],
+                    'autoload' => ['psr-4' => ['BEAR\\Package\\' => 'src/']],
+                ],
+                [
+                    'name' => 'bear/aura-router-module',
+                    'source' => [
+                        'url' => 'https://github.com/bearsunday/BEAR.AuraRouterModule.git',
+                        'reference' => 'auraref',
+                    ],
+                    'autoload' => ['psr-4' => ['BEAR\\Package\\' => 'src/']],
+                ],
+                [
+                    'name' => 'acme/package',
+                    'source' => [
+                        'url' => 'https://github.com/acme/package.git',
+                        'reference' => 'acmeref',
+                    ],
+                    'autoload' => ['psr-4' => ['Acme\\Package\\' => 'src/']],
+                ],
+            ],
+        ]);
+
+        $page = (new BindingsHtml())->page($markdown, $lock, '', $vendor);
+        $this->assertStringContainsString('id="srcmap"', $page);
+        $this->assertSame(1, preg_match('/id="srcmap">(.+?)<\/script>/s', $page, $m));
+        $encodedMap = $m[1] ?? '';
+        $this->assertNotSame('', $encodedMap);
+        /** @var list<array{p: string, n: string, path?: string, x?: 1}> $map */
+        $map = json_decode($encodedMap, true, 512, JSON_THROW_ON_ERROR);
+        $byClass = [];
+        foreach ($map as $entry) {
+            if (isset($entry['path'])) {
+                $byClass[$entry['p']] = $entry;
+            }
+        }
+
+        $this->assertSame('bear/package', $byClass['BEAR\\Package\\Provide\\Router\\WebRouter']['n']);
+        $this->assertSame(
+            'src/Provide/Router/WebRouter.php',
+            $byClass['BEAR\\Package\\Provide\\Router\\WebRouter']['path'],
+        );
+        $this->assertSame(
+            'bear/aura-router-module',
+            $byClass['BEAR\\Package\\Provide\\Router\\AuraRouter']['n'],
+        );
+        $this->assertSame(
+            'src/Provide/Router/AuraRouter.php',
+            $byClass['BEAR\\Package\\Provide\\Router\\AuraRouter']['path'],
+        );
+        $this->assertSame(
+            'bear/aura-router-module',
+            $byClass['BEAR\\Package\\Provide\\Router\\AuraRouterModule']['n'],
+        );
+        $this->assertSame(
+            'src/Provide/Router/AuraRouterModule.php',
+            $byClass['BEAR\\Package\\Provide\\Router\\AuraRouterModule']['path'],
+        );
+        $this->assertSame(1, $byClass['BEAR\\Package\\Provide\\Router\\AuraRouterModule']['x'] ?? null);
+    }
+
+    private function removeDirectory(string $directory): void
+    {
+        $entries = scandir($directory);
+        if ($entries === false) {
+            return;
+        }
+
+        foreach ($entries as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+
+            $path = $directory . '/' . $entry;
+            if (is_dir($path)) {
+                $this->removeDirectory($path);
+                continue;
+            }
+
+            unlink($path);
+        }
+
+        rmdir($directory);
     }
 
     /** A composer.lock whose one package's namespace (Ray\Di\) appears in the markdown. */

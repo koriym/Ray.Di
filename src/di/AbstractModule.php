@@ -8,6 +8,7 @@ use Ray\Aop\AbstractMatcher;
 use Ray\Aop\Matcher;
 use Ray\Aop\Pointcut;
 use Ray\Aop\PriorityPointcut;
+use Ray\Bindings\ModuleVisitorInterface;
 use Stringable;
 
 use function assert;
@@ -61,6 +62,12 @@ abstract class AbstractModule implements Stringable
     public function __toString(): string
     {
         return (new ModuleString())($this->getContainer(), $this->getContainer()->getPointcuts());
+    }
+
+    /** Visit the module after its bindings have been composed. */
+    public function accept(ModuleVisitorInterface $visitor): void
+    {
+        $visitor->visit($this->getContainer());
     }
 
     /**

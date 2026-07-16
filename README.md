@@ -12,4 +12,29 @@
 
 Ray.Di is DI and AOP framework for PHP inspired by [Google Guice](https://github.com/google/guice/wiki).
 
+## Binding snapshots
+
+Collect a module's composed bindings explicitly when diagnostics are needed:
+
+```php
+use Ray\Bindings\Bindings;
+
+$bindings = new Bindings();
+$module->accept($bindings);
+
+$markdown = $bindings->toMarkdown();
+$html = $bindings->toHtml($composerLock, 'prod-app', $vendorDir);
+```
+
+The snapshot is captured when `accept()` is called. Later module changes and
+Injector processing do not change it; visiting another module with the same
+`Bindings` instance replaces the snapshot. It contains bindings composed by
+the application module through `bind()`, `install()`, and `override()`, without
+Injector built-ins or bindings discovered later during object resolution.
+
+`Injector` does not create `bindings.md` automatically. Applications that
+previously read that generated file should use `toMarkdown()` or `toHtml()` as
+shown above. The explicit `Ray\Bindings\BindingsMarkdown` file writer and the
+`bindings-html` command remain available for file-based workflows.
+
 https://ray-di.github.io

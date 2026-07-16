@@ -63,6 +63,12 @@ abstract class AbstractModule implements Stringable
         return (new ModuleString())($this->getContainer(), $this->getContainer()->getPointcuts());
     }
 
+    /** Visit the module after its bindings have been composed. */
+    public function accept(ModuleVisitorInterface $visitor): void
+    {
+        $visitor->visit($this->getContainer());
+    }
+
     /**
      * Install module
      */

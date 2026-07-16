@@ -46,20 +46,18 @@ class BindingsMarkdownTest extends TestCase
         }
     }
 
-    /**
-     * Building an injector emits bindings.md next to the generated classes,
-     * with the provenance log and the resolved bindings.
-     */
-    public function testInjectorEmitsBindingsMarkdown(): void
+    /** The explicit writer retains the existing markdown format. */
+    public function testExplicitWriterEmitsBindingsMarkdown(): void
     {
-        new Injector(new FakeLogStringModule(), $this->classDir);
+        $writer = new BindingsMarkdown();
+        $writer((new FakeLogStringModule())->getContainer(), $this->classDir);
 
         $markdown = file_get_contents($this->classDir . '/bindings.md');
         assert(is_string($markdown));
 
         // title + summary counts, then Bindings first
         $this->assertStringStartsWith(
-            "# Ray.Di bindings\n\n15 bindings · 5 modules · 0 replaced · 0 discarded\n\n## Bindings\n\n",
+            "# Ray.Di bindings\n\n9 bindings · 1 modules · 0 replaced · 0 discarded\n\n## Bindings\n\n",
             $markdown,
         );
         // bindings list the resolved target
@@ -67,11 +65,7 @@ class BindingsMarkdownTest extends TestCase
         // modules, sorted, with each module's binding count, then provenance
         $this->assertStringContainsString(
             "## Modules\n\n"
-            . "- Ray\\Di\\AssistedInjectModule (1)\n"
-            . "- Ray\\Di\\AssistedModule (2)\n"
-            . '- ' . FakeLogStringModule::class . " (9)\n"
-            . "- Ray\\Di\\MultiBinding\\MultiBindingModule (2)\n"
-            . "- Ray\\Di\\ProviderSetModule (1)\n\n## Provenance",
+            . '- ' . FakeLogStringModule::class . " (9)\n\n## Provenance",
             $markdown,
         );
         // provenance names the module that bound it
@@ -85,18 +79,21 @@ class BindingsMarkdownTest extends TestCase
      */
     public function testSummaryCountsReplacedAndDiscarded(): void
     {
-        new Injector(new FakeBindingLogModule(new FakeBindingLogInnerModule()), $this->classDir);
+        $writer = new BindingsMarkdown();
+        $writer((new FakeBindingLogModule(new FakeBindingLogInnerModule()))->getContainer(), $this->classDir);
 
         $markdown = file_get_contents($this->classDir . '/bindings.md');
         assert(is_string($markdown));
 
-        $this->assertStringContainsString('8 bindings · 6 modules · 1 replaced · 1 discarded', $markdown);
+        $this->assertStringContainsString('2 bindings · 2 modules · 1 replaced · 1 discarded', $markdown);
     }
 
     /** A closure binding is rendered without serializing the container. */
     public function testClosureBindingIsWrittenToMarkdown(): void
     {
-        $injector = new Injector(new FakeClosureBindModule(), $this->classDir);
+        $module = new FakeClosureBindModule();
+        (new BindingsMarkdown())($module->getContainer(), $this->classDir);
+        $injector = new Injector($module, $this->classDir);
 
         $this->assertInstanceOf(Closure::class, $injector->getInstance('', 'callback'));
         $markdown = file_get_contents($this->classDir . '/bindings.md');
@@ -117,12 +114,31 @@ class BindingsMarkdownTest extends TestCase
                 $this->bind(FakeEngine::class);
             }
         };
-        new Injector($module, $this->classDir);
+        (new BindingsMarkdown())($module->getContainer(), $this->classDir);
 
         $markdown = file_get_contents($this->classDir . '/bindings.md');
         assert(is_string($markdown));
 
         $this->assertStringContainsString(FakeEngine::class . '- => (untargeted)', $markdown);
+    }
+
+    public function testInjectorDoesNotEmitBindingsArtifacts(): void
+    {
+        new Injector(new FakeToBindModule(), $this->classDir);
+
+        $this->assertFileDoesNotExist($this->classDir . '/bindings.md');
+        $this->assertFileDoesNotExist($this->classDir . '/bindings.md.signature');
+    }
+
+    public function testWriterUsesThePublicRenderer(): void
+    {
+        $container = (new FakeLogStringModule())->getContainer();
+        $writer = new BindingsMarkdown();
+        $rendered = $writer->render($container);
+
+        $writer($container, $this->classDir);
+
+        $this->assertSame($rendered, file_get_contents($this->classDir . '/bindings.md'));
     }
 
     /** An unchanged binding surface reuses the existing markdown. */

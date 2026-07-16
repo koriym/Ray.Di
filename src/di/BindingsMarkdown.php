@@ -24,13 +24,11 @@ use function sprintf;
 use function trim;
 
 /**
- * Emit the composed container as bindings.md next to the generated classes
+ * Render or write a composed container as bindings.md
  *
  * A summary line, the resolved bindings, the modules that composed them, and
- * the provenance log (who bound what, who was discarded). Written at
- * composition time — before aspect weaving, so class names are the originals
- * and no proxy graph is serialized. Best-effort: a diagnostics artifact must
- * never break container construction.
+ * the provenance log (who bound what, who was discarded). The invokable writer
+ * is best-effort: a diagnostics artifact must never break its caller.
  */
 final class BindingsMarkdown
 {
@@ -52,7 +50,7 @@ final class BindingsMarkdown
                 file_put_contents($signatureFile, $signature);
             }
         } catch (Throwable) { // @codeCoverageIgnoreStart
-            // best-effort: never break construction for a diagnostics file
+            // best-effort: never break the caller for a diagnostics file
         } // @codeCoverageIgnoreEnd
     }
 
@@ -125,7 +123,7 @@ final class BindingsMarkdown
         return hash_equals($signature, trim($cachedSignature));
     }
 
-    private function render(Container $container): string
+    public function render(Container $container): string
     {
         $log = $container->log;
         $replaced = 0;

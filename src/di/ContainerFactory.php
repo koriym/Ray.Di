@@ -26,8 +26,6 @@ final class ContainerFactory
         $container = $appModule->getContainer();
         // Compile null objects
         (new CompileNullObject())($container, $classDir);
-        // Emit bindings.md before weaving, while class names are the originals
-        (new BindingsMarkdown())($container, $classDir);
         // Compile aspects
         /** @psalm-suppress InvalidArgument */
         $container->weaveAspects(new Compiler($classDir));

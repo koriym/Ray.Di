@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Add an explicit module visitor API and `Ray\Bindings\Bindings` snapshots for rendering composed bindings as Markdown or HTML.
+
+### Changed
+
+- Stop generating `bindings.md` and its signature as a side effect of constructing an `Injector`; collect bindings with `$module->accept(new Bindings())` when diagnostics are needed.
+
 ## 2.21.2 - 2026-07-16
 
 ### Fixed

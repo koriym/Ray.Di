@@ -25,9 +25,19 @@
     function attr(s) { return esc(s).replace(/"/g, '&quot;'); }
 
     function resolve(fqcn) {
-      var best = null;
+      // Exact-class overrides (x=1) first — used when two packages share a PSR-4
+      // prefix (e.g. bear/package vs bear/aura-router-module both claim BEAR\Package\).
       for (var i = 0; i < srcmap.length; i++) {
-        var e = srcmap[i];
+        var ex = srcmap[i];
+        if (ex.x === 1 && ex.p === fqcn && ex.path && /^https?:\/\//.test(ex.u)) {
+          return { gh: ex.u + (ex.u.indexOf('github.com') !== -1 ? '/blob/' + ex.r + '/' + ex.path : ''), local: 'vendor/' + ex.n + '/' + ex.path };
+        }
+      }
+      // Longest PSR-4 prefix wins; equal length keeps the first entry.
+      var best = null;
+      for (var j = 0; j < srcmap.length; j++) {
+        var e = srcmap[j];
+        if (e.x === 1) { continue; }
         if (fqcn.indexOf(e.p) === 0 && (!best || e.p.length > best.p.length)) { best = e; }
       }
       // only link http(s) repositories, so a hostile source URL can't become a javascript: href

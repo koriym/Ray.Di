@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.21.2 - 2026-07-16
+
+### Fixed
+
+- Resolve bindings viewer source links correctly when multiple packages share a PSR-4 prefix by checking the optional Composer vendor directory ([#330](https://github.com/ray-di/Ray.Di/pull/330)).
+
 ## 2.21.1 - 2026-07-15
 
 ### Changed

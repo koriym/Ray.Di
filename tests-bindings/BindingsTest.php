@@ -20,6 +20,7 @@ use function assert;
 use function is_array;
 use function preg_match;
 use function preg_split;
+use function strpos;
 use function sys_get_temp_dir;
 
 final class BindingsTest extends TestCase
@@ -87,6 +88,21 @@ final class BindingsTest extends TestCase
 
         $this->assertNotSame($first, $bindings->toMarkdown());
         $this->assertStringContainsString('1 bindings · 1 modules', $bindings->toMarkdown());
+    }
+
+    public function testModulesAreSorted(): void
+    {
+        $module = new FakeToBindModule();
+        $module->install(new FakeLogStringModule());
+        $bindings = new Bindings();
+        $module->accept($bindings);
+        $markdown = $bindings->toMarkdown();
+
+        $logModulePosition = strpos($markdown, '- ' . FakeLogStringModule::class);
+        $toBindModulePosition = strpos($markdown, '- ' . FakeToBindModule::class);
+        $this->assertIsInt($logModulePosition);
+        $this->assertIsInt($toBindModulePosition);
+        $this->assertLessThan($toBindModulePosition, $logModulePosition);
     }
 
     public function testToMarkdownBeforeCollectionThrows(): void

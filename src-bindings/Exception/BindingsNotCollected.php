@@ -6,7 +6,7 @@ namespace Ray\Bindings\Exception;
 
 use LogicException;
 
-/** Bindings were rendered before a module snapshot was collected. */
+/** Thrown when bindings are rendered before a module snapshot is collected. */
 final class BindingsNotCollected extends LogicException
 {
 }

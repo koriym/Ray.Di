@@ -108,7 +108,6 @@ final class BindingsTest extends TestCase
     public function testToMarkdownBeforeCollectionThrows(): void
     {
         $this->expectException(BindingsNotCollected::class);
-        $this->expectExceptionMessage('Collect bindings with AbstractModule::accept() before rendering.');
 
         (new Bindings())->toMarkdown();
     }

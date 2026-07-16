@@ -30,7 +30,7 @@ final class Bindings implements ModuleVisitorInterface
     private function getMarkdown(): string
     {
         if ($this->markdown === null) {
-            throw new BindingsNotCollected('Collect bindings with AbstractModule::accept() before rendering.');
+            throw new BindingsNotCollected();
         }
 
         return $this->markdown;

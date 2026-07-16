@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ray\Bindings;
 
 use PHPUnit\Framework\TestCase;
-use Ray\Di\Exception\BindingsNotCollected;
+use Ray\Bindings\Exception\BindingsNotCollected;
 use Ray\Di\FakeBindingLogInnerModule;
 use Ray\Di\FakeBindingLogModule;
 use Ray\Di\FakeEngine;

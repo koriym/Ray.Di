@@ -34,7 +34,7 @@ Injector built-ins or bindings discovered later during object resolution.
 
 `Injector` does not create `bindings.md` automatically. Applications that
 previously read that generated file should use `toMarkdown()` or `toHtml()` as
-shown above. The explicit `BindingsMarkdown` file writer and the
+shown above. The explicit `Ray\Bindings\BindingsMarkdown` file writer and the
 `bindings-html` command remain available for file-based workflows.
 
 https://ray-di.github.io

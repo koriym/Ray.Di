@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Ray\Bindings;
 
-use Ray\Di\BindingsMarkdown;
+use Ray\Bindings\Exception\BindingsNotCollected;
 use Ray\Di\Container;
-use Ray\Di\Exception\BindingsNotCollected;
-use Ray\Di\ModuleVisitorInterface;
 
 /** An immutable-at-render-time snapshot of a module's composed bindings. */
 final class Bindings implements ModuleVisitorInterface

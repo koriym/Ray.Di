@@ -2,12 +2,27 @@
 
 declare(strict_types=1);
 
-namespace Ray\Di;
+namespace Ray\Bindings;
 
 use Closure;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\Matcher;
 use Ray\Aop\Pointcut;
+use Ray\Di\AbstractModule;
+use Ray\Di\Bind;
+use Ray\Di\BindingsMarkdown as LegacyBindingsMarkdown;
+use Ray\Di\Container;
+use Ray\Di\FakeAop;
+use Ray\Di\FakeAopInterface;
+use Ray\Di\FakeBindingLogInnerModule;
+use Ray\Di\FakeBindingLogModule;
+use Ray\Di\FakeClosureBindModule;
+use Ray\Di\FakeCountingMatcher;
+use Ray\Di\FakeDoubleInterceptor;
+use Ray\Di\FakeEngine;
+use Ray\Di\FakeLogStringModule;
+use Ray\Di\FakeToBindModule;
+use Ray\Di\Injector;
 use RuntimeException;
 
 use function assert;
@@ -46,7 +61,7 @@ class BindingsMarkdownTest extends TestCase
         }
     }
 
-    /** The explicit writer retains the existing markdown format. */
+    /** The explicit writer preserves the existing markdown format. */
     public function testExplicitWriterEmitsBindingsMarkdown(): void
     {
         $writer = new BindingsMarkdown();
@@ -139,6 +154,18 @@ class BindingsMarkdownTest extends TestCase
         $writer($container, $this->classDir);
 
         $this->assertSame($rendered, file_get_contents($this->classDir . '/bindings.md'));
+    }
+
+    public function testLegacyWriterDelegatesToBindingsWriter(): void
+    {
+        $container = (new FakeLogStringModule())->getContainer();
+        $legacyWriter = new LegacyBindingsMarkdown();
+
+        $this->assertSame((new BindingsMarkdown())->render($container), $legacyWriter->render($container));
+
+        $legacyWriter($container, $this->classDir);
+
+        $this->assertFileExists($this->classDir . '/bindings.md');
     }
 
     /** An unchanged binding surface reuses the existing markdown. */

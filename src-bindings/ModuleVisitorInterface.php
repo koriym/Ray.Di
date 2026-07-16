@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ray\Di;
+namespace Ray\Bindings;
 
-/** Visits a module's composed container. */
+use Ray\Di\Container;
+
+/** Visits the composed container of a module. */
 interface ModuleVisitorInterface
 {
     public function visit(Container $container): void;

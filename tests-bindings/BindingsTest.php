@@ -16,8 +16,10 @@ use Ray\Di\FakeToBindModule;
 use Ray\Di\Injector;
 
 use function array_filter;
-use function explode;
+use function assert;
+use function is_array;
 use function preg_match;
+use function preg_split;
 use function sys_get_temp_dir;
 
 final class BindingsTest extends TestCase
@@ -118,7 +120,9 @@ final class BindingsTest extends TestCase
         $matched = preg_match('/## Bindings\n\n(.+?)\n\n## Modules/s', $markdown, $matches);
         $this->assertSame(1, $matched);
         $section = $matches[1];
-        $lines = array_filter(explode("\n", $section), static fn (string $line): bool => $line !== '');
+        $lines = preg_split('/\R/', $section);
+        assert(is_array($lines));
+        $lines = array_filter($lines, static fn (string $line): bool => $line !== '');
         $this->assertCount($expectedCount, $lines);
         foreach ($lines as $line) {
             $this->assertMatchesRegularExpression('/^[^\r\n]+ => [^\r\n]+$/D', $line);

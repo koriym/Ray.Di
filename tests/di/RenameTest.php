@@ -100,13 +100,14 @@ class RenameTest extends TestCase
     }
 
     /**
-     * When no binding exists at the source index, rename() must
-     * surface Container::move()'s Unbound rather than silently no-op.
+     * With no constructor-chained module to supply the source, a rename whose
+     * source never composed is dropped -- rename() in that position has been a
+     * silent no-op for the whole 2.x line, and `composer update` must not turn
+     * long-dormant rename() calls into constructor-time errors. Existing
+     * bindings stay untouched.
      */
-    public function testThrowsUnboundWhenSourceMissing(): void
+    public function testMissingSourceWithoutChainedModuleIsNoOp(): void
     {
-        $this->expectException(Unbound::class);
-
         $module = new class extends AbstractModule {
             protected function configure(): void
             {
@@ -114,6 +115,10 @@ class RenameTest extends TestCase
                 $this->rename(FakeRobotInterface::class, 'renamed', 'does-not-exist');
             }
         };
+
+        $instance = $module->getContainer()->getInstance(FakeRobotInterface::class, Name::ANY);
+
+        $this->assertInstanceOf(FakeRobot::class, $instance);
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
+use Ray\Di\Exception\Unbound;
 
 /**
  * Pins the rename()-then-rebind decorator idiom
@@ -82,5 +83,33 @@ class RenameDecoratorTest extends TestCase
 
         $this->assertInstanceOf(FakeRobotDecorator::class, $decorator);
         $this->assertInstanceOf(FakeRobot::class, $decorator->inner);
+    }
+
+    /**
+     * When the chained module fails to provide the source -- an application
+     * without a RouterInterface handed to CliModule -- construction must fail
+     * loudly, as moving on the chained container did in 2.20. The pending
+     * rename must never fall through to the module's own container, where it
+     * would move the decorator onto the source's new name: the decorator then
+     * injects itself, and the unnamed index resolves to nothing.
+     */
+    public function testMissingSourceInChainedModuleFailsAtConstruction(): void
+    {
+        $emptyChained = new class extends AbstractModule {
+            protected function configure(): void
+            {
+            }
+        };
+
+        $this->expectException(Unbound::class);
+
+        new class ($emptyChained) extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->rename(FakeRobotInterface::class, 'original');
+                $this->bind(FakeRobotInterface::class)
+                    ->toConstructor(FakeRobotDecorator::class, ['inner' => 'original']);
+            }
+        };
     }
 }

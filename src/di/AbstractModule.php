@@ -59,7 +59,7 @@ abstract class AbstractModule implements Stringable
             $this->getContainer()->merge($module->getContainer());
         }
 
-        $this->applyPendingRenames();
+        $this->discardPendingRenames();
     }
 
     public function __toString(): string
@@ -149,10 +149,13 @@ abstract class AbstractModule implements Stringable
      *
      * A binding already composed when rename() runs — own bind() or install() —
      * moves on the spot, so a later bind() to the vacated slot decorates it.
-     * Inside configure() a source that has not composed yet arrives with the
-     * constructor-chained module, so the rename is applied to that module's
-     * bindings when composition completes; the exceptions below then surface
-     * from the constructor.
+     * Inside configure() a source that has not composed yet must arrive with
+     * the constructor-chained module: the rename is applied to that module's
+     * bindings just before they merge, and a source missing there surfaces the
+     * exceptions below from the constructor. Without a chained module such a
+     * rename is dropped — a no-op, as everywhere in 2.x. Renaming a source
+     * that a later install() introduces is therefore not supported: install
+     * first, then rename.
      *
      * @param string $interface       Interface
      * @param string $newName         New binding name
@@ -202,7 +205,7 @@ abstract class AbstractModule implements Stringable
         $this->matcher = new Matcher();
         $this->isConfiguring = true;
         $this->configure();
-        $this->applyPendingRenames();
+        $this->discardPendingRenames();
     }
 
     private function hasBinding(string $interface, string $name): bool
@@ -211,22 +214,17 @@ abstract class AbstractModule implements Stringable
     }
 
     /**
-     * Apply pending renames whose source arrived in the given container, consuming them
+     * Apply pending renames to the constructor-chained container, consuming them
      *
      * The move happens before the merge, so the vacated slot stays free for
-     * whatever configure() declared there.
+     * whatever configure() declared there. A source missing from the chained
+     * container is an error, exactly as moving on it was in 2.20 — the pending
+     * rename must never fall through to the module's own container, where
+     * configure() may have re-bound the source index with a decorator.
      */
     private function applyPendingRenamesTo(Container $container): void
     {
-        $remaining = [];
-        foreach ($this->pendingRenames as $rename) {
-            [$interface, $newName, $sourceName, $targetInterface] = $rename;
-            if (! isset($container->getContainer()[$interface . '-' . $sourceName])) {
-                $remaining[] = $rename;
-
-                continue;
-            }
-
+        foreach ($this->pendingRenames as [$interface, $newName, $sourceName, $targetInterface]) {
             if ($this->hasBinding($targetInterface, $newName)) {
                 throw new RenameTargetAlreadyBound(sprintf("'%s-%s'", $targetInterface, $newName));
             }
@@ -234,16 +232,19 @@ abstract class AbstractModule implements Stringable
             $container->move($interface, $sourceName, $targetInterface, $newName);
         }
 
-        $this->pendingRenames = $remaining;
+        $this->pendingRenames = [];
     }
 
-    private function applyPendingRenames(): void
+    /**
+     * End composition, dropping renames no chained module could satisfy
+     *
+     * Without a constructor-chained module a pending rename has no source to
+     * arrive: it is dropped, as rename() in that position has been a no-op
+     * for the whole 2.x line.
+     */
+    private function discardPendingRenames(): void
     {
         $this->isConfiguring = false;
-        foreach ($this->pendingRenames as [$interface, $newName, $sourceName, $targetInterface]) {
-            $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
-        }
-
         $this->pendingRenames = [];
     }
 }

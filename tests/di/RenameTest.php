@@ -201,6 +201,25 @@ class RenameTest extends TestCase
     }
 
     /**
+     * Cross-interface rename works on a source that arrives with the
+     * constructor-chained module too: $targetInterface must travel the
+     * deferred path intact.
+     */
+    public function testMovesConstructorChainedBindingToDifferentInterface(): void
+    {
+        $module = new class (new FakeToBindModule()) extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->rename(FakeRobotInterface::class, 'moved', Name::ANY, FakeCarInterface::class);
+            }
+        };
+        $container = $module->getContainer();
+
+        $this->assertInstanceOf(FakeRobot::class, $container->getInstance(FakeCarInterface::class, 'moved'));
+        $this->assertArrayNotHasKey(FakeRobotInterface::class . '-' . Name::ANY, $container->getContainer());
+    }
+
+    /**
      * Renaming a binding to its own current name must be a no-op, not an
      * error. The existing binding must remain resolvable under the same name.
      */

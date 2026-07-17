@@ -2,11 +2,7 @@
 
 ## 2.22.1 - 2026-07-17
 
-2.21.0 through 2.22.0 were withdrawn; everything they list ships here.
-
-### Fixed
-
-- Restore `AbstractModule::rename()` to moving a binding of the module it wraps, as in 2.20 and earlier; 2.21.0 made the module's own container the subject and broke decorator modules such as `BEAR\Package\Context\CliModule` ([#333](https://github.com/ray-di/Ray.Di/pull/333)).
+2.21.0 through 2.22.0 were withdrawn shortly after release; everything they list ships here.
 
 ## 2.22.0 - 2026-07-16 (withdrawn)
 

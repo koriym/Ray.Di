@@ -2,30 +2,16 @@
 
 ## 2.22.1 - 2026-07-17
 
-2.21.0 through 2.22.0 were withdrawn shortly after release; everything they list ships here.
-
-## 2.22.0 - 2026-07-16 (withdrawn)
-
 ### Added
 
-- Add `Ray\Bindings\ModuleVisitorInterface` and `Ray\Bindings\Bindings` snapshots for rendering composed bindings as Markdown or HTML.
+- Detect circular dependencies and report them with a dedicated exception, instead of recursing until the process dies ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
+- Add a binding provenance log recording how each binding was composed, and `Ray\Bindings\Bindings` snapshots for rendering it as Markdown or HTML — collected explicitly with `$module->accept(new Bindings())` ([#323](https://github.com/ray-di/Ray.Di/pull/323), [#331](https://github.com/ray-di/Ray.Di/pull/331)).
+- Add the `Ray\Bindings\BindingsHtml` viewer and the `bin/bindings-html` command ([#325](https://github.com/ray-di/Ray.Di/pull/325), [#330](https://github.com/ray-di/Ray.Di/pull/330)).
 
 ### Changed
 
-- Stop generating `bindings.md` and its signature as a side effect of constructing an `Injector`; collect bindings with `$module->accept(new Bindings())` when diagnostics are needed.
-- Move the canonical `BindingsMarkdown` writer to `Ray\Bindings`; the deprecated `Ray\Di\BindingsMarkdown` name remains as a compatibility adapter.
-
-## 2.21.2 - 2026-07-16 (withdrawn)
-
-### Fixed
-
-- Resolve bindings viewer source links correctly when multiple packages share a PSR-4 prefix by checking the optional Composer vendor directory ([#330](https://github.com/ray-di/Ray.Di/pull/330)).
-
-## 2.21.1 - 2026-07-15 (withdrawn)
-
-### Changed
-
-- Update `infection/infection` to ^0.34 in development dependencies.
+- Improve module composition compatibility and DI hot-path performance ([#316](https://github.com/ray-di/Ray.Di/pull/316), [#319](https://github.com/ray-di/Ray.Di/pull/319), [#333](https://github.com/ray-di/Ray.Di/pull/333)).
+- Update the CI and development toolchain for PHP 8.5, PHPUnit 11, PHP_CodeSniffer 4, and mutation testing ([#315](https://github.com/ray-di/Ray.Di/pull/315), [#317](https://github.com/ray-di/Ray.Di/pull/317), [#326](https://github.com/ray-di/Ray.Di/pull/326)).
 
 ### Deprecated
 
@@ -33,31 +19,10 @@
 
 ### Fixed
 
-- Fix assisted injection re-entry with Ray.Aop 2.22's parent-call dispatch, and preserve explicit `null` arguments during assisted injection ([#328](https://github.com/ray-di/Ray.Di/pull/328)).
-
-### Included pull requests
-
-- [#328 Fix assisted injection re-entry](https://github.com/ray-di/Ray.Di/pull/328)
-- [#329 Make exception phpdoc consistent and self-documenting](https://github.com/ray-di/Ray.Di/pull/329)
-
-## 2.21.0 - 2026-07-15 (withdrawn)
-
-### Added
-
-- Add a binding provenance log and emit `bindings.md` during module composition ([#323](https://github.com/ray-di/Ray.Di/pull/323)).
-- Add a reusable `Ray\Bindings\BindingsHtml` viewer and the `bin/bindings-html` command ([#325](https://github.com/ray-di/Ray.Di/pull/325)).
-- Detect circular dependencies and report them with a dedicated exception ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
-
-### Changed
-
-- Improve module composition compatibility and DI hot-path performance ([#316](https://github.com/ray-di/Ray.Di/pull/316), [#319](https://github.com/ray-di/Ray.Di/pull/319)).
-- Update the CI and development toolchain for PHP 8.5, PHPUnit 11, PHP_CodeSniffer 4, and mutation testing ([#315](https://github.com/ray-di/Ray.Di/pull/315), [#317](https://github.com/ray-di/Ray.Di/pull/317), [#326](https://github.com/ray-di/Ray.Di/pull/326)).
-
-### Fixed
-
 - Preserve provider constructor injection points during dependency resolution ([#320](https://github.com/ray-di/Ray.Di/pull/320)).
-- Correct JIT binding recursion, singleton handling, multi-binding scope clearing, and multi-interceptor registration ([#318](https://github.com/ray-di/Ray.Di/pull/318)).
-- Cache `bindings.md` generation when the binding signature is unchanged ([#327](https://github.com/ray-di/Ray.Di/pull/327)).
+- Correct JIT binding recursion, singleton handling, multi-binding scope clearing, and multi-interceptor registration ([#318](https://github.com/ray-di/Ray.Di/pull/318), [#319](https://github.com/ray-di/Ray.Di/pull/319)).
+- Fix assisted injection re-entry with Ray.Aop 2.22's parent-call dispatch, and preserve explicit `null` arguments during assisted injection ([#328](https://github.com/ray-di/Ray.Di/pull/328)).
+- Reject a rename onto an index that already has a binding instead of silently destroying it ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
 
 ### Included pull requests
 
@@ -71,4 +36,8 @@
 - [#323 Add binding provenance logging](https://github.com/ray-di/Ray.Di/pull/323)
 - [#325 Add the bindings HTML viewer](https://github.com/ray-di/Ray.Di/pull/325)
 - [#326 Bump CI tooling to PHP 8.5/8.4](https://github.com/ray-di/Ray.Di/pull/326)
-- [#327 Optimize bindings markdown generation](https://github.com/ray-di/Ray.Di/pull/327)
+- [#328 Fix assisted injection re-entry](https://github.com/ray-di/Ray.Di/pull/328)
+- [#329 Make exception phpdoc consistent and self-documenting](https://github.com/ray-di/Ray.Di/pull/329)
+- [#330 Disambiguate shared PSR-4 source links](https://github.com/ray-di/Ray.Di/pull/330)
+- [#331 Add an explicit bindings snapshot API](https://github.com/ray-di/Ray.Di/pull/331)
+- [#333 Restore rename() to its wrapper transformation](https://github.com/ray-di/Ray.Di/pull/333)

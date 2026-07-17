@@ -8,100 +8,110 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\Exception\RenameTargetAlreadyBound;
 use Ray\Di\Exception\Unbound;
 
+/**
+ * Pins the mechanics of renaming a wrapped module's binding
+ *
+ * The wrapper transformation itself — move aside, bind over, inject the moved
+ * one — is pinned by {@see RenameDecoratorTest}. This covers what a rename does
+ * to the index: which name it lands on, which interface, and how it refuses.
+ */
 class RenameTest extends TestCase
 {
     /**
-     * rename() must operate on getContainer() directly, so a binding
-     * introduced via install() -- not just constructor chaining -- can be
-     * renamed. After the move, the new name resolves and the old (unnamed)
-     * index is gone.
+     * With $targetInterface omitted, the rename stays within the same
+     * interface -- only the binding name changes.
      */
-    public function testRenamesBindingIntroducedByInstall(): void
+    public function testRenameWithinSameInterfaceWhenTargetInterfaceOmitted(): void
     {
-        $module = new class extends AbstractModule {
+        $module = new class (new FakeToBindModule()) extends AbstractModule {
             protected function configure(): void
             {
-                $this->install(new FakeToBindModule());
                 $this->rename(FakeRobotInterface::class, 'renamed');
+            }
+        };
+        $array = $module->getContainer()->getContainer();
+
+        $this->assertArrayHasKey(FakeRobotInterface::class . '-renamed', $array);
+        $this->assertArrayNotHasKey(FakeRobotInterface::class . '-' . Name::ANY, $array);
+    }
+
+    /**
+     * With $targetInterface specified, the binding moves to a different
+     * interface index entirely, not just a new name under the source one.
+     */
+    public function testMovesToDifferentInterfaceWhenTargetInterfaceSpecified(): void
+    {
+        $module = new class (new FakeToBindModule()) extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->rename(FakeRobotInterface::class, 'moved', Name::ANY, FakeCarInterface::class);
             }
         };
         $container = $module->getContainer();
 
-        $instance = $container->getInstance(FakeRobotInterface::class, 'renamed');
-        $this->assertInstanceOf(FakeRobot::class, $instance);
-
-        $this->expectException(Unbound::class);
-        $container->getInstance(FakeRobotInterface::class, Name::ANY);
+        $this->assertInstanceOf(FakeRobot::class, $container->getInstance(FakeCarInterface::class, 'moved'));
+        $this->assertArrayNotHasKey(FakeRobotInterface::class . '-' . Name::ANY, $container->getContainer());
     }
 
     /**
-     * override() replaces $this->container with the target module's (merged)
-     * container. rename() inside configure() is deferred and applied against
-     * getContainer() after composition completes, so it must act on that
-     * merged container, not on a stale reference captured before the swap.
+     * Renaming a binding to its own current name is a no-op, not an error.
+     * The existing binding remains resolvable under the same name.
      */
-    public function testRenamesBindingAfterOverride(): void
+    public function testSelfRenameIsNoOp(): void
     {
-        $module = new class extends AbstractModule {
+        $module = new class (new FakeToBindModule()) extends AbstractModule {
             protected function configure(): void
             {
-                $this->install(new FakeToBindModule());
-                $this->override(new class extends AbstractModule {
-                    protected function configure(): void
-                    {
-                        $this->bind(FakeEngineInterface::class)->toInstance(new FakeEngine());
-                    }
-                });
-                $this->rename(FakeRobotInterface::class, 'renamed');
+                $this->rename(FakeRobotInterface::class, Name::ANY, Name::ANY);
             }
         };
-        $container = $module->getContainer();
 
-        // the renamed binding, originally introduced before override(), is reachable
-        $instance = $container->getInstance(FakeRobotInterface::class, 'renamed');
+        $instance = $module->getContainer()->getInstance(FakeRobotInterface::class, Name::ANY);
+
         $this->assertInstanceOf(FakeRobot::class, $instance);
-
-        // and the override target's own binding survived alongside it
-        $this->assertInstanceOf(FakeEngine::class, $container->getInstance(FakeEngineInterface::class, Name::ANY));
     }
 
     /**
-     * When no binding exists at the source index, rename() must
-     * surface Container::move()'s Unbound rather than silently no-op.
+     * When the wrapped module has no binding at the source index, rename()
+     * surfaces Container::move()'s Unbound rather than silently no-op.
      */
     public function testThrowsUnboundWhenSourceMissing(): void
     {
         $this->expectException(Unbound::class);
 
-        $module = new class extends AbstractModule {
+        new class (new FakeToBindModule()) extends AbstractModule {
             protected function configure(): void
             {
-                $this->install(new FakeToBindModule());
                 $this->rename(FakeRobotInterface::class, 'renamed', 'does-not-exist');
             }
         };
     }
 
     /**
-     * Renaming onto an index that already has a binding must be rejected
-     * instead of silently overwriting it. The pre-existing binding at the
-     * target index must remain resolvable afterward, proving move() aborted
-     * before mutating the container.
+     * Renaming onto an index that already has a binding is rejected instead of
+     * silently overwriting it. The pre-existing binding at the target index
+     * remains resolvable afterward, proving move() aborted before mutating the
+     * container.
      */
     public function testThrowsWhenTargetAlreadyBoundAndPreservesExistingBinding(): void
     {
-        $module = new class extends AbstractModule {
+        $wrapped = new class extends AbstractModule {
             protected function configure(): void
             {
-                $this->install(new FakeToBindModule());
-                // occupy the target index before attempting the rename
+                $this->bind(FakeRobotInterface::class)->to(FakeRobot::class);
+                // occupy the target index before the rename is attempted
                 $this->bind(FakeRobotInterface::class)->annotatedWith('renamed')->to(FakeRobot2::class);
             }
         };
 
         $threw = false;
         try {
-            $module->rename(FakeRobotInterface::class, 'renamed');
+            new class ($wrapped) extends AbstractModule {
+                protected function configure(): void
+                {
+                    $this->rename(FakeRobotInterface::class, 'renamed');
+                }
+            };
         } catch (RenameTargetAlreadyBound $e) {
             $threw = true;
         }
@@ -109,74 +119,9 @@ class RenameTest extends TestCase
         $this->assertTrue($threw, 'RenameTargetAlreadyBound was not thrown');
 
         // the pre-existing binding at the target index was not destroyed
-        $instance = $module->getContainer()->getInstance(FakeRobotInterface::class, 'renamed');
-        $this->assertInstanceOf(FakeRobot2::class, $instance);
-
+        $container = $wrapped->getContainer();
+        $this->assertInstanceOf(FakeRobot2::class, $container->getInstance(FakeRobotInterface::class, 'renamed'));
         // and the source binding was left untouched since the move aborted
-        $source = $module->getContainer()->getInstance(FakeRobotInterface::class, Name::ANY);
-        $this->assertInstanceOf(FakeRobot::class, $source);
-    }
-
-    /**
-     * With $targetInterface omitted, the rename must stay within the same
-     * interface -- only the binding name changes.
-     */
-    public function testRenameWithinSameInterfaceWhenTargetInterfaceOmitted(): void
-    {
-        $module = new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->install(new FakeToBindModule());
-                $this->rename(FakeRobotInterface::class, 'renamed');
-            }
-        };
-        $container = $module->getContainer();
-        $array = $container->getContainer();
-
-        $this->assertArrayHasKey(FakeRobotInterface::class . '-renamed', $array);
-        $this->assertArrayNotHasKey(FakeRobotInterface::class . '-' . Name::ANY, $array);
-    }
-
-    /**
-     * With $targetInterface specified, the binding must move to a different
-     * interface index entirely, not just get a new name under the source
-     * interface.
-     */
-    public function testMovesToDifferentInterfaceWhenTargetInterfaceSpecified(): void
-    {
-        $module = new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->install(new FakeToBindModule());
-                $this->rename(FakeRobotInterface::class, 'moved', Name::ANY, FakeCarInterface::class);
-            }
-        };
-        $container = $module->getContainer();
-        $array = $container->getContainer();
-
-        $this->assertArrayHasKey(FakeCarInterface::class . '-moved', $array);
-        $this->assertArrayNotHasKey(FakeRobotInterface::class . '-' . Name::ANY, $array);
-
-        $instance = $container->getInstance(FakeCarInterface::class, 'moved');
-        $this->assertInstanceOf(FakeRobot::class, $instance);
-    }
-
-    /**
-     * Renaming a binding to its own current name must be a no-op, not an
-     * error. The existing binding must remain resolvable under the same name.
-     */
-    public function testSelfRenameIsNoOp(): void
-    {
-        $module = new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->install(new FakeToBindModule());
-                $this->rename(FakeRobotInterface::class, Name::ANY, Name::ANY);
-            }
-        };
-        $container = $module->getContainer();
-
-        $instance = $container->getInstance(FakeRobotInterface::class, Name::ANY);
-        $this->assertInstanceOf(FakeRobot::class, $instance);
+        $this->assertInstanceOf(FakeRobot::class, $container->getInstance(FakeRobotInterface::class, Name::ANY));
     }
 }

@@ -138,10 +138,9 @@ LOG;
      */
     public function testRenameRecordsMoveEventAndTransfersProvenance(): void
     {
-        $module = new class extends AbstractModule {
+        $module = new class (new FakeToBindModule()) extends AbstractModule {
             protected function configure(): void
             {
-                $this->install(new FakeToBindModule());
                 $this->rename(FakeRobotInterface::class, 'renamed');
             }
         };

@@ -26,28 +26,19 @@ abstract class AbstractModule implements Stringable
     protected $matcher;
 
     /**
+     * The module this one wraps — the subject of rename()
+     *
      * @var ?AbstractModule
-     * @deprecated Unused since rename() now operates on getContainer().
      */
     protected $lastModule;
     private ?Container $container = null;
 
-    /**
-     * Renames requested while configure() runs, applied after composition completes
-     *
-     * @var list<array{string, string, string, string}> [$interface, $newName, $sourceName, $targetInterface]
-     */
-    private array $pendingRenames = [];
-    private bool $isConfiguring = false;
-
     public function __construct(
         ?self $module = null
     ) {
-        /** @psalm-suppress DeprecatedProperty kept for BC */
         $this->lastModule = $module;
         $this->container = new Container();
         $this->matcher = new Matcher();
-        $this->isConfiguring = true;
         $this->configure();
         // Merged after configure() so that everything configure() declared —
         // bind(), install()ed bindings, pointcuts — takes priority over the
@@ -55,8 +46,6 @@ abstract class AbstractModule implements Stringable
         if ($module instanceof self) {
             $this->getContainer()->merge($module->getContainer());
         }
-
-        $this->applyPendingRenames();
     }
 
     public function __toString(): string
@@ -137,33 +126,31 @@ abstract class AbstractModule implements Stringable
     }
 
     /**
-     * Rename a binding
+     * Rename a binding of the wrapped module
      *
-     * Renames an existing binding from $sourceName to $newName, optionally
-     * moving it to a different interface. Works on the module's own container,
-     * so bindings introduced via constructor chaining, install(), or override()
-     * are all reachable. Inside configure() the rename is deferred until module
-     * composition completes (the constructor-chained module is merged after
-     * configure()); the exceptions below then surface from the constructor.
+     * Moves a binding the wrapped module made from $sourceName to $newName,
+     * optionally onto a different interface, so this module can bind its own
+     * implementation over the vacated index and inject the moved one by its
+     * new name — the wrapper transformation a decorator module is built on.
+     *
+     * The subject is always the wrapped module, never the bindings this module
+     * is declaring: renaming reaches the past. With nothing wrapped there is no
+     * past to rewire and the call does nothing.
      *
      * @param string $interface       Interface
      * @param string $newName         New binding name
      * @param string $sourceName      Original binding name
      * @param string $targetInterface Target interface to move the binding to (default: same as $interface)
      *
-     * @throws Exception\Unbound                 When no binding exists at $interface-$sourceName.
+     * @throws Exception\Unbound                 When the wrapped module has no binding at $interface-$sourceName.
      * @throws Exception\RenameTargetAlreadyBound When a binding already exists at the target index.
      */
     public function rename(string $interface, string $newName, string $sourceName = Name::ANY, string $targetInterface = ''): void
     {
         $targetInterface = $targetInterface ?: $interface;
-        if ($this->isConfiguring) {
-            $this->pendingRenames[] = [$interface, $newName, $sourceName, $targetInterface];
-
-            return;
+        if ($this->lastModule instanceof self) {
+            $this->lastModule->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
         }
-
-        $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
     }
 
     /**
@@ -192,18 +179,6 @@ abstract class AbstractModule implements Stringable
     {
         $this->container = new Container();
         $this->matcher = new Matcher();
-        $this->isConfiguring = true;
         $this->configure();
-        $this->applyPendingRenames();
-    }
-
-    private function applyPendingRenames(): void
-    {
-        $this->isConfiguring = false;
-        foreach ($this->pendingRenames as [$interface, $newName, $sourceName, $targetInterface]) {
-            $this->getContainer()->move($interface, $sourceName, $targetInterface, $newName);
-        }
-
-        $this->pendingRenames = [];
     }
 }

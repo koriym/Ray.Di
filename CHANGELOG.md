@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Restore `AbstractModule::rename()` to the wrapper transformation it is in every released 2.x version: it moves a binding of the module it wraps, so a module can move a binding aside, bind its own implementation over it, and inject the moved one by its new name. 2.21.0 made the module's own container the subject and deferred the rename past composition, which renamed the decorator onto its own inner name — breaking `BEAR\Package\Context\CliModule` and with it the CLI context of every BEAR.Sunday application, as well as BEAR.Defer and BEAR.DevTools. 2.21.0, 2.21.1 and 2.22.0 carry the break and were removed from Packagist.
+- Renaming a binding composed by the renaming module itself, through `bind()`, `install()` or `override()`, is not supported and never was; only the wrapped module's bindings can be renamed.
+
 ## 2.22.0 - 2026-07-16
 
 ### Added
@@ -42,7 +49,7 @@
 
 - Add a binding provenance log and emit `bindings.md` during module composition ([#323](https://github.com/ray-di/Ray.Di/pull/323)).
 - Add a reusable `Ray\Bindings\BindingsHtml` viewer and the `bin/bindings-html` command ([#325](https://github.com/ray-di/Ray.Di/pull/325)).
-- Detect circular dependencies and report them with a dedicated exception, and add the official `AbstractModule::renameBinding()` API ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
+- Detect circular dependencies and report them with a dedicated exception ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
 
 ### Changed
 

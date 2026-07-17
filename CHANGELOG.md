@@ -2,14 +2,13 @@
 
 ## 2.22.1 - 2026-07-17
 
-The first installable release since 2.20.0. 2.21.0, 2.21.1 and 2.22.0 were published and then removed from Packagist, each with zero installs, and 2.21.2 was never tagged — every change listed under those entries ships here.
+2.21.0 through 2.22.0 were withdrawn; everything they list ships here.
 
 ### Fixed
 
-- Restore `AbstractModule::rename()` to the wrapper transformation it is in every installable 2.x version: it moves a binding of the module it wraps, so a module can move a binding aside, bind its own implementation over it, and inject the moved one by its new name. 2.21.0 made the module's own container the subject and deferred the rename past composition, which renamed the decorator onto its own inner name — breaking `BEAR\Package\Context\CliModule` and with it the CLI context of every BEAR.Sunday application, as well as BEAR.Defer and BEAR.DevTools ([#333](https://github.com/ray-di/Ray.Di/pull/333)).
-- Renaming a binding composed by the renaming module itself, through `bind()`, `install()` or `override()`, is not supported and never was; only the wrapped module's bindings can be renamed ([#333](https://github.com/ray-di/Ray.Di/pull/333)).
+- Restore `AbstractModule::rename()` to moving a binding of the module it wraps, as in 2.20 and earlier; 2.21.0 made the module's own container the subject and broke decorator modules such as `BEAR\Package\Context\CliModule` ([#333](https://github.com/ray-di/Ray.Di/pull/333)).
 
-## 2.22.0 - 2026-07-16 (withdrawn — ships in 2.22.1)
+## 2.22.0 - 2026-07-16 (withdrawn)
 
 ### Added
 
@@ -20,13 +19,13 @@ The first installable release since 2.20.0. 2.21.0, 2.21.1 and 2.22.0 were publi
 - Stop generating `bindings.md` and its signature as a side effect of constructing an `Injector`; collect bindings with `$module->accept(new Bindings())` when diagnostics are needed.
 - Move the canonical `BindingsMarkdown` writer to `Ray\Bindings`; the deprecated `Ray\Di\BindingsMarkdown` name remains as a compatibility adapter.
 
-## 2.21.2 - 2026-07-16 (never tagged — ships in 2.22.1)
+## 2.21.2 - 2026-07-16 (withdrawn)
 
 ### Fixed
 
 - Resolve bindings viewer source links correctly when multiple packages share a PSR-4 prefix by checking the optional Composer vendor directory ([#330](https://github.com/ray-di/Ray.Di/pull/330)).
 
-## 2.21.1 - 2026-07-15 (withdrawn — ships in 2.22.1)
+## 2.21.1 - 2026-07-15 (withdrawn)
 
 ### Changed
 
@@ -45,7 +44,7 @@ The first installable release since 2.20.0. 2.21.0, 2.21.1 and 2.22.0 were publi
 - [#328 Fix assisted injection re-entry](https://github.com/ray-di/Ray.Di/pull/328)
 - [#329 Make exception phpdoc consistent and self-documenting](https://github.com/ray-di/Ray.Di/pull/329)
 
-## 2.21.0 - 2026-07-15 (withdrawn — ships in 2.22.1)
+## 2.21.0 - 2026-07-15 (withdrawn)
 
 ### Added
 

@@ -66,6 +66,40 @@ class RenameTest extends TestCase
     }
 
     /**
+     * A deferred rename whose source never arrives -- not with the chained
+     * module either -- must still surface Unbound, not vanish.
+     */
+    public function testThrowsUnboundWhenDeferredSourceNeverArrives(): void
+    {
+        $this->expectException(Unbound::class);
+
+        new class (new FakeToBindModule()) extends AbstractModule {
+            protected function configure(): void
+            {
+                // FakeToBindModule binds FakeRobotInterface, never FakeEngineInterface
+                $this->rename(FakeEngineInterface::class, 'renamed');
+            }
+        };
+    }
+
+    /**
+     * When configure() has bound the index a deferred rename targets, the
+     * rename must be rejected rather than lose that binding to the merge.
+     */
+    public function testThrowsWhenDeferredRenameTargetIsAlreadyBound(): void
+    {
+        $this->expectException(RenameTargetAlreadyBound::class);
+
+        new class (new FakeToBindModule()) extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->rename(FakeRobotInterface::class, 'renamed');
+                $this->bind(FakeRobotInterface::class)->annotatedWith('renamed')->to(FakeRobot2::class);
+            }
+        };
+    }
+
+    /**
      * When no binding exists at the source index, rename() must
      * surface Container::move()'s Unbound rather than silently no-op.
      */

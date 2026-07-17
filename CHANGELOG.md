@@ -42,7 +42,7 @@
 
 - Add a binding provenance log and emit `bindings.md` during module composition ([#323](https://github.com/ray-di/Ray.Di/pull/323)).
 - Add a reusable `Ray\Bindings\BindingsHtml` viewer and the `bin/bindings-html` command ([#325](https://github.com/ray-di/Ray.Di/pull/325)).
-- Detect circular dependencies and report them with a dedicated exception, and add the official `AbstractModule::renameBinding()` API ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
+- Detect circular dependencies and report them with a dedicated exception, and add the official `AbstractModule::rename()` API ([#319](https://github.com/ray-di/Ray.Di/pull/319)).
 
 ### Changed
 

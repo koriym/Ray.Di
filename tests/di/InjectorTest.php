@@ -56,6 +56,19 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(FakeEngine::class, $instance);
     }
 
+    public function testGetUnboundNonInstantiableConcreteClassThrowsUnbound(): void
+    {
+        $injector = new Injector(new FakeInstanceBindModule());
+
+        try {
+            $injector->getInstance(FakePrivateConstructor::class);
+            self::fail('A non-instantiable class must not be just-in-time bound.');
+        } catch (Unbound $e) {
+            self::assertSame(Unbound::class, $e::class);
+            self::assertSame("'" . FakePrivateConstructor::class . "-'", $e->getMessage());
+        }
+    }
+
     public function testUnboundConcreteClassIsConstructedOnlyOnce(): void
     {
         FakeConstructCounter::$constructCount = 0;

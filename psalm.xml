@@ -8,7 +8,6 @@
 >
     <projectFiles>
         <directory name="src/di"/>
-        <directory name="src-bindings"/>
     </projectFiles>
     <stubs>
         <file name="tests/stub/BindInterface.phpstub"/>

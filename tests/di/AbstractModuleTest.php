@@ -9,6 +9,23 @@ use Ray\Aop\Matcher;
 
 class AbstractModuleTest extends TestCase
 {
+    public function testAcceptCoreModuleVisitor(): void
+    {
+        $module = new NullModule();
+        $visitor = new class implements ModuleVisitorInterface {
+            public ?Container $container = null;
+
+            public function visit(Container $container): void
+            {
+                $this->container = $container;
+            }
+        };
+
+        $module->accept($visitor);
+
+        $this->assertSame($module->getContainer(), $visitor->container);
+    }
+
     /**
      * override() merges THIS module's bindings into the target module and then
      * adopts that merged container. Both modules' bindings must resolve, and in

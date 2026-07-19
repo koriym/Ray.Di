@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ray\Bindings;
-
-use Ray\Di\Container;
+namespace Ray\Di;
 
 /** Visits the composed container of a module. */
 interface ModuleVisitorInterface

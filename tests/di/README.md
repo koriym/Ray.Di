@@ -25,7 +25,7 @@ layer exists so that class of change can never again pass silently.
 | rename(): deferred application, reachable sources, error contract | `RenameTest` |
 | Cycle detection vs legal re-entry (singleton `@PostConstruct`) | `CircularDependencyTest` |
 | Singleton identity, serialization lifecycle | `DependencyTest`, `InjectorTest` |
-| JIT (untargeted) binding: single construction, named requests fail fast | `InjectorTest` |
+| Runtime resolution: configured bindings resolve; unbound concrete classes fail with `Untargeted` (`Unbound`) | `InjectorTest` |
 | Module-list merging (`new Injector([$m1, $m2])`): first module wins | `ModuleMergerTest` |
 | Binding provenance & collision history | `BindingLogTest` |
 

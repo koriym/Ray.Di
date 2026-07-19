@@ -11,6 +11,7 @@ use PHPUnit\Framework\Attributes\RequiresOperatingSystem;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\NullInterceptor;
 use Ray\Di\Exception\Unbound;
+use Ray\Di\Exception\Untargeted;
 
 use function assert;
 use function defined;
@@ -44,16 +45,17 @@ class InjectorTest extends TestCase
         $this->assertSame($engine, $injector->getInstance(FakeEngine::class));
     }
 
-    /**
-     * An unbound concrete class is auto-registered as an untargeted binding:
-     * getInstance() catches Untargeted, binds the class on the fly, then
-     * resolves it. Removing that self-bind makes the retry recurse endlessly.
-     */
-    public function testGetUnboundConcreteClassIsAutoBound(): void
+    public function testGetUnboundConcreteClassThrowsUntargeted(): void
     {
         $injector = new Injector(new FakeInstanceBindModule());
-        $instance = $injector->getInstance(FakeEngine::class);
-        $this->assertInstanceOf(FakeEngine::class, $instance);
+
+        try {
+            $injector->getInstance(FakeEngine::class);
+            self::fail('An unbound concrete class must not be bound at runtime.');
+        } catch (Unbound $e) {
+            self::assertSame(Untargeted::class, $e::class);
+            self::assertSame(FakeEngine::class, $e->getMessage());
+        }
     }
 
     public function testGetUnboundNonInstantiableConcreteClassThrowsUnbound(): void
@@ -69,27 +71,17 @@ class InjectorTest extends TestCase
         }
     }
 
-    public function testUnboundConcreteClassIsConstructedOnlyOnce(): void
-    {
-        FakeConstructCounter::$constructCount = 0;
-        $injector = new Injector(new FakeInstanceBindModule());
-        $instance = $injector->getInstance(FakeConstructCounter::class);
-
-        $this->assertInstanceOf(FakeConstructCounter::class, $instance);
-        $this->assertSame(1, FakeConstructCounter::$constructCount);
-    }
-
-    /**
-     * A named request cannot be satisfied by just-in-time binding (which
-     * registers under Name::ANY only), so it fails fast as Unbound.
-     */
     public function testUnboundConcreteClassWithNameThrowsUnbound(): void
     {
         $injector = new Injector(new FakeInstanceBindModule());
 
-        $this->expectException(Unbound::class);
-        $this->expectExceptionMessage(FakeConstructCounter::class . '-no-such-name');
-        $injector->getInstance(FakeConstructCounter::class, 'no-such-name');
+        try {
+            $injector->getInstance(FakeEngine::class, 'no-such-name');
+            self::fail('A named request must preserve its binding name.');
+        } catch (Unbound $e) {
+            self::assertSame(Unbound::class, $e::class);
+            self::assertSame("'" . FakeEngine::class . "-no-such-name'", $e->getMessage());
+        }
     }
 
     public function testUnbound(): void
@@ -336,14 +328,6 @@ class InjectorTest extends TestCase
         $result = $instance->returnSame(2);
         $this->assertSame(4, $result);
         unlink($cacheFile);
-    }
-
-    public function testAopOnDemandByUnboundConcreteClass(): void
-    {
-        $injector = new Injector(new FakeAopInterceptorModule());
-        $instance = $injector->getInstance(FakeAop::class);
-        $result = $instance->returnSame(2);
-        $this->assertSame(4, $result);
     }
 
     /**

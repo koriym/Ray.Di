@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
-use ReflectionProperty;
 
 use function assert;
 use function serialize;
@@ -195,8 +194,7 @@ LOG;
     }
 
     /**
-     * The Injector's built-in InjectorInterface binding (and everything the
-     * Injector writes after composition, e.g. JIT bindings) is attributed to
+     * The Injector's built-in InjectorInterface binding is attributed to
      * Ray\Di\Injector, not to the user module it happens to be merged into.
      */
     public function testInjectorBuiltinBindingAttributesToInjector(): void
@@ -206,23 +204,6 @@ LOG;
 
         $log = $module->getContainer()->log;
         $this->assertSame(Injector::class, $log->getSource(InjectorInterface::class . '-'));
-    }
-
-    /**
-     * A cached (unserialized) injector keeps that promise: __wakeup()
-     * re-stamps the container source, so a JIT binding performed after
-     * unserialize() is attributed to Ray\Di\Injector, not 'unknown'.
-     */
-    public function testUnserializedInjectorAttributesJitBindingToInjector(): void
-    {
-        $injector = unserialize(serialize(new Injector(null, __DIR__ . '/tmp')));
-        assert($injector instanceof Injector);
-        $injector->getInstance(FakeEngine::class); // JIT binding after wakeup
-
-        $container = (new ReflectionProperty(Injector::class, 'container'))->getValue($injector);
-        assert($container instanceof Container);
-
-        $this->assertSame(Injector::class, $container->log->getSource(FakeEngine::class . '-'));
     }
 
     private function composeGoldenLog(): BindingLog

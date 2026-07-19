@@ -246,7 +246,7 @@ final class Container implements InjectorInterface
     {
         /** @psalm-suppress PossiblyUndefinedArrayOffset -- $index is always "{interface}-{name}" */
         [$class, $name] = explode('-', $index, 2);
-        if (class_exists($class) && ! (new ReflectionClass($class))->isAbstract()) {
+        if (class_exists($class) && (new ReflectionClass($class))->isInstantiable()) {
             return new Untargeted($class);
         }
 

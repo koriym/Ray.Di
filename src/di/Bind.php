@@ -40,7 +40,7 @@ final class Bind implements Stringable
         public readonly string $source = ''
     ) {
         $this->validate = new BindValidator();
-        $bindUntarget = class_exists($this->interface) && ! (new \ReflectionClass($this->interface))->isAbstract() && ! $this->isRegistered($this->interface);
+        $bindUntarget = class_exists($this->interface) && (new \ReflectionClass($this->interface))->isInstantiable() && ! $this->isRegistered($this->interface);
         $this->bound = new NullDependency();
         if ($bindUntarget) {
             /** @var class-string $interface */

@@ -9,8 +9,8 @@ namespace Ray\Di\Exception;
  *
  * Message format: {class name}
  *
- * The Injector catches this exception to register the class as a
- * just-in-time binding and retry, so it normally never surfaces to callers.
+ * Runtime just-in-time binding is no longer performed, so the Injector lets
+ * this exception propagate to the caller.
  */
 final class Untargeted extends Unbound
 {

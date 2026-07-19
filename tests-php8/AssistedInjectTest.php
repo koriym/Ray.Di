@@ -14,7 +14,7 @@ class AssistedInjectTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->injector = new Injector(new FakeToBindModule(), __DIR__ . '/tmp');
+        $this->injector = new Injector(new FakeAssistedConsumerModule(new FakeToBindModule()), __DIR__ . '/tmp');
     }
 
     public function testAssisted(): void
@@ -28,7 +28,7 @@ class AssistedInjectTest extends TestCase
 
     public function testAssistedWithName(): void
     {
-        $this->injector = new Injector(new FakeInstanceBindModule());
+        $this->injector = new Injector(new FakeAssistedConsumerModule(new FakeInstanceBindModule()));
         $consumer = $this->injector->getInstance(FakeAssistedInjectConsumer::class);
         /** @var FakeAssistedConsumer $consumer */
         $assistedDependency = $consumer->assistWithName('a7');
@@ -38,7 +38,7 @@ class AssistedInjectTest extends TestCase
 
     public function testAssistedAnyWithName(): void
     {
-        $injector = new Injector(new FakeToBindModule(new FakeInstanceBindModule()));
+        $injector = new Injector(new FakeAssistedConsumerModule(new FakeToBindModule(new FakeInstanceBindModule())));
         $consumer = $injector->getInstance(FakeAssistedInjectConsumer::class);
         /** @var FakeAssistedConsumer $consumer */
         [$assistedDependency1, $assistedDependency2] = $consumer->assistAny();
@@ -59,7 +59,7 @@ class AssistedInjectTest extends TestCase
 
     public function testAssistedCustomeInject(): void
     {
-        $injector = new Injector(new FakeInstanceBindModule());
+        $injector = new Injector(new FakeAssistedConsumerModule(new FakeInstanceBindModule()));
 
         $assistedConsumer = $injector->getInstance(FakeAssistedInjectConsumer::class);
         /** @var FakeAssistedInjectConsumer $assistedConsumer */
@@ -74,6 +74,7 @@ class AssistedInjectTest extends TestCase
             {
                 protected function configure()
                 {
+                    $this->bind(FakePropConstruct::class);
                     $this->bind()->annotatedWith('abc')->toInstance('abc');
                 }
             }

@@ -261,4 +261,21 @@ class ContainerTest extends TestCase
         $instance = $container->getInstance(FakeEngine::class);
         $this->assertInstanceOf(FakeEngine::class, $instance);
     }
+
+    public function testWeaveSingleAspect(): void
+    {
+        $container = new Container();
+        $container->addPointcut(
+            new Pointcut((new Matcher())->any(), (new Matcher())->any(), [FakeDoubleInterceptor::class])
+        );
+        $bind = (new Bind($container, FakeAopInterface::class))->to(FakeAop::class);
+        (new Bind($container, FakeDoubleInterceptor::class))->to(FakeDoubleInterceptor::class);
+        $dependency = $bind->getBound();
+        assert($dependency instanceof Dependency);
+
+        $this->assertSame($container, $container->weaveAspect(new Compiler(__DIR__ . '/tmp'), $dependency));
+        $instance = $container->getInstance(FakeAopInterface::class);
+        assert($instance instanceof FakeAopInterface);
+        $this->assertSame(4, $instance->returnSame(2));
+    }
 }

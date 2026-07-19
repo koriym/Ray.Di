@@ -14,7 +14,7 @@ class AssistedTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->injector = new Injector(new FakeToBindModule());
+        $this->injector = new Injector(new FakeAssistedConsumerModule(new FakeToBindModule()));
     }
 
     public function testAssisted(): void
@@ -27,7 +27,7 @@ class AssistedTest extends TestCase
 
     public function testAssistedWithName(): void
     {
-        $this->injector = new Injector(new FakeInstanceBindModule());
+        $this->injector = new Injector(new FakeAssistedConsumerModule(new FakeInstanceBindModule()));
         $consumer = $this->injector->getInstance(FakeAssistedConsumer::class);
         $assistedDependency = $consumer->assistWithName('a7');
         $expected = 1;
@@ -36,7 +36,7 @@ class AssistedTest extends TestCase
 
     public function testAssistedAnyWithName(): void
     {
-        $injector = new Injector(new FakeToBindModule(new FakeInstanceBindModule()));
+        $injector = new Injector(new FakeAssistedConsumerModule(new FakeToBindModule(new FakeInstanceBindModule())));
         $consumer = $injector->getInstance(FakeAssistedConsumer::class);
         [$assistedDependency1, $assistedDependency2] = $consumer->assistAny();
         $expected1 = 1;

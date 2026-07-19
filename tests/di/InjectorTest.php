@@ -183,9 +183,14 @@ class InjectorTest extends TestCase
         $this->assertSame(spl_object_hash($instance1), spl_object_hash($instance2));
     }
 
-    public function testGetConcreteClass(): void
+    public function testGetExplicitlyBoundConcreteClass(): void
     {
-        $injector = new Injector();
+        $injector = new Injector(new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeRobot::class);
+            }
+        });
         $robot = $injector->getInstance(FakeRobot::class);
         $this->assertInstanceOf(FakeRobot::class, $robot);
     }
@@ -196,6 +201,7 @@ class InjectorTest extends TestCase
             protected function configure()
             {
                 $this->bind(FakeRobot::class);
+                $this->bind(FakeRobotTeam::class);
             }
         });
         $team = $injector->getInstance(FakeRobotTeam::class);
@@ -204,10 +210,10 @@ class InjectorTest extends TestCase
         $this->assertInstanceOf(FakeRobot::class, $team->robot2);
     }
 
-    public function testGetConcreteClassWithModule(): void
+    public function testGetInterfaceWithModule(): void
     {
         $injector = new Injector(new FakeCarModule());
-        $car = $injector->getInstance(FakeCar::class);
+        $car = $injector->getInstance(FakeCarInterface::class);
         $this->assertInstanceOf(FakeCar::class, $car);
     }
 
@@ -270,13 +276,25 @@ class InjectorTest extends TestCase
 
     public function testBuiltinBinding(): void
     {
-        $instance = (new Injector())->getInstance(FakeBuiltin::class);
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeBuiltin::class);
+            }
+        };
+        $instance = (new Injector($module))->getInstance(FakeBuiltin::class);
         $this->assertInstanceOf(Injector::class, $instance->injector);
     }
 
     public function testSerializeBuiltinBinding(): void
     {
-        $injector = unserialize(serialize(new Injector()));
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeBuiltin::class);
+            }
+        };
+        $injector = unserialize(serialize(new Injector($module)));
         assert($injector instanceof InjectorInterface);
         $instance = $injector->getInstance(FakeBuiltin::class);
         $this->assertInstanceOf(Injector::class, $instance->injector);
@@ -334,13 +352,13 @@ class InjectorTest extends TestCase
      * Multiple interceptors bound in a SINGLE bindInterceptor() call must all be
      * registered so the woven proxy can resolve every one. Before the fix the
      * loop returned after the first class interceptor, leaving the rest unbound;
-     * building the proxy then threw an uncaught Untargeted during weaving. Here
+     * building the proxy then threw an unbound exception during weaving. Here
      * the woven instance must build AND both interceptors must run.
      */
     public function testBindInterceptorWeavesAllInterceptors(): void
     {
         $injector = new Injector(new FakeMultiInterceptorModule());
-        $instance = $injector->getInstance(FakeAop::class);
+        $instance = $injector->getInstance(FakeAopInterface::class);
         // returnSame(2) wrapped by FakeDoubleInterceptor (*2) then
         // FakeIncrementInterceptor (+1): (2 + 1) * 2 = 6. A result of 6 proves
         // BOTH interceptors ran; 4 would mean only the first, 2 means neither.
@@ -526,6 +544,7 @@ class InjectorTest extends TestCase
         $injector = new Injector(new class extends AbstractModule{
             protected function configure()
             {
+                $this->bind(FakeSet::class);
                 $this->bind(FakeEngineInterface::class)->to(FakeEngine::class);
             }
         });

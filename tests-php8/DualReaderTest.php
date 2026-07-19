@@ -14,7 +14,7 @@ class DualReaderTest extends TestCase
     public function testPhp8Attribute(): FakePhp8Car
     {
         $injector = new Injector(new FakePhp8CarModule());
-        $car = $injector->getInstance(FakePhp8Car::class);
+        $car = $injector->getInstance(FakeCarInterface::class);
         $this->assertInstanceOf(FakePhp8Car::class, $car);
 
         return $car;

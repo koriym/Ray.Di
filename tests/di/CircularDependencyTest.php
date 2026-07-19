@@ -72,6 +72,7 @@ class CircularDependencyTest extends TestCase
         $injector = new Injector(new class extends AbstractModule {
             protected function configure(): void
             {
+                $this->bind(FakeDiamondRoot::class);
                 $this->bind(FakeDiamondSharedInterface::class)->to(FakeDiamondShared::class);
             }
         });

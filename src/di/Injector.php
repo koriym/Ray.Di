@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Ray\Di;
 
-use Ray\Aop\Compiler;
 use Ray\Di\Exception\DirectoryNotWritable;
-use Ray\Di\Exception\Unbound;
-use Ray\Di\Exception\Untargeted;
 
-use function assert;
 use function file_exists;
 use function is_dir;
 use function is_writable;
@@ -19,7 +15,6 @@ use function str_replace;
 use function sys_get_temp_dir;
 
 /**
- * @psalm-import-type BindableInterface from Types
  * @psalm-import-type ModuleList from Types
  * @psalm-import-type ScriptDir from Types
  */
@@ -68,39 +63,7 @@ final class Injector implements InjectorInterface
      */
     public function getInstance($interface, $name = Name::ANY)
     {
-        try {
-            /** @psalm-suppress MixedAssignment */
-            $instance = $this->container->getInstance($interface, $name);
-        } catch (Untargeted $untargeted) {
-            // Just-in-time binding registers the class under Name::ANY only, so a
-            // named request can never be satisfied by it and would retry forever.
-            if ($name !== Name::ANY) {
-                throw new Unbound(sprintf("'%s-%s'", $interface, $name), 0, $untargeted);
-            }
-
-            /**
-             * @psalm-var class-string $interface
-             * @psalm-suppress MixedAssignment
-             */
-            $instance = $this->bind($interface);
-        }
-
         /** @psalm-suppress MixedReturnStatement */
-        return $instance;
-    }
-
-    /**
-     * @param BindableInterface $class
-     *
-     * @return mixed
-     */
-    private function bind(string $class)
-    {
-        new Bind($this->container, $class, self::class);
-        $bound = $this->container->getContainer()[$class . '-' . Name::ANY];
-        assert($bound instanceof Dependency);
-
-        /** @psalm-suppress InvalidArgument */
-        return $this->container->weaveAspect(new Compiler($this->classDir), $bound)->getInstance($class);
+        return $this->container->getInstance($interface, $name);
     }
 }

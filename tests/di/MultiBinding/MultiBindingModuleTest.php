@@ -39,6 +39,14 @@ class MultiBindingModuleTest extends TestCase
         $this->module = new class extends AbstractModule {
             protected function configure(): void
             {
+                $this->bind(FakeMultiBindingConsumer::class);
+                $this->bind(FakeMultiBindingAnnotation::class);
+                $this->bind(FakeSetNotFoundWithMap::class);
+                $this->bind(FakeEngine::class);
+                $this->bind(FakeEngine2::class);
+                $this->bind(FakeEngine3::class);
+                $this->bind(FakeRobot::class);
+                $this->bind(FakeRobotProvider::class);
                 $engineBinder = MultiBinder::newInstance($this, FakeEngineInterface::class);
                 $engineBinder->addBinding('one')->to(FakeEngine::class);
                 $engineBinder->addBinding('two')->to(FakeEngine2::class);
@@ -184,7 +192,12 @@ class MultiBindingModuleTest extends TestCase
     public function testSetNotFoundInProvider(): void
     {
         $this->expectException(SetNotFound::class);
-        $injector = new Injector();
+        $injector = new Injector(new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeSetNotFoundWithProvider::class);
+            }
+        });
         $injector->getInstance(FakeSetNotFoundWithProvider::class);
     }
 }

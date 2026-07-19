@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.22.2 - 2026-07-19
+
+### Fixed
+
+- Reject non-instantiable classes (for example private constructors) from just-in-time binding. They now fail with `Unbound` instead of a bare PHP `Error` after language-level `new` in `NewInstance` ([#335](https://github.com/ray-di/Ray.Di/pull/335)).
+
 ## 2.22.1 - 2026-07-17
 
 ### Added

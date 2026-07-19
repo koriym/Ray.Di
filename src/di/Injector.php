@@ -30,8 +30,9 @@ final class Injector implements InjectorInterface
      */
     public function __construct($module = null, string $tmpDir = '')
     {
+        $hasScriptDir = is_dir($tmpDir);
         /** @var ScriptDir $classDir */
-        $classDir = is_dir($tmpDir) ? $tmpDir : sys_get_temp_dir();
+        $classDir = $hasScriptDir ? $tmpDir : sys_get_temp_dir();
         if (! is_writable($classDir)) {
             throw new DirectoryNotWritable($classDir); // @codeCoverageIgnore
         }
@@ -41,6 +42,11 @@ final class Injector implements InjectorInterface
         // Bind injector (built-in bindings)
         (new Bind($this->container, InjectorInterface::class, self::class))->toInstance($this);
         $this->container->sort();
+        if ($hasScriptDir) {
+            // The sys_get_temp_dir() fallback is shared across applications, so
+            // the bindings.md snapshot is written only to an explicitly owned dir.
+            (new BindingsMarkdown())($this->container, $classDir);
+        }
     }
 
     /**

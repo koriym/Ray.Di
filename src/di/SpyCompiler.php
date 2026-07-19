@@ -10,6 +10,7 @@ use Ray\Di\Exception\SpyCompilerNotInstantiable;
 
 use function array_keys;
 use function implode;
+use function is_object;
 use function method_exists;
 use function sprintf;
 
@@ -80,14 +81,17 @@ final class SpyCompiler implements CompilerInterface
 
         $log = ' (aop)';
         foreach ($bindings as $method => $interceptors) {
-            /**
-             * @phpstan-var array<string> $interceptors
-             * @psalm-ignore-var
-             */
+            $names = [];
+            // Ray.Aop declares class-string[] but accepts interceptor instances too
+            /** @var array<class-string|object> $interceptors */
+            foreach ($interceptors as $interceptor) {
+                $names[] = is_object($interceptor) ? $interceptor::class : $interceptor;
+            }
+
             $log .= sprintf(
                 ' +%s(%s)',
                 $method,
-                implode(', ', $interceptors)
+                implode(', ', $names)
             );
         }
 

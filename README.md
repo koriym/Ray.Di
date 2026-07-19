@@ -14,6 +14,18 @@ Ray.Di is DI and AOP framework for PHP inspired by [Google Guice](https://github
 
 ## Binding diagnostics
 
+An `Injector` created with an explicit `$tmpDir` writes the composed bindings
+to `{$tmpDir}/bindings.md` — a deterministic, human- and agent-readable
+snapshot of every resolved binding, the modules that composed them, and the
+binding provenance:
+
+```php
+new Injector(new AppModule(), $tmpDir); // writes {$tmpDir}/bindings.md
+```
+
+The snapshot is written once at composition time, atomically, and only when
+the composed bindings changed; `getInstance()` performs no diagnostics I/O.
+
 Install [Ray.ObjectGrapher](https://github.com/ray-di/Ray.ObjectGrapher) to
 visualize composed bindings and the object graph:
 

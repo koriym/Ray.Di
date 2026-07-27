@@ -21,7 +21,7 @@ final class AssistedInjectMatcher extends AbstractMatcher
      */
     public function matchesClass(ReflectionClass $class, array $arguments): bool
     {
-        throw new InvalidAssistedInjectMatch('AssistedInjectMatcher is a method matcher and must not be used as a class matcher');
+        throw new InvalidAssistedInjectMatch();
     }
 
     /**

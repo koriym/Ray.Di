@@ -97,18 +97,24 @@ class MultiBindingModuleTest extends TestCase
     #[Depends('testInjectMap')]
     public function testOffsetSet(Map $map): void
     {
-        $this->expectException(ReadOnlyMapAccess::class);
-        $this->expectExceptionMessage('one');
-        $map['one'] = 1;
+        try {
+            $map['one'] = 1;
+            self::fail('A read-only Map must not accept offsetSet().');
+        } catch (ReadOnlyMapAccess $e) {
+            self::assertSame('one', $e->getMessage());
+        }
     }
 
     /** @param Map<object> $map */
     #[Depends('testInjectMap')]
     public function testOffsetUnset(Map $map): void
     {
-        $this->expectException(ReadOnlyMapAccess::class);
-        $this->expectExceptionMessage('one');
-        unset($map['one']);
+        try {
+            unset($map['one']);
+            self::fail('A read-only Map must not accept offsetUnset().');
+        } catch (ReadOnlyMapAccess $e) {
+            self::assertSame('one', $e->getMessage());
+        }
     }
 
     /**

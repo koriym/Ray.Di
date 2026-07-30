@@ -9,6 +9,8 @@ use LogicException;
 /**
  * Thrown when SpyCompiler::newInstance() is called
  *
+ * Message format: {class name} of the instance that was requested
+ *
  * SpyCompiler only logs binding information and never produces real
  * instances, so this method is never expected to be invoked.
  */

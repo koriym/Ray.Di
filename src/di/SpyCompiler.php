@@ -28,7 +28,7 @@ final class SpyCompiler implements CompilerInterface
     public function newInstance(string $class, array $args, BindInterface $bind)
     {
         // never called
-        throw new SpyCompilerNotInstantiable(sprintf('%s should never be instantiated', $class));
+        throw new SpyCompilerNotInstantiable($class);
     }
 
     /**

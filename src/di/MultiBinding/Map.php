@@ -15,8 +15,6 @@ use ReturnTypeWillChange;
 
 use function array_key_exists;
 use function count;
-use function is_scalar;
-use function sprintf;
 
 /**
  * @template T
@@ -62,7 +60,7 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     {
         unset($value);
 
-        throw new ReadOnlyMapAccess(sprintf('Cannot set offset "%s" on a read-only Map', $this->offsetToString($offset)));
+        throw new ReadOnlyMapAccess((string) $offset);
     }
 
     /**
@@ -73,7 +71,7 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     #[ReturnTypeWillChange]
     public function offsetUnset($offset): void
     {
-        throw new ReadOnlyMapAccess(sprintf('Cannot unset offset "%s" on a read-only Map', $this->offsetToString($offset)));
+        throw new ReadOnlyMapAccess((string) $offset);
     }
 
     /** @return Generator<array-key, T, void, void> */
@@ -90,19 +88,5 @@ final class Map implements IteratorAggregate, ArrayAccess, Countable
     public function count(): int
     {
         return count($this->lazies);
-    }
-
-    /** @param mixed $offset array-key at the type level, but ArrayAccess allows null (e.g. `$map[] = $value`) */
-    private function offsetToString($offset): string
-    {
-        if ($offset === null) {
-            return 'null';
-        }
-
-        if (is_scalar($offset)) {
-            return (string) $offset;
-        }
-
-        return ''; // @codeCoverageIgnore
     }
 }

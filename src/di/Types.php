@@ -33,8 +33,8 @@ use Ray\Aop\Pointcut;
  * @psalm-type QualifierList = array<object>
  * @psalm-type ScopeType = Scope::SINGLETON|Scope::PROTOTYPE
  * @psalm-type ProviderContext = string
- * @psalm-type MultiBindingMap = array<string, non-empty-array<array-key, MultiBinding\LazyInterface>>
- * @psalm-type LazyBindingList = non-empty-array<array-key, MultiBinding\LazyInterface>
+ * @psalm-type MultiBindingMap = array<string, array<array-key, MultiBinding\LazyInterface>>
+ * @psalm-type LazyBindingList = array<array-key, MultiBinding\LazyInterface>
  * @psalm-type MethodInterceptorBindings array<non-empty-string, list<MethodInterceptor>>
  * @psalm-type InterceptorClassList array<class-string<MethodInterceptor>>
  * @psalm-type VisitorResult = object|array<array-key, mixed>|null

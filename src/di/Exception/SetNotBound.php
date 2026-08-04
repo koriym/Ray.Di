@@ -14,10 +14,9 @@ use LogicException;
  * MultiBinder::newInstance() declares the set, so an interface declared with
  * zero members injects an empty Map rather than reaching here. Reaching here
  * means the interface is absent from the MultiBindings this injection point
- * received: no MultiBinder ran for it, a setBinding() dropped it and the chain
- * stopped before to() put it back, or a sibling module's declarations never
- * arrived -- each MultiBinder binds MultiBindings to its own instance.
+ * received: no MultiBinder ran for it, or a setBinding() dropped it and the
+ * chain stopped before to() put it back.
  */
-final class MultiBindingNotFound extends LogicException implements ExceptionInterface
+final class SetNotBound extends LogicException implements ExceptionInterface
 {
 }

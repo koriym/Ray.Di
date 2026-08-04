@@ -9,6 +9,7 @@ use PHPUnit\Framework\Attributes\Depends;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Exception\ReadOnlyMapAccess;
+use Ray\Di\Exception\SetNotBound;
 use Ray\Di\Exception\SetNotFound;
 use Ray\Di\FakeEngine;
 use Ray\Di\FakeEngine2;
@@ -207,5 +208,75 @@ class MultiBindingModuleTest extends TestCase
         $this->expectException(SetNotFound::class);
         $injector = new Injector();
         $injector->getInstance(FakeSetNotFoundWithProvider::class);
+    }
+
+    /**
+     * A set declared by MultiBinder but given no members is a legal
+     * configuration (`new AppModule([])` with a plugin list that happens to be
+     * empty), so it must inject an empty Map rather than fail.
+     */
+    public function testDeclaredSetWithNoMemberInjectsEmptyMap(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                MultiBinder::newInstance($this, FakeEngineInterface::class);
+                MultiBinder::newInstance($this, FakeRobotInterface::class);
+            }
+        };
+
+        // constructing the consumer must not throw: MapProvider runs on injection
+        $consumer = (new Injector($module))->getInstance(FakeMultiBindingConsumer::class);
+
+        $this->assertSame(0, count($consumer->engines));
+        $this->assertSame([], iterator_to_array($consumer->engines));
+        $this->assertSame(0, count($consumer->robots));
+        $this->assertSame([], iterator_to_array($consumer->robots));
+    }
+
+    /**
+     * An interface no MultiBinder ever declared is a wiring error, and must be
+     * named as such instead of failing inside Map's constructor.
+     */
+    public function testSetNotBound(): void
+    {
+        $injector = new Injector(new NullModule());
+        try {
+            $injector->getInstance(FakeMultiBindingConsumer::class);
+            self::fail('SetNotBound must be thrown when no MultiBinder declared the #[Set] interface.');
+        } catch (SetNotBound $e) {
+            // the missing interface and the injection point, per Unbound's message format
+            self::assertStringStartsWith("'" . FakeEngineInterface::class . "' in ", $e->getMessage());
+            self::assertStringEndsWith('($engines)', $e->getMessage());
+        }
+    }
+
+    /**
+     * setBinding() drops the set on the spot and to() puts the replacement
+     * back, so a chain abandoned in between leaves the interface undeclared --
+     * unlike an abandoned addBinding(), which records a key and touches
+     * nothing. setBinding() is left as it is, which makes that broken module
+     * report the same way as one that never bound the interface, rather than
+     * quietly injecting an empty Map: that is reserved for a set someone
+     * declared and left without members on purpose.
+     */
+    public function testAbandonedSetBindingIsReported(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                MultiBinder::newInstance($this, FakeRobotInterface::class)->addBinding('robot')->to(FakeRobot::class);
+                $engineBinder = MultiBinder::newInstance($this, FakeEngineInterface::class);
+                $engineBinder->addBinding('one')->to(FakeEngine::class);
+                $engineBinder->setBinding('two'); // the chain stops here: to() is never reached
+            }
+        };
+        $injector = new Injector($module);
+        try {
+            $injector->getInstance(FakeMultiBindingConsumer::class);
+            self::fail('An abandoned setBinding() leaves the set undeclared and must be reported.');
+        } catch (SetNotBound $e) {
+            self::assertStringStartsWith("'" . FakeEngineInterface::class . "' in ", $e->getMessage());
+        }
     }
 }

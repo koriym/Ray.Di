@@ -337,4 +337,46 @@ class ModuleCompositionTest extends TestCase
             array_keys(iterator_to_array($consumer->engines))
         );
     }
+
+    /**
+     * Every installed sibling contributes its multibindings, even when the
+     * installing module declares none of its own.
+     *
+     * MultiBinder binds MultiBindings::class toInstance() the store of the
+     * module it was called on, so each sibling carries its own store into the
+     * parent as an ordinary binding while merge() collects the entries into the
+     * parent's store. The binding that wins must be the merged store, not
+     * whichever sibling happened to be installed first.
+     */
+    public function testEveryInstalledSiblingContributesMultiBindings(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('first-sibling')->to(FakeEngine::class);
+                    }
+                });
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('second-sibling')->to(FakeEngine2::class);
+                        MultiBinder::newInstance($this, FakeRobotInterface::class)
+                            ->addBinding('robot')->to(FakeRobot::class);
+                    }
+                });
+            }
+        };
+        $consumer = (new Injector($module))->getInstance(FakeMultiBindingConsumer::class);
+
+        $this->assertSame(
+            ['first-sibling', 'second-sibling'],
+            array_keys(iterator_to_array($consumer->engines))
+        );
+        $this->assertSame(['robot'], array_keys(iterator_to_array($consumer->robots)));
+    }
 }

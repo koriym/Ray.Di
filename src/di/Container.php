@@ -303,6 +303,18 @@ final class Container implements InjectorInterface
         $this->multiBindings->merge($container->multiBindings);
         $this->container += $otherContainer;
         $this->pointcuts = array_merge($this->pointcuts, $container->getPointcuts());
+        $this->bindMergedMultiBindings();
+    }
+
+    /** Re-point the MultiBindings binding at the merged store */
+    private function bindMergedMultiBindings(): void
+    {
+        $index = MultiBindings::class . '-' . Name::ANY;
+        if (! isset($this->container[$index])) {
+            return;
+        }
+
+        $this->container[$index] = new Instance($this->multiBindings);
     }
 
     /**

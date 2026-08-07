@@ -168,6 +168,23 @@ class MultiBindingModuleTest extends TestCase
         $this->assertArrayHasKey('four', (array) $multiBindings[FakeEngineInterface::class]);
     }
 
+    /**
+     * MultiBindings resolves to the container's own store — the object
+     * Container::merge() accumulates entries into — so what was merged is what
+     * gets injected.
+     *
+     * Holds even with no MultiBinder in play: MultiBindingModule's binding is
+     * what makes the index exist at all, and without it the request falls
+     * through to just-in-time binding and yields an unrelated empty store.
+     */
+    public function testMultiBindingsResolvesToTheContainersOwnStore(): void
+    {
+        $module = new NullModule();
+        $injector = new Injector($module);
+
+        $this->assertSame($module->getContainer()->multiBindings, $injector->getInstance(MultiBindings::class));
+    }
+
     public function testAnnotation(): void
     {
         $injector = new Injector($this->module);

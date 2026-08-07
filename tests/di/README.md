@@ -22,6 +22,7 @@ layer exists so that class of change can never again pass silently.
 | Binding precedence: bind() / install() / constructor chain / override() | `ModuleCompositionTest` |
 | AOP wrapping order across modules and install() | `ModuleCompositionTest` |
 | MultiBinding collection order across modules | `ModuleCompositionTest` |
+| MultiBinding visibility: every installed sibling contributes | `ModuleCompositionTest` |
 | rename(): deferred application, reachable sources, error contract | `RenameTest` |
 | Cycle detection vs legal re-entry (singleton `@PostConstruct`) | `CircularDependencyTest` |
 | Singleton identity, serialization lifecycle | `DependencyTest`, `InjectorTest` |

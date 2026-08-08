@@ -7,6 +7,8 @@ namespace Ray\Di;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
+use function assert;
+
 /**
  * Pins the singleton cache rollback contract for @PostConstruct failures
  *

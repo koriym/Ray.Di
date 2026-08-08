@@ -10,6 +10,7 @@ use Ray\Aop\MethodInterceptor;
 use Ray\Aop\WeavedInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use Throwable;
 
 use function assert;
 use function method_exists;
@@ -97,7 +98,21 @@ final class Dependency implements DependencyInterface, AcceptInterface
         // @PostConstruct
         if ($this->postConstruct !== null) {
             assert(method_exists($instance, $this->postConstruct));
-            $instance->{$this->postConstruct}();
+            try {
+                $instance->{$this->postConstruct}();
+            } catch (Throwable $e) {
+                // Roll back the singleton cache so the next resolution rebuilds
+                // instead of returning this half-initialized instance. The cache
+                // is committed before PostConstruct on purpose (to let a singleton
+                // resolve itself from its own lifecycle method); we only unwind it
+                // when PostConstruct actually fails.
+                if ($this->isSingleton) {
+                    $this->instance = null;
+                    $this->isInstantiated = false;
+                }
+
+                throw $e;
+            }
         }
 
         return $instance;
@@ -125,7 +140,16 @@ final class Dependency implements DependencyInterface, AcceptInterface
         // @PostConstruct
         if ($this->postConstruct !== null) {
             assert(method_exists($instance, $this->postConstruct));
-            $instance->{$this->postConstruct}();
+            try {
+                $instance->{$this->postConstruct}();
+            } catch (Throwable $e) {
+                if ($this->isSingleton) {
+                    $this->instance = null;
+                    $this->isInstantiated = false;
+                }
+
+                throw $e;
+            }
         }
 
         return $instance;

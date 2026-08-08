@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Ray\Di\MultiBinding;
 
 use Ray\Di\Di\Set;
+use Ray\Di\Exception\SetNotBound;
 use Ray\Di\Exception\SetNotFound;
 use Ray\Di\InjectionPointInterface;
 use Ray\Di\InjectorInterface;
 use Ray\Di\ProviderInterface;
+
+use function sprintf;
 
 /** @implements ProviderInterface<Map> */
 final class MapProvider implements ProviderInterface
@@ -28,6 +31,16 @@ final class MapProvider implements ProviderInterface
 
         /** @var Set<object> $set */
         $set = $setAttribute[0]->newInstance();
+
+        if (! $this->multiBindings->offsetExists($set->interface)) {
+            throw new SetNotBound(sprintf(
+                "'%s' in %s:%d ($%s)",
+                $set->interface,
+                $param->getDeclaringFunction()->getFileName(),
+                $param->getDeclaringFunction()->getStartLine(),
+                $param->getName()
+            ));
+        }
 
         /** @var array<string, LazyTo<object>> $lazies */
         $lazies = $this->multiBindings[$set->interface];

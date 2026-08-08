@@ -26,6 +26,7 @@ final class MultiBinder
     {
         $this->container = $module->getContainer();
         $this->multiBindings = $this->container->multiBindings;
+        $this->declareSet();
         $this->container->add(
             (new Bind($this->container, MultiBindings::class))->toInstance($this->multiBindings)
         );
@@ -73,8 +74,22 @@ final class MultiBinder
         $this->bind(new LazyInstance($instance), $this->key);
     }
 
+    /**
+     * Declare the set, so that "declared with no member" is a state the store
+     * can represent and MapProvider can inject as an empty Map
+     */
+    private function declareSet(): void
+    {
+        if ($this->multiBindings->offsetExists($this->interface)) {
+            return;
+        }
+
+        $this->multiBindings->offsetSet($this->interface, []);
+    }
+
     private function bind(LazyInterface $lazy, ?string $key): void
     {
+        // setBinding() removes the key, so it may be absent here
         $bindings = [];
         if ($this->multiBindings->offsetExists($this->interface)) {
             $bindings = $this->multiBindings->offsetGet($this->interface);

@@ -60,4 +60,37 @@ class MultiBinderTest extends TestCase
         // interface B's own binding is present
         $this->assertArrayHasKey('robot', (array) $multiBindings[FakeRobotInterface::class]);
     }
+
+    /**
+     * newInstance() declares the set, so "declared with no member" is a state
+     * the store can represent. Without it a consumer cannot tell an empty set
+     * from an interface nobody bound.
+     */
+    public function testNewInstanceDeclaresEmptySet(): void
+    {
+        $module = new NullModule();
+        MultiBinder::newInstance($module, FakeEngineInterface::class);
+
+        /** @var MultiBindings $multiBindings */
+        $multiBindings = $module->getContainer()->getInstance(MultiBindings::class);
+        $this->assertTrue($multiBindings->offsetExists(FakeEngineInterface::class));
+        $this->assertSame([], $multiBindings[FakeEngineInterface::class]);
+    }
+
+    /**
+     * Declaring a set that already has members must leave them alone. Two
+     * modules binding the same interface each construct their own MultiBinder,
+     * so the second declaration must append rather than wipe the first.
+     */
+    public function testNewInstanceKeepsExistingMembers(): void
+    {
+        $module = new NullModule();
+        MultiBinder::newInstance($module, FakeEngineInterface::class)->addBinding('one')->to(FakeEngine::class);
+        MultiBinder::newInstance($module, FakeEngineInterface::class)->addBinding('two')->to(FakeEngine2::class);
+
+        /** @var MultiBindings $multiBindings */
+        $multiBindings = $module->getContainer()->getInstance(MultiBindings::class);
+        $this->assertArrayHasKey('one', (array) $multiBindings[FakeEngineInterface::class]);
+        $this->assertArrayHasKey('two', (array) $multiBindings[FakeEngineInterface::class]);
+    }
 }

@@ -1,5 +1,36 @@
 # Changelog
 
+## 2.23.0 - 2026-08-11
+
+### Added
+
+- Write `bindings.md` at composition time: the injector records how the container was composed — every binding with its provenance — via `BindingLog`, `BindingEvent`, and the core `Ray\Di\BindingsMarkdown` renderer ([#336](https://github.com/ray-di/Ray.Di/pull/336)).
+- Add `Ray\Di\ModuleVisitorInterface` as the stable route for tools to visit a module's composed container via `AbstractModule::accept()` ([#336](https://github.com/ray-di/Ray.Di/pull/336)).
+
+### Removed
+
+- Move rich binding visualization out of core: `Ray\Bindings\Bindings`, `Ray\Bindings\BindingsHtml`, `Ray\Bindings\BindingsMarkdown`, and the `bin/bindings-html` command now live in the standalone `ray/bindings` package (`composer require --dev ray/bindings`). These APIs were introduced in 2.22.1; the composition-time `bindings.md` above remains in core ([#336](https://github.com/ray-di/Ray.Di/pull/336)).
+
+### Fixed
+
+- Fix multibindings being lost from all but the first installed module ([#340](https://github.com/ray-di/Ray.Di/pull/340)).
+- Distinguish an empty multibinding set from an undeclared one ([#341](https://github.com/ray-di/Ray.Di/pull/341)).
+- Keep the first install's entry on a same-key multibinding collision ([#348](https://github.com/ray-di/Ray.Di/pull/348)).
+- Exclude the MultiBindings index from the BindingLog ([#347](https://github.com/ray-di/Ray.Di/pull/347)).
+- Roll back the singleton cache when `@PostConstruct` throws ([#346](https://github.com/ray-di/Ray.Di/pull/346)).
+- Fix exception messages to follow the value-only convention ([#339](https://github.com/ray-di/Ray.Di/pull/339)).
+
+### Included pull requests
+
+- [#336 Binding diagnostics as a core artifact](https://github.com/ray-di/Ray.Di/pull/336)
+- [#339 Fix exception messages to follow value-only convention](https://github.com/ray-di/Ray.Di/pull/339)
+- [#340 Fix multibindings being lost from all but the first installed module](https://github.com/ray-di/Ray.Di/pull/340)
+- [#341 Distinguish an empty multibinding set from an undeclared one](https://github.com/ray-di/Ray.Di/pull/341)
+- [#344 Bump squizlabs/php_codesniffer from 4.0.1 to 4.0.2](https://github.com/ray-di/Ray.Di/pull/344)
+- [#346 Roll back the singleton cache when @PostConstruct throws](https://github.com/ray-di/Ray.Di/pull/346)
+- [#347 Exclude the MultiBindings index from the BindingLog](https://github.com/ray-di/Ray.Di/pull/347)
+- [#348 Keep the first install's entry on a same-key multibinding collision](https://github.com/ray-di/Ray.Di/pull/348)
+
 ## 2.22.2 - 2026-07-19
 
 ### Fixed

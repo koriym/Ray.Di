@@ -16,9 +16,11 @@ use Ray\Di\Exception\Untargeted;
 use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionClass;
 
+use function array_filter;
 use function array_intersect_key;
 use function array_keys;
 use function array_merge;
+use function array_values;
 use function class_exists;
 use function explode;
 use function implode;
@@ -34,6 +36,12 @@ use function sprintf;
  */
 final class Container implements InjectorInterface
 {
+    /**
+     * Bookkeeping binding installed by MultiBinder, not a user binding,
+     * so it is excluded from the BindingLog
+     */
+    private const MULTI_BINDINGS_INDEX = MultiBindings::class . '-' . Name::ANY;
+
     /** @var MultiBindings */
     public $multiBindings;
 
@@ -86,6 +94,10 @@ final class Container implements InjectorInterface
         $previous = $this->container[$index] ?? null;
         $dependency = $bind->getBound();
         $dependency->register($this->container, $bind);
+        if ($index === self::MULTI_BINDINGS_INDEX) {
+            return;
+        }
+
         /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyContainer alias unexpanded */
         $this->log->register(
             $index,
@@ -291,6 +303,11 @@ final class Container implements InjectorInterface
         $otherContainer = $container->getContainer();
         // iterate the incoming (usually smaller) side: O(incoming), not O(accumulated)
         $collidingIndexes = array_keys(array_intersect_key($otherContainer, $this->container));
+        // MultiBindings collides on every merge by design; excluded from the log (see MULTI_BINDINGS_INDEX)
+        $collidingIndexes = array_values(array_filter(
+            $collidingIndexes,
+            static fn (string $index): bool => $index !== self::MULTI_BINDINGS_INDEX
+        ));
         $keptDependencies = [];
         $discardedDependencies = [];
         foreach ($collidingIndexes as $index) {
@@ -309,7 +326,7 @@ final class Container implements InjectorInterface
     /** Re-point the MultiBindings binding at the merged store */
     private function bindMergedMultiBindings(): void
     {
-        $index = MultiBindings::class . '-' . Name::ANY;
+        $index = self::MULTI_BINDINGS_INDEX;
         if (! isset($this->container[$index])) {
             return;
         }

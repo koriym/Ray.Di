@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
+use Ray\Di\MultiBinding\MultiBindings;
 use ReflectionProperty;
 
+use function array_filter;
 use function assert;
 use function serialize;
 use function unserialize;
@@ -223,6 +225,83 @@ LOG;
         assert($container instanceof Container);
 
         $this->assertSame(Injector::class, $container->log->getSource(FakeEngine::class . '-'));
+    }
+
+    /**
+     * The MultiBindings container binding is infrastructure that
+     * MultiBinder installs alongside the real map/set entries; the entries
+     * themselves bypass the log (they are written straight to the store), so
+     * logging only the MultiBindings binding produces noise that the
+     * docblock promises is absent. Assert that promise holds: no event of
+     * any kind (bind/replace/keep/move) carries the MultiBindings index, and
+     * the provenance map has no entry for it.
+     */
+    public function testMultiBindingsIndexIsExcludedFromTheLog(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                MultiBinder::newInstance($this, FakeEngineInterface::class)
+                    ->addBinding('one')->to(FakeEngine::class);
+                MultiBinder::newInstance($this, FakeRobotInterface::class)
+                    ->addBinding('robot')->to(FakeRobot::class);
+            }
+        };
+        $log = $module->getContainer()->log;
+        $index = MultiBindings::class . '-' . Name::ANY;
+
+        foreach ($log->getEvents() as $event) {
+            $this->assertNotSame($index, $event->index, 'MultiBindings index must not appear in any event: ' . $event);
+        }
+
+        $this->assertArrayNotHasKey($index, $log->getSources());
+        $this->assertNull($log->getSource($index));
+    }
+
+    /**
+     * The same exclusion holds across a module merge: when sibling modules
+     * each install their own MultiBinder, the MultiBindings binding collides
+     * on the merge and would otherwise surface as a keep event. The keep
+     * event is the noise the #340 fix made invisible by re-pointing the
+     * binding after the merge; the log must not record it in the first place.
+     */
+    public function testMultiBindingsIndexEmitsNoKeepEventOnMerge(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('first')->to(FakeEngine::class);
+                    }
+                });
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('second')->to(FakeEngine2::class);
+                        MultiBinder::newInstance($this, FakeRobotInterface::class)
+                            ->addBinding('robot')->to(FakeRobot::class);
+                    }
+                });
+            }
+        };
+        $log = $module->getContainer()->log;
+        $index = MultiBindings::class . '-' . Name::ANY;
+
+        $keepEvents = array_filter(
+            $log->getEvents(),
+            static fn (BindingEvent $event): bool => $event->type === BindingEvent::KEEP && $event->index === $index
+        );
+        $this->assertSame([], $keepEvents, 'No keep event for the MultiBindings index after merge');
+
+        foreach ($log->getEvents() as $event) {
+            $this->assertNotSame($index, $event->index, 'MultiBindings index must not appear in any event: ' . $event);
+        }
+
+        $this->assertArrayNotHasKey($index, $log->getSources());
     }
 
     private function composeGoldenLog(): BindingLog

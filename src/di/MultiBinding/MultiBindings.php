@@ -15,32 +15,35 @@ use function is_int;
  */
 final class MultiBindings extends ArrayObject
 {
-    /**
-     * An existing string key keeps its first entry, matching the += winner of
-     * the container merge; integer-keyed (unnamed) entries append
-     */
     public function merge(self $multiBindings): void
     {
         foreach ($multiBindings->getArrayCopy() as $interface => $lazies) {
-            if (! $this->offsetExists($interface)) {
-                $this->offsetSet($interface, $lazies);
+            /** @var LazyBindingList $existing */
+            $existing = $this->offsetExists($interface) ? $this[$interface] : [];
+            $this->offsetSet($interface, $this->mergeEntries($existing, $lazies));
+        }
+    }
+
+    /**
+     * An existing string key keeps its first entry, matching the += winner of
+     * the container merge; integer-keyed (unnamed) entries append
+     *
+     * @param LazyBindingList $existing
+     * @param LazyBindingList $lazies
+     *
+     * @return LazyBindingList
+     */
+    private function mergeEntries(array $existing, array $lazies): array
+    {
+        foreach ($lazies as $key => $lazy) {
+            if (is_int($key)) {
+                $existing[] = $lazy;
                 continue;
             }
 
-            /** @var LazyBindingList $existing */
-            $existing = $this[$interface];
-            foreach ($lazies as $key => $lazy) {
-                if (is_int($key)) {
-                    $existing[] = $lazy;
-                    continue;
-                }
-
-                if (! isset($existing[$key])) {
-                    $existing[$key] = $lazy;
-                }
-            }
-
-            $this->offsetSet($interface, $existing);
+            $existing[$key] ??= $lazy;
         }
+
+        return $existing;
     }
 }

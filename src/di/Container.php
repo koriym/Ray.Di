@@ -37,12 +37,8 @@ use function sprintf;
 final class Container implements InjectorInterface
 {
     /**
-     * Index of the MultiBindings container binding
-     *
-     * MultiBinder installs a toInstance binding for MultiBindings under
-     * Name::ANY; it is bookkeeping infrastructure, not a user binding, so it
-     * is excluded from the BindingLog (the entries themselves are written
-     * straight to the store and never logged either).
+     * Bookkeeping binding installed by MultiBinder, not a user binding,
+     * so it is excluded from the BindingLog
      */
     private const MULTI_BINDINGS_INDEX = MultiBindings::class . '-' . Name::ANY;
 

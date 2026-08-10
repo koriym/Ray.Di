@@ -307,10 +307,7 @@ final class Container implements InjectorInterface
         $otherContainer = $container->getContainer();
         // iterate the incoming (usually smaller) side: O(incoming), not O(accumulated)
         $collidingIndexes = array_keys(array_intersect_key($otherContainer, $this->container));
-        // The MultiBindings binding collides on every merge (each module
-        // carries its own), but it is bookkeeping infrastructure: exclude it
-        // so no keep event is emitted and its provenance is not adopted.
-        // bindMergedMultiBindings() re-points the binding to the merged store.
+        // MultiBindings collides on every merge by design; excluded from the log (see MULTI_BINDINGS_INDEX)
         $collidingIndexes = array_values(array_filter(
             $collidingIndexes,
             static fn (string $index): bool => $index !== self::MULTI_BINDINGS_INDEX

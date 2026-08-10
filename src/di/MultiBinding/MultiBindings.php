@@ -7,7 +7,7 @@ namespace Ray\Di\MultiBinding;
 use ArrayObject;
 use Ray\Di\Types;
 
-use function array_merge_recursive;
+use function is_int;
 
 /**
  * @psalm-import-type LazyBindingList from Types
@@ -17,8 +17,33 @@ final class MultiBindings extends ArrayObject
 {
     public function merge(self $multiBindings): void
     {
-        $this->exchangeArray(
-            array_merge_recursive($this->getArrayCopy(), $multiBindings->getArrayCopy())
-        );
+        foreach ($multiBindings->getArrayCopy() as $interface => $lazies) {
+            /** @var LazyBindingList $existing */
+            $existing = $this->offsetExists($interface) ? $this[$interface] : [];
+            $this->offsetSet($interface, $this->mergeEntries($existing, $lazies));
+        }
+    }
+
+    /**
+     * An existing string key keeps its first entry, matching the += winner of
+     * the container merge; integer-keyed (unnamed) entries append
+     *
+     * @param LazyBindingList $existing
+     * @param LazyBindingList $lazies
+     *
+     * @return LazyBindingList
+     */
+    private function mergeEntries(array $existing, array $lazies): array
+    {
+        foreach ($lazies as $key => $lazy) {
+            if (is_int($key)) {
+                $existing[] = $lazy;
+                continue;
+            }
+
+            $existing[$key] ??= $lazy;
+        }
+
+        return $existing;
     }
 }

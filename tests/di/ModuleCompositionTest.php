@@ -23,6 +23,8 @@ use function iterator_to_array;
  *   own install()     vs constructor-chained module -> own install()
  *   bind()            vs install() (either order)   -> bind()
  *   first install()   vs second install()           -> first install()
+ *   first install's multibinding entry vs second install's, same Map key
+ *                                                   -> first install's entry
  *   outer chain       vs inner chain                -> outer
  *   override() target vs anything already bound     -> override() target
  *
@@ -378,5 +380,81 @@ class ModuleCompositionTest extends TestCase
             array_keys(iterator_to_array($consumer->engines))
         );
         $this->assertSame(['robot'], array_keys(iterator_to_array($consumer->robots)));
+    }
+
+    /**
+     * A same-key multibinding collision across two installs resolves like an
+     * ordinary binding collision: the first install's entry wins. Without a
+     * decided winner the merge nests both entries into an array and Map
+     * iteration dies invoking it as a callable (#345).
+     */
+    public function testFirstInstallWinsWhenMultiBindingKeysCollideAcrossInstalls(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('shared-key')->to(FakeEngine::class);
+                        MultiBinder::newInstance($this, FakeRobotInterface::class)
+                            ->addBinding('robot')->to(FakeRobot::class);
+                    }
+                });
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('shared-key')->to(FakeEngine2::class);
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding('second-only')->to(FakeEngine3::class);
+                    }
+                });
+            }
+        };
+        $consumer = (new Injector($module))->getInstance(FakeMultiBindingConsumer::class);
+        $engines = iterator_to_array($consumer->engines);
+
+        // colliding key: the first install's entry wins
+        $this->assertInstanceOf(FakeEngine::class, $engines['shared-key']);
+        // non-colliding entries from both installs are kept, in install order
+        $this->assertSame(['shared-key', 'second-only'], array_keys($engines));
+        $this->assertInstanceOf(FakeEngine3::class, $engines['second-only']);
+    }
+
+    /**
+     * Unnamed (integer-keyed) entries cannot collide on a key, so a merge
+     * appends them from both installs in install order.
+     */
+    public function testUnnamedMultiBindingEntriesAppendAcrossInstalls(): void
+    {
+        $module = new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding()->to(FakeEngine::class);
+                        MultiBinder::newInstance($this, FakeRobotInterface::class)
+                            ->addBinding('robot')->to(FakeRobot::class);
+                    }
+                });
+                $this->install(new class extends AbstractModule {
+                    protected function configure(): void
+                    {
+                        MultiBinder::newInstance($this, FakeEngineInterface::class)
+                            ->addBinding()->to(FakeEngine2::class);
+                    }
+                });
+            }
+        };
+        $consumer = (new Injector($module))->getInstance(FakeMultiBindingConsumer::class);
+        $engines = iterator_to_array($consumer->engines);
+
+        $this->assertSame([0, 1], array_keys($engines));
+        $this->assertInstanceOf(FakeEngine::class, $engines[0]);
+        $this->assertInstanceOf(FakeEngine2::class, $engines[1]);
     }
 }

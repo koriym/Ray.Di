@@ -101,11 +101,6 @@ final class Dependency implements DependencyInterface, AcceptInterface
             try {
                 $instance->{$this->postConstruct}();
             } catch (Throwable $e) {
-                // Roll back the singleton cache so the next resolution rebuilds
-                // instead of returning this half-initialized instance. The cache
-                // is committed before PostConstruct on purpose (to let a singleton
-                // resolve itself from its own lifecycle method); we only unwind it
-                // when PostConstruct actually fails.
                 if ($this->isSingleton) {
                     $this->instance = null;
                     $this->isInstantiated = false;

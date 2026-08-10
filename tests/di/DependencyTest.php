@@ -12,6 +12,7 @@ use Ray\Aop\Pointcut;
 use Ray\Aop\WeavedInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use RuntimeException;
 
 use function assert;
 use function is_object;
@@ -207,5 +208,40 @@ class DependencyTest extends TestCase
         $this->assertSame('first', $second->value);
         // postConstruct ran exactly once, not on every injectWithArgs() call
         $this->assertSame(1, $second->postConstructCount);
+    }
+
+    /**
+     * A failed @PostConstruct on the args path must roll back the singleton
+     * cache so the next injectWithArgs() rebuilds instead of returning the
+     * half-initialized cached instance. Mirrors the inject() rollback that
+     * the public getInstance() path is tested for.
+     */
+    public function testInjectWithArgsRollsBackSingletonOnPostConstructFailure(): void
+    {
+        FakePostConstructRetrySingleton::reset();
+
+        /** @var ReflectionClass<object> $class */
+        $class = new ReflectionClass(FakePostConstructRetrySingleton::class);
+        $newInstance = new NewInstance($class, new SetterMethods([]));
+        $dependency = new Dependency($newInstance, new ReflectionMethod(FakePostConstructRetrySingleton::class, 'initialize'));
+        $dependency->setScope(Scope::SINGLETON);
+        $container = new Container();
+
+        // First call: PostConstruct throws.
+        try {
+            $dependency->injectWithArgs($container, []);
+            $this->fail('Expected PostConstruct to throw on the first injectWithArgs call');
+        } catch (RuntimeException $e) {
+            $this->assertSame('PostConstruct failed on first call', $e->getMessage());
+        }
+
+        // Second call must rebuild — the singleton cache was rolled back,
+        // not left holding the half-initialized instance.
+        $instance = $dependency->injectWithArgs($container, []);
+        assert($instance instanceof FakePostConstructRetrySingleton);
+
+        $this->assertSame(2, FakePostConstructRetrySingleton::$constructCount);
+        $this->assertSame(2, FakePostConstructRetrySingleton::$postConstructCount);
+        $this->assertTrue(FakePostConstructRetrySingleton::$initialized);
     }
 }

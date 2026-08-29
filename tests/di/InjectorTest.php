@@ -295,13 +295,24 @@ class InjectorTest extends TestCase
 
     public function testBuiltinBinding(): void
     {
-        $instance = (new Injector())->getInstance(FakeBuiltin::class);
+        $injector = new Injector(new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeBuiltin::class);
+            }
+        });
+        $instance = $injector->getInstance(FakeBuiltin::class);
         $this->assertInstanceOf(Injector::class, $instance->injector);
     }
 
     public function testSerializeBuiltinBinding(): void
     {
-        $injector = unserialize(serialize(new Injector()));
+        $injector = unserialize(serialize(new Injector(new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(FakeBuiltin::class);
+            }
+        })));
         assert($injector instanceof InjectorInterface);
         $instance = $injector->getInstance(FakeBuiltin::class);
         $this->assertInstanceOf(Injector::class, $instance->injector);
@@ -566,6 +577,7 @@ class InjectorTest extends TestCase
             protected function configure()
             {
                 $this->bind(FakeEngineInterface::class)->to(FakeEngine::class);
+                $this->bind(FakeSet::class);
             }
         });
         $fakeSet = $injector->getInstance(FakeSet::class);

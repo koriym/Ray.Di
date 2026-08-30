@@ -7,9 +7,9 @@ namespace Ray\Di;
 use Ray\Aop\MethodInvocation;
 use Ray\Di\Exception\MethodInvocationNotAvailable;
 
-use function array_key_last;
 use function array_pop;
 use function count;
+use function end;
 
 /**
  * Per-coroutine LIFO stack of in-flight method invocations
@@ -43,13 +43,12 @@ final class MethodInvocationProvider implements ProviderInterface
     /** @return MethodInvocation<object> */
     public function get(): MethodInvocation
     {
-        $stack = $this->invocations[CoroutineContext::id()] ?? null;
-        if ($stack === null) {
+        $stack = $this->invocations[CoroutineContext::id()] ?? [];
+        $invocation = end($stack);
+        if ($invocation === false) {
             throw new MethodInvocationNotAvailable();
         }
 
-        /** @psalm-suppress PossiblyNullArrayOffset -- $stack is the non-null list guarded above */
-
-        return $stack[array_key_last($stack)]; // @phpstan-ignore offsetAccess.notFound
+        return $invocation;
     }
 }

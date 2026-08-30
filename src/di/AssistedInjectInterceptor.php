@@ -38,22 +38,26 @@ final class AssistedInjectInterceptor implements MethodInterceptor
     public function invoke(MethodInvocation $invocation)
     {
         $this->methodInvocationProvider->set($invocation);
-        $params = $invocation->getMethod()->getParameters();
-        $namedArguments = $this->getNamedArguments($invocation);
-        foreach ($params as $param) {
-            /** @var list<ReflectionAttribute> $inject */
-            $inject = $param->getAttributes(InjectInterface::class, ReflectionAttribute::IS_INSTANCEOF); // @phpstan-ignore-line
-            /** @var list<ReflectionAttribute> $assisted */
-            $assisted = $param->getAttributes(Assisted::class);
-            if (isset($assisted[0]) || isset($inject[0])) {
-                /** @psalm-suppress MixedAssignment */
-                $namedArguments[$param->getName()] = $this->getDependency($param);
+        try {
+            $params = $invocation->getMethod()->getParameters();
+            $namedArguments = $this->getNamedArguments($invocation);
+            foreach ($params as $param) {
+                /** @var list<ReflectionAttribute> $inject */
+                $inject = $param->getAttributes(InjectInterface::class, ReflectionAttribute::IS_INSTANCEOF); // @phpstan-ignore-line
+                /** @var list<ReflectionAttribute> $assisted */
+                $assisted = $param->getAttributes(Assisted::class);
+                if (isset($assisted[0]) || isset($inject[0])) {
+                    /** @psalm-suppress MixedAssignment */
+                    $namedArguments[$param->getName()] = $this->getDependency($param);
+                }
             }
+
+            $invocation->getArguments()->exchangeArray($namedArguments);
+
+            return $invocation->proceed();
+        } finally {
+            $this->methodInvocationProvider->pop();
         }
-
-        $invocation->getArguments()->exchangeArray($namedArguments);
-
-        return $invocation->proceed();
     }
 
     /**

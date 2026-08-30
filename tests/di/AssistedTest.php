@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 use PHPUnit\Framework\TestCase;
+use Ray\Aop\MethodInvocation;
 use Ray\Di\Exception\MethodInvocationNotAvailable;
+
+use function assert;
 
 class AssistedTest extends TestCase
 {
@@ -76,6 +79,28 @@ class AssistedTest extends TestCase
         $this->expectException(MethodInvocationNotAvailable::class);
         $assistedDbProvider = (new Injector(new FakeAssistedDbModule()))->getInstance(FakeAssistedDbProvider::class);
         $assistedDbProvider->get();
+    }
+
+    public function testAssistedMethodInvocationNotAvailableAfterCallCompletes(): void
+    {
+        $injector = new Injector(new FakeAssistedDbModule());
+        $consumer = $injector->getInstance(FakeAssistedParamsConsumer::class);
+        $consumer->getUser(1);
+
+        $this->expectException(MethodInvocationNotAvailable::class);
+        $assistedDbProvider = $injector->getInstance(FakeAssistedDbProvider::class);
+        $assistedDbProvider->get();
+    }
+
+    public function testAssistedNestedInterceptionRestoresOuterInvocation(): void
+    {
+        $consumer = (new Injector(new FakeAssistedNestedModule()))->getInstance(FakeAssistedNestedConsumer::class);
+        $invocations = $consumer->outer(1);
+        assert($invocations[0] instanceof MethodInvocation);
+        assert($invocations[1] instanceof MethodInvocation);
+
+        $this->assertSame('outer', $invocations[0]->getMethod()->getName());
+        $this->assertSame($invocations[0], $invocations[1]);
     }
 
     public function testAssistedCustomInject(): void

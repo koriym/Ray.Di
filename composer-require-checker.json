@@ -4,6 +4,8 @@
     "static", "self", "parent",
     "array", "string", "int", "float", "bool", "iterable", "callable", "void", "object",
     "Attribute", "ReflectionAttribute",
-    "Doctrine\\Common\\Cache\\CacheProvider"
+    "Doctrine\\Common\\Cache\\CacheProvider",
+    "Swoole\\Coroutine",
+    "OpenSwoole\\Coroutine"
   ]
 }

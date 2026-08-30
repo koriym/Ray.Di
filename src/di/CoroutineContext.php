@@ -46,12 +46,17 @@ final class CoroutineContext
     private static function detectIdResolver(bool $swooleLoaded, bool $openswooleLoaded): callable
     {
         if ($swooleLoaded) {
+            // @codeCoverageIgnoreStart
+            // This body runs only where ext-swoole is loaded (local dev); CI has
+            // no swoole, so the @RequiresPhpExtension('swoole') tests are skipped
+            // there and this branch stays uncovered in the CI coverage run.
             return static function (): int {
                 /** @psalm-suppress RedundantCast -- int for phpstan, which sees mixed via extension reflection */
                 $cid = (int) Coroutine::getCid();
 
                 return $cid > 0 ? $cid : 0;
             };
+            // @codeCoverageIgnoreEnd
         }
 
         if ($openswooleLoaded) {

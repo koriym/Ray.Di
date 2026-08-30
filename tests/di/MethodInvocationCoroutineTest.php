@@ -33,18 +33,22 @@ class MethodInvocationCoroutineTest extends TestCase
             $wg = new WaitGroup();
             for ($i = 0; $i < 2; $i++) {
                 $wg->add();
-                Coroutine::create(static function () use ($consumer, &$markers, $wg, $i): void {
-                    $invocation = $consumer->currentInvocation($i);
-                    /** @var mixed $rawMarker */
-                    $rawMarker = $invocation->getArguments()->offsetGet('marker'); // @phpstan-ignore argument.type
-                    /** @var int $marker */
-                    $marker = $rawMarker;
-                    $markers[$i] = $marker;
-                    $wg->done();
+                $created = Coroutine::create(static function () use ($consumer, &$markers, $wg, $i): void {
+                    try {
+                        $invocation = $consumer->currentInvocation($i);
+                        /** @var mixed $rawMarker */
+                        $rawMarker = $invocation->getArguments()->offsetGet('marker'); // @phpstan-ignore argument.type
+                        /** @var int $marker */
+                        $marker = $rawMarker;
+                        $markers[$i] = $marker;
+                    } finally {
+                        $wg->done();
+                    }
                 });
+                self::assertNotFalse($created);
             }
 
-            $wg->wait();
+            self::assertTrue($wg->wait(1.0));
         });
 
         ksort($markers);

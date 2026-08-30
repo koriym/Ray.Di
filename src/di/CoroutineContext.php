@@ -27,19 +27,25 @@ final class CoroutineContext
      * Return the current coroutine id, or 0 outside any coroutine
      *
      * cid 0 is the single shared context of non-coroutine execution and of
-     * the main context when an extension is loaded.
+     * the main context when an extension is loaded. The resolver is chosen
+     * from the extensions loaded when id() is first called.
      */
     public static function id(): int
     {
-        $resolver = self::$idResolver ??= self::detectIdResolver();
+        $resolver = self::$idResolver ??= self::detectIdResolver(extension_loaded('swoole'), extension_loaded('openswoole'));
 
         return $resolver();
     }
 
-    /** @return callable(): int */
-    private static function detectIdResolver(): callable
+    /**
+     * @param bool $swooleLoaded     whether ext-swoole is loaded
+     * @param bool $openswooleLoaded whether ext-openswoole is loaded
+     *
+     * @return callable(): int
+     */
+    private static function detectIdResolver(bool $swooleLoaded, bool $openswooleLoaded): callable
     {
-        if (extension_loaded('swoole')) {
+        if ($swooleLoaded) {
             return static function (): int {
                 /** @psalm-suppress RedundantCast -- int for phpstan, which sees mixed via extension reflection */
                 $cid = (int) Coroutine::getCid();
@@ -48,13 +54,17 @@ final class CoroutineContext
             };
         }
 
-        if (extension_loaded('openswoole')) {
+        if ($openswooleLoaded) {
+            // @codeCoverageIgnoreStart
+            // ext-swoole and ext-openswoole cannot be loaded in the same process,
+            // so this body is unreachable from any single test environment.
             return static function (): int {
                 /** @psalm-suppress RedundantCast -- int for phpstan, which sees mixed via extension reflection */
                 $cid = (int) \OpenSwoole\Coroutine::getCid();
 
                 return $cid > 0 ? $cid : 0;
             };
+            // @codeCoverageIgnoreEnd
         }
 
         return static fn (): int => 0;

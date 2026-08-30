@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- `MethodInvocationProvider` keeps the invocation only while an intercepted method runs: the slot is cleared on return and nested interceptions each see their own invocation, and concurrent coroutine interceptions are isolated from each other ([#349](https://github.com/ray-di/Ray.Di/issues/349)).
+
 ## 2.23.0 - 2026-08-11
 
 ### Added

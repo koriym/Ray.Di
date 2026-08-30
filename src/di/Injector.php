@@ -19,6 +19,8 @@ use function str_replace;
 use function sys_get_temp_dir;
 use function trigger_error;
 
+use const E_USER_DEPRECATED;
+
 /**
  * @psalm-import-type BindableInterface from Types
  * @psalm-import-type ModuleList from Types

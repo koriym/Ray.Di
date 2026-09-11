@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ray\Di;
 
 /**
- * @psalm-import-type DependencyContainer from Types
+ * @psalm-import-type DependencyStore from Types
  * @psalm-import-type ScopeType from Types
  * @psalm-import-type InjectableValue from Types
  */
@@ -24,11 +24,11 @@ interface DependencyInterface
     /**
      * Register dependency to container
      *
-     * @param DependencyContainer $container
+     * @param DependencyStore $container
      *
      * @return void
      *
-     * @param-out DependencyContainer $container
+     * @param-out DependencyStore $container
      */
     public function register(array &$container, Bind $bind);
 

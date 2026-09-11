@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- An unserialized injector revives each binding on its first request instead of rebuilding every binding inside `unserialize()`; the serialized format changed, so regenerate cached injectors.
+
 ### Deprecated
 
 - Just-in-time binding of an unbound concrete class from `getInstance()` now emits an `E_USER_DEPRECATED` notice. Bind the class explicitly; JIT resolution is unavailable under `CompiledInjector` and is not recorded in `bindings.md` ([#337](https://github.com/ray-di/Ray.Di/issues/337)).

@@ -16,6 +16,8 @@ use Ray\Aop\Pointcut;
  * Container and Registry Types
  *
  * @psalm-type DependencyContainer = array<non-empty-string, DependencyInterface>
+ * @psalm-type SerializedDependency = non-empty-string
+ * @psalm-type DependencyStore = array<non-empty-string, DependencyInterface|SerializedDependency>
  * @psalm-type DependencyIndex = non-empty-string
  * @psalm-type PointcutList array<int, Pointcut>
  * @psalm-type BindingName = non-empty-string

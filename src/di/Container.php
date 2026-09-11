@@ -24,11 +24,16 @@ use function array_values;
 use function class_exists;
 use function explode;
 use function implode;
+use function is_string;
 use function ksort;
+use function serialize;
 use function sprintf;
+use function unserialize;
 
 /**
  * @psalm-import-type DependencyContainer from Types
+ * @psalm-import-type DependencyStore from Types
+ * @psalm-import-type SerializedDependency from Types
  * @psalm-import-type PointcutList from Types
  * @psalm-import-type DependencyIndex from Types
  * @psalm-import-type MethodArguments from Types
@@ -45,7 +50,12 @@ final class Container implements InjectorInterface
     /** @var MultiBindings */
     public $multiBindings;
 
-    /** @var DependencyContainer */
+    /**
+     * Bindings by index; a revived container holds each binding as its
+     * serialized string until that binding is first requested
+     *
+     * @var DependencyStore
+     */
     private array $container = [];
 
     /** @var array<int, Pointcut> */
@@ -63,8 +73,8 @@ final class Container implements InjectorInterface
     /**
      * Composition-time binding history
      *
-     * Not serialized (excluded from __sleep()); re-created empty on __wakeup()
-     * so a revived container never carries build-time history into runtime.
+     * Not serialized; re-created empty on __unserialize() so a revived
+     * container never carries build-time history into runtime.
      */
     public BindingLog $log;
 
@@ -74,15 +84,59 @@ final class Container implements InjectorInterface
         $this->log = new BindingLog();
     }
 
-    /** @return list<string> */
-    public function __sleep()
+    /**
+     * Serialize each binding on its own so unserialize() can revive them one at a time
+     *
+     * The injector and MultiBindings instances are shared with the surrounding
+     * object graph (the injector being serialized, $this->multiBindings), so
+     * they stay in that graph to keep the shared identity after revival.
+     *
+     * @return array{container: DependencyStore, pointcuts: PointcutList, multiBindings: MultiBindings}
+     */
+    public function __serialize(): array
     {
-        return ['container', 'pointcuts', 'multiBindings'];
+        $container = [];
+        foreach ($this->container as $index => $dependency) {
+            /** @var SerializedDependency|DependencyInterface $stored */
+            $stored = is_string($dependency) || $this->isSharedInstance($dependency)
+                ? $dependency
+                : serialize($dependency);
+            $container[$index] = $stored;
+        }
+
+        return ['container' => $container, 'pointcuts' => $this->pointcuts, 'multiBindings' => $this->multiBindings];
     }
 
-    public function __wakeup(): void
+    /** @param array{container: DependencyStore, pointcuts: PointcutList, multiBindings: MultiBindings} $data */
+    public function __unserialize(array $data): void
     {
+        $this->container = $data['container'];
+        $this->pointcuts = $data['pointcuts'];
+        $this->multiBindings = $data['multiBindings'];
         $this->log = new BindingLog();
+    }
+
+    private function isSharedInstance(DependencyInterface $dependency): bool
+    {
+        return $dependency instanceof Instance
+            && ($dependency->value instanceof InjectorInterface || $dependency->value instanceof MultiBindings);
+    }
+
+    /**
+     * Return the binding at $index, reviving it from its serialized form on first request
+     *
+     * @param DependencyIndex $index
+     */
+    private function dependency(string $index): DependencyInterface
+    {
+        $dependency = $this->container[$index];
+        if (is_string($dependency)) {
+            /** @var DependencyInterface $dependency */
+            $dependency = unserialize($dependency);
+            $this->container[$index] = $dependency;
+        }
+
+        return $dependency;
     }
 
     /**
@@ -91,14 +145,14 @@ final class Container implements InjectorInterface
     public function add(Bind $bind): void
     {
         $index = (string) $bind;
-        $previous = $this->container[$index] ?? null;
+        $previous = isset($this->container[$index]) ? $this->dependency($index) : null;
         $dependency = $bind->getBound();
         $dependency->register($this->container, $bind);
         if ($index === self::MULTI_BINDINGS_INDEX) {
             return;
         }
 
-        /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyContainer alias unexpanded */
+        /** @psalm-suppress InvalidArrayAccess -- register()'s @param-out leaves the DependencyStore alias unexpanded */
         $this->log->register(
             $index,
             (string) $this->container[$index],
@@ -181,7 +235,7 @@ final class Container implements InjectorInterface
             throw $this->unbound($index);
         }
 
-        $dependency = $this->container[$index];
+        $dependency = $this->dependency($index);
         if (! $dependency instanceof Dependency) {
             throw new BadMethodCallException($interface);
         }
@@ -205,7 +259,7 @@ final class Container implements InjectorInterface
         }
 
         if (isset($this->resolving[$index])) {
-            $dependency = $this->container[$index];
+            $dependency = $this->dependency($index);
             // An already-instantiated singleton satisfies re-entrant requests
             // (e.g. from a @PostConstruct method) with its cached instance,
             // without recursing — not a cycle.
@@ -218,7 +272,7 @@ final class Container implements InjectorInterface
 
         $this->resolving[$index] = true;
         try {
-            return $this->container[$index]->inject($this);
+            return $this->dependency($index)->inject($this);
         } finally {
             unset($this->resolving[$index]);
         }
@@ -277,7 +331,14 @@ final class Container implements InjectorInterface
      */
     public function getContainer(): array
     {
-        return $this->container;
+        foreach (array_keys($this->container) as $index) {
+            $this->dependency($index);
+        }
+
+        /** @var DependencyContainer $container */
+        $container = $this->container;
+
+        return $container;
     }
 
     /**
@@ -311,7 +372,7 @@ final class Container implements InjectorInterface
         $keptDependencies = [];
         $discardedDependencies = [];
         foreach ($collidingIndexes as $index) {
-            $keptDependencies[$index] = (string) $this->container[$index];
+            $keptDependencies[$index] = (string) $this->dependency($index);
             $discardedDependencies[$index] = (string) $otherContainer[$index];
         }
 
@@ -343,7 +404,7 @@ final class Container implements InjectorInterface
             return;
         }
 
-        foreach ($this->container as $dependency) {
+        foreach ($this->getContainer() as $dependency) {
             if ($dependency instanceof Dependency) {
                 $dependency->weaveAspects($compiler, $this->pointcuts);
             }
@@ -363,8 +424,8 @@ final class Container implements InjectorInterface
     /** @param callable(DependencyInterface, string): DependencyInterface $f */
     public function map(callable $f): void
     {
-        foreach ($this->container as $key => &$index) {
-            $index = $f($index, $key);
+        foreach (array_keys($this->container) as $index) {
+            $this->container[$index] = $f($this->dependency($index), $index);
         }
     }
 

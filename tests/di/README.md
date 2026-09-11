@@ -27,6 +27,7 @@ layer exists so that class of change can never again pass silently.
 | Cycle detection vs legal re-entry (singleton `@PostConstruct`) | `CircularDependencyTest` |
 | Assisted invocation: not available after the call, nested calls restore the outer invocation, coroutine interceptions isolated | `AssistedTest`, `MethodInvocationCoroutineTest` |
 | Singleton identity, serialization lifecycle | `DependencyTest`, `InjectorTest` |
+| Revived container: bindings reconstructed only on request, injector identity, singleton identity, multi-binding, full listing | `ContainerUnserializeTest` |
 | JIT (untargeted) binding: single construction, named requests fail fast | `InjectorTest` |
 | Module-list merging (`new Injector([$m1, $m2])`): first module wins | `ModuleMergerTest` |
 | Binding provenance & collision history | `BindingLogTest` |

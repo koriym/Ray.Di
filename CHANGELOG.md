@@ -4,7 +4,7 @@
 
 ### Changed
 
-- An `#[Assisted]` (or `#[Inject]`-attributed) method argument the caller passes is now kept; the dependency is injected only when the argument is omitted or `null`. Previously the interceptor replaced every such argument, discarding the caller's value. **Audit these parameters before upgrading if a framework fills method arguments from untrusted input:** that input now reaches them. BEAR.Resource passes the request query as arguments, so a client sending `?uuid=attacker` now sets an `#[Assisted]` `$uuid` that previously always came from DI.
+- An `#[Assisted]` (or `#[Inject]`-attributed) method argument the caller passes is now kept; the dependency is injected only when the argument is omitted, `null`, or equal to the parameter's default value (a caller that fills every parameter, such as BEAR.Resource or a named-argument call, passes an omitted one as its default). Previously the interceptor replaced every such argument, discarding the caller's value. **Audit these parameters before upgrading if a framework fills method arguments from untrusted input:** that input now reaches them. BEAR.Resource passes the request query as arguments, so a client sending `?uuid=attacker` now sets an `#[Assisted]` `$uuid` that previously always came from DI.
 
 ### Deprecated
 

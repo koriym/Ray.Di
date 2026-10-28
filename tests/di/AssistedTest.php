@@ -92,6 +92,21 @@ class AssistedTest extends TestCase
         $this->assertInstanceOf(FakeRobot::class, $consumer->assistOne('a', 'b', null));
     }
 
+    public function testAssistedInjectsAnArgumentPassedAsItsOwnDefault(): void
+    {
+        $consumer = (new Injector(new FakeInstanceBindModule()))->getInstance(FakeAssistedInjectConsumer::class);
+
+        // A caller that fills every parameter, as BEAR.Resource does, passes an omitted one as its default.
+        $this->assertSame(1, $consumer->assistCustomeAssistedInject(one: 0));
+    }
+
+    public function testAssistedKeepsAnArgumentThatDiffersFromItsDefault(): void
+    {
+        $consumer = (new Injector(new FakeInstanceBindModule()))->getInstance(FakeAssistedInjectConsumer::class);
+
+        $this->assertSame(5, $consumer->assistCustomeAssistedInject(5));
+    }
+
     public function testAssistedInstalledTwiceKeepsTheOtherArguments(): void
     {
         $module = new FakeToBindModule(new FakeInstanceBindModule(new AssistedModule()));

@@ -46,8 +46,8 @@ final class AssistedInjectInterceptor implements MethodInterceptor
                 $inject = $param->getAttributes(InjectInterface::class, ReflectionAttribute::IS_INSTANCEOF); // @phpstan-ignore-line
                 /** @var list<ReflectionAttribute> $assisted */
                 $assisted = $param->getAttributes(Assisted::class);
-                // Inject only what the caller left out: an omitted or null argument.
-                if ((isset($assisted[0]) || isset($inject[0])) && ! isset($namedArguments[$param->getName()])) {
+                // Inject only what the caller left out; a value it passed is kept.
+                if ((isset($assisted[0]) || isset($inject[0])) && ! $this->isPassed($param, $namedArguments)) {
                     /** @psalm-suppress MixedAssignment */
                     $namedArguments[$param->getName()] = $this->getDependency($param);
                 }
@@ -88,6 +88,18 @@ final class AssistedInjectInterceptor implements MethodInterceptor
         }
 
         return $namedParams;
+    }
+
+    /** @param array<string, mixed> $namedArguments */
+    private function isPassed(ReflectionParameter $param, array $namedArguments): bool
+    {
+        $name = $param->getName();
+        if (! isset($namedArguments[$name])) {
+            return false;
+        }
+
+        // A caller that fills every parameter (BEAR.Resource, or a named-argument call skipping this one) passes the default for an omitted one.
+        return ! $param->isDefaultValueAvailable() || $namedArguments[$name] !== $param->getDefaultValue();
     }
 
     /** @return mixed */

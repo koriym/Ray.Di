@@ -70,6 +70,38 @@ class AssistedTest extends TestCase
         $this->assertInstanceOf(FakeRobot::class, $assistedDependency);
     }
 
+    public function testAssistedKeepsAnArgumentTheCallerPassed(): void
+    {
+        $consumer = $this->injector->getInstance(FakeAssistedConsumer::class);
+        $robot = new FakeRobot();
+
+        $this->assertSame($robot, $consumer->assistOne('a', 'b', $robot));
+    }
+
+    public function testAssistedKeepsANamedScalarTheCallerPassed(): void
+    {
+        $consumer = (new Injector(new FakeInstanceBindModule()))->getInstance(FakeAssistedConsumer::class);
+
+        $this->assertSame(2, $consumer->assistWithName('a7', 2));
+    }
+
+    public function testAssistedInjectsWhenTheCallerPassesNull(): void
+    {
+        $consumer = $this->injector->getInstance(FakeAssistedConsumer::class);
+
+        $this->assertInstanceOf(FakeRobot::class, $consumer->assistOne('a', 'b', null));
+    }
+
+    public function testAssistedInstalledTwiceKeepsTheOtherArguments(): void
+    {
+        $module = new FakeToBindModule(new FakeInstanceBindModule(new AssistedModule()));
+        $consumer = (new Injector($module))->getInstance(FakeAssistedConsumer::class);
+        [$value, $robot] = $consumer->assistAfterDefault('x');
+
+        $this->assertSame('x', $value);
+        $this->assertInstanceOf(FakeRobot::class, $robot);
+    }
+
     public function testAssistedMethodInvocation(): void
     {
         $assistedConsumer = (new Injector(new FakeAssistedDbModule()))->getInstance(FakeAssistedParamsConsumer::class);
